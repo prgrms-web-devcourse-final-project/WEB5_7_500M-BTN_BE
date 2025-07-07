@@ -1,0 +1,47 @@
+spring:
+  jackson:
+    time-zone: Asia/Seoul
+
+  datasource:
+    url: ${{ secrets.DB_URL }}
+    username: ${{ secrets.DB_USERNAME }}
+    password: ${{ secrets.DB_PASSWORD }}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop   # ?? create, none, validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    generate-ddl: true
+
+  data:
+    redis:
+      host: ${{ secrets.REDIS_HOST }}
+      port: ${{ secrets.REDIS_PORT }}
+      password: ${{ secrets.REDIS_PASSWORD }}
+      timeout: 5000
+
+custom:
+  jwt:
+    redirection:
+      base: ${{ secrets.JWT_REDIRECT_BASE }}
+    exp-time:
+      access: ${{ secrets.JWT_EXP_ACCESS }}
+      refresh: ${{ secrets.JWT_EXP_REFRESH }}
+    secrets:
+      originkey: ${{ secrets.JWT_ORIGIN_KEY }}
+      appkey: ${{ secrets.JWT_APP_KEY }}
+
+toss:
+  secret-key: ${{ secrets.TOSS_SECRET_KEY }}
+  client-key: ${{ secrets.TOSS_CLIENT_KEY }}
+
+logging:
+  level:
+    root: INFO
+
+server:
+  port: ${{ secrets.SERVER_PORT }}
