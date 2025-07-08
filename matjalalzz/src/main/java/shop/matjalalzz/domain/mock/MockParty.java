@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.comment.entity;
+package shop.matjalalzz.domain.mock;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
