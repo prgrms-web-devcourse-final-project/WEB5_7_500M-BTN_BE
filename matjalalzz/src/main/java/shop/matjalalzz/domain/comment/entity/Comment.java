@@ -3,6 +3,7 @@ package shop.matjalalzz.domain.comment.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -47,17 +48,17 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private boolean deleted = false;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Comment parent;
 
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> children;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private MockParty party;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private MockUser writer;
 
