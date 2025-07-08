@@ -3,14 +3,14 @@ spring:
     time-zone: Asia/Seoul
 
   datasource:
-    url: ${{ secrets.DB_URL }}
-    username: ${{ secrets.DB_USERNAME }}
-    password: ${{ secrets.DB_PASSWORD }}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create-drop   # ?? create, none, validate
+      ddl-auto: create-drop   # 개발 시: create, 운영 시: validate 또는 none 권장
     show-sql: true
     properties:
       hibernate:
@@ -19,29 +19,29 @@ spring:
 
   data:
     redis:
-      host: ${{ secrets.REDIS_HOST }}
-      port: ${{ secrets.REDIS_PORT }}
-      password: ${{ secrets.REDIS_PASSWORD }}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
       timeout: 5000
 
 custom:
   jwt:
     redirection:
-      base: ${{ secrets.JWT_REDIRECT_BASE }}
+      base: ${JWT_REDIRECT_BASE}
     exp-time:
-      access: ${{ secrets.JWT_EXP_ACCESS }}
-      refresh: ${{ secrets.JWT_EXP_REFRESH }}
+      access: ${JWT_EXP_ACCESS}
+      refresh: ${JWT_EXP_REFRESH}
     secrets:
-      originkey: ${{ secrets.JWT_ORIGIN_KEY }}
-      appkey: ${{ secrets.JWT_APP_KEY }}
+      originkey: ${JWT_ORIGIN_KEY}
+      appkey: ${JWT_APP_KEY}
 
 toss:
-  secret-key: ${{ secrets.TOSS_SECRET_KEY }}
-  client-key: ${{ secrets.TOSS_CLIENT_KEY }}
+  secret-key: ${TOSS_SECRET_KEY}
+  client-key: ${TOSS_CLIENT_KEY}
 
 logging:
   level:
     root: INFO
 
 server:
-  port: ${{ secrets.SERVER_PORT }}
+  port: ${SERVER_PORT}
