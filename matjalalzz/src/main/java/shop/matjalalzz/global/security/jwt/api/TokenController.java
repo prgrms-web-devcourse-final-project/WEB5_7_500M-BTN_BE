@@ -1,16 +1,11 @@
 package shop.matjalalzz.global.security.jwt.api;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
-import shop.matjalalzz.global.security.jwt.dto.RefreshTokenRequestDto;
-import shop.matjalalzz.global.unit.BaseResponse;
-import shop.matjalalzz.user.dto.LoginRequest;
 
 @RestController
 @RequestMapping("/tokens")
