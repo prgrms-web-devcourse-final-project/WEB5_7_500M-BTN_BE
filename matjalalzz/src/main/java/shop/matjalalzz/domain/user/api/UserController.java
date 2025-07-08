@@ -1,0 +1,66 @@
+package shop.matjalalzz.domain.user.api;
+
+
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import shop.matjalalzz.global.security.PrincipalUser;
+import shop.matjalalzz.global.unit.BaseResponse;
+import shop.matjalalzz.domain.user.app.UserService;
+import shop.matjalalzz.domain.user.dto.LoginRequest;
+import shop.matjalalzz.domain.user.dto.OAuthSignUpRequest;
+import shop.matjalalzz.domain.user.dto.SignUpRequest;
+
+@RestController
+@RequiredArgsConstructor
+@Validated
+public class UserController {
+
+    private final UserService userService;
+
+    @Operation(summary = "회원가입", description = "폼 로그인 회원가입")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/user/signup")
+    public BaseResponse<Void> signup(@RequestBody @Valid SignUpRequest signUpRequestDto) {
+        userService.signup(signUpRequestDto);
+        return BaseResponse.okOnlyStatus(HttpStatus.CREATED);//201
+    }
+
+    @Operation(summary = "회원가입", description = "OAuth 추가 회원가입")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping("/user/signup/oauth")
+    public BaseResponse<Void> oauthSignup(
+        @AuthenticationPrincipal PrincipalUser userInfo,
+        @RequestBody @Valid OAuthSignUpRequest oauthSignUpRequestDto) {
+        userService.oauthSignup(userInfo.getEmail(), oauthSignUpRequestDto);
+        return BaseResponse.okOnlyStatus(HttpStatus.CREATED); //201
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/user/delete")
+    public void deleteUser(
+        @AuthenticationPrincipal PrincipalUser userInfo,
+        @CookieValue(name = "refreshToken") String refreshToken,
+        HttpServletResponse response) {
+        userService.deleteUser(userInfo.getId(), refreshToken, response);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    //반환으로 헤더에 토큰값을 넣어줘야 하니깐 HttpServletResponse
+    @PostMapping("/login")
+    public BaseResponse<Void> login(@RequestBody @Valid LoginRequest loginRequest,
+        HttpServletResponse response) {
+        userService.login(loginRequest, response);
+        return BaseResponse.okOnlyStatus(HttpStatus.OK); //200
+    }
+}

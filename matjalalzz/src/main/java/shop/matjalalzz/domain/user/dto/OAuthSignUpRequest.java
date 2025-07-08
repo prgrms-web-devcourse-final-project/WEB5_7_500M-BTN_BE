@@ -1,9 +1,9 @@
-package shop.matjalalzz.user.dto;
+package shop.matjalalzz.domain.user.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import shop.matjalalzz.user.domain.enums.Gender;
+import shop.matjalalzz.domain.user.domain.enums.Gender;
 
 public record OAuthSignUpRequest(
 	@NotBlank(message = "닉네임은 필수 입력값입니다.")

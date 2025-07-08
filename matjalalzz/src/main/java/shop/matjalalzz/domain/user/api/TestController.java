@@ -1,4 +1,4 @@
-package shop.matjalalzz.user.api;
+package shop.matjalalzz.domain.user.api;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

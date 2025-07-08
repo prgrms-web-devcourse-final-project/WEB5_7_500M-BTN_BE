@@ -1,4 +1,4 @@
-package shop.matjalalzz.user.dto;
+package shop.matjalalzz.domain.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

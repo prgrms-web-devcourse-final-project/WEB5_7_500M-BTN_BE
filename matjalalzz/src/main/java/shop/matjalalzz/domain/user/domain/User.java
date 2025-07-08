@@ -1,22 +1,19 @@
-package shop.matjalalzz.user.domain;
+package shop.matjalalzz.domain.user.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.unit.BaseEntity;
-import shop.matjalalzz.user.domain.enums.Gender;
-import shop.matjalalzz.user.domain.enums.Role;
+import shop.matjalalzz.domain.user.domain.enums.Gender;
+import shop.matjalalzz.domain.user.domain.enums.Role;
 
 @Entity
 @Getter
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
@@ -25,50 +22,65 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 320, nullable = false)
+    @Size(max = 255)
+    @Column(unique = true)
+    private String oauthId;
+
+    @NotNull
+    @Size(max = 255)
+    @Column(unique = true)
     private String email;
 
-    @Column(length = 254, nullable = false)
+    @NotNull
+    @Size(max = 255)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.USER;
 
+    @NotNull
+    @Size(max = 20)
     private String nickname;
 
+    @NotNull
+    @Size(max = 20)
     private String name;
 
     private long age;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    @NotNull
+    @Size(max = 20)
     private String phoneNumber;
 
-    private long point;
+    private long point = 0;
 
-    private boolean deleted;
+    private boolean deleted = false;
 
-    private String bucket_id;
+    @Size(max = 255)
+    @Column(name = "bucket_id")
+    private String bucketId;
 
-    private String profile_image_url;
-
+    @Size(max = 255)
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 
 
     @Builder
-    public User(String email, String password, String nickname, String phoneNumber, String name, long age, Gender gender, String bucket_id, String profile_image_url) {
+    public User(String email, String oauthId, String password, String nickname, String phoneNumber, String name, long age, Gender gender, String bucketId, String profileImageUrl) {
         this.email = email;
+        this.oauthId = oauthId;
         this.password = password;
         this.nickname = nickname;
         this.phoneNumber = phoneNumber;
         this.name = name;
         this.age = age;
         this.gender = gender;
-        this.deleted = false;
-        this.point = 0;
-        this.role = Role.USER;
-        this.bucket_id = bucket_id;
-        this.profile_image_url = profile_image_url;
+        this.bucketId = bucketId;
+        this.profileImageUrl = profileImageUrl;
     }
 
     // 닉네임 변경 메서드
@@ -95,8 +107,13 @@ public class User extends BaseEntity {
     }
 
     //사진 변경 메서드
-    public void updateProfileImageUrl(String profile_image_url) {
-        this.profile_image_url = profile_image_url;
+    public void updateProfileImage(String bucketId, String profileImageUrl) {
+        this.bucketId = bucketId;
+        this.profileImageUrl = profileImageUrl;
     }
 
+    // 권한 변경 메서드
+    public void updateRole(Role role) {
+        this.role = role;
+    }
 }
