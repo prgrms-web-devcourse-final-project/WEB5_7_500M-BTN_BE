@@ -43,4 +43,10 @@ public class PartyUser extends BaseEntity {
             .build();
     }
 
+    public static PartyUser createUser(Party party) {
+        return PartyUser.builder()
+            .party(party)
+            .isHost(false)
+            .build();
+    }
 }
