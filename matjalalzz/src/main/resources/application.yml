@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create   # ?? create, none, validate
+      ddl-auto: create-drop   # 개발 시: create, 운영 시: validate 또는 none 권장
     show-sql: true
     properties:
       hibernate:
