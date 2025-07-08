@@ -15,8 +15,10 @@ import shop.matjalalzz.domain.party.entity.Party;
 import shop.matjalalzz.domain.party.entity.PartyStatus;
 import shop.matjalalzz.domain.party.entity.PartyUser;
 import shop.matjalalzz.domain.party.mapper.PartyMapper;
-import shop.matjalalzz.domain.shop.Shop;
-import shop.matjalalzz.domain.shop.ShopRepository;
+import shop.matjalalzz.domain.party.mock.dao.MockShopRepository;
+import shop.matjalalzz.domain.party.mock.dao.MockUserRepository;
+import shop.matjalalzz.domain.party.mock.entity.MockShop;
+import shop.matjalalzz.domain.party.mock.entity.MockUser;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 
@@ -25,8 +27,9 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 @Transactional(readOnly = true)
 public class PartyService {
 
-    private final ShopRepository shopRepository;
+    private final MockShopRepository shopRepository;
     private final PartyRepository partyRepository;
+    private final MockUserRepository userRepository;
 
     @Transactional
     public void createParty(PartyCreateRequest request) {
@@ -35,16 +38,19 @@ public class PartyService {
             throw new BusinessException(ErrorCode.INVALID_DEADLINE);
         }
 
-        Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
+        // request.shopId()를 1L로 대체
+        MockShop shop = shopRepository.findById(1L).orElseThrow(() ->
             new BusinessException(ErrorCode.DATA_NOT_FOUND)); //todo 추후 shopService로 이동
 
         Party party = PartyMapper.toEntity(request, shop);
 
-        PartyUser host = PartyUser.createHost(party); //todo userId 필요
+        MockUser user = findUserById(); //todo
+        PartyUser host = PartyUser.createHost(party, user);
         party.getPartyUsers().add(host);
 
         partyRepository.save(party);
     }
+
 
     public PartyDetailResponse getPartyDetail(Long partyId) {
         return PartyMapper.toDetailResponse(findById(partyId));
@@ -58,12 +64,33 @@ public class PartyService {
     @Transactional
     public void joinParty(Long partyId) {
         Party party = findById(partyId);
-        PartyUser user = PartyUser.createUser(party);
-        party.getPartyUsers().add(user);
+        MockUser user = findUserById();
+
+        PartyUser partyUser = PartyUser.createUser(party, user);
+        party.getPartyUsers().add(partyUser);
+    }
+
+    public void quitParty(Long partyId) {
+        Party party = findById(partyId);
+
+//        party.getPartyUsers().remove()
+    }
+
+    public void deleteParty(Long partyId) {
+
+    }
+
+    public void completePartyRecruit(Long partyId) {
+
     }
 
     private Party findById(Long partyId) {
         return partyRepository.findById(partyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+    private MockUser findUserById() {
+        return userRepository.findById(1L).orElseThrow(() ->
+            new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 }

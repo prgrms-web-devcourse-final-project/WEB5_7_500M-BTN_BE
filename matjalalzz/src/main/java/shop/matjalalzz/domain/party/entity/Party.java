@@ -20,7 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.domain.shop.Shop;
+import shop.matjalalzz.domain.party.mock.entity.MockShop;
 import shop.matjalalzz.global.unit.BaseEntity;
 
 @Entity
@@ -65,7 +65,7 @@ public class Party extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "shop_id")
-    private Shop shop;
+    private MockShop shop;
 
     @Builder.Default
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)

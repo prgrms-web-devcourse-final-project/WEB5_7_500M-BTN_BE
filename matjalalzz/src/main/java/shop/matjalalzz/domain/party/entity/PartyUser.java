@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import shop.matjalalzz.domain.party.mock.entity.MockUser;
 import shop.matjalalzz.global.unit.BaseEntity;
 
 @Entity
@@ -34,18 +35,22 @@ public class PartyUser extends BaseEntity {
 
     private boolean isHost;
 
-    //추후 User 엔티티와 연관관계 필요
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private MockUser user;
 
-    public static PartyUser createHost(Party party) {
+    public static PartyUser createHost(Party party, MockUser user) {
         return PartyUser.builder()
             .party(party)
+            .user(user)
             .isHost(true)
             .build();
     }
 
-    public static PartyUser createUser(Party party) {
+    public static PartyUser createUser(Party party, MockUser user) {
         return PartyUser.builder()
             .party(party)
+            .user(user)
             .isHost(false)
             .build();
     }
