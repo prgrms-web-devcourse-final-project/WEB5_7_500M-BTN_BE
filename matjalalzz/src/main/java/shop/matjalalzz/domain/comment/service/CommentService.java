@@ -39,14 +39,14 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long commentId, Long actorId) {
+    public void deleteComment(Long commentId, Long userId) {
         Comment comment = getComment(commentId);
-        hasPermission(comment,actorId);
+        validatePermission(comment, userId);
         commentRepository.delete(comment);
     }
 
-    private void hasPermission(Comment comment, Long userId) {
-        if(!comment.getWriter().getId().equals(userId)){
+    private void validatePermission(Comment comment, Long actorId) {
+        if(!comment.getWriter().getId().equals(actorId)){
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }

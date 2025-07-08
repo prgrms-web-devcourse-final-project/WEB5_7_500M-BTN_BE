@@ -5,10 +5,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Digits;
 import java.util.List;
 import lombok.AccessLevel;
@@ -27,6 +29,13 @@ import shop.matjalalzz.global.unit.BaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
+@Table(
+    indexes = {
+        @Index(name = "idx_review_writer", columnList = "writer_id"),
+        @Index(name = "idx_review_reservation", columnList = "reservation_id"),
+        @Index(name = "idx_review_shop", columnList = "shop_id")
+    }
+)
 public class Review extends BaseEntity {
 
     @Id
