@@ -100,6 +100,9 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            
+            ls -a
             cd ~/WEB5_7_500M-BTN_BE/matjalalzz
+            ls -a
             docker compose down
             docker compose up --build -d
