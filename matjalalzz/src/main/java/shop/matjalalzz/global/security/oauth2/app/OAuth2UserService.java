@@ -15,8 +15,8 @@ import shop.matjalalzz.global.security.oauth2.dto.KakaoResponseDto;
 import shop.matjalalzz.global.security.oauth2.dto.NaverResponseDto;
 import shop.matjalalzz.global.security.oauth2.dto.OAuth2ResponseDto;
 import shop.matjalalzz.global.security.oauth2.utils.OAuth2Mapper;
-import shop.matjalalzz.user.dao.UserRepository;
-import shop.matjalalzz.user.domain.User;
+import shop.matjalalzz.domain.user.dao.UserRepository;
+import shop.matjalalzz.domain.user.entity.User;
 
 import java.util.Optional;
 

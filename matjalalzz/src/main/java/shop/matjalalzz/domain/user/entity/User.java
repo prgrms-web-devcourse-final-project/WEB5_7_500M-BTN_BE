@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.user.domain;
+package shop.matjalalzz.domain.user.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -8,8 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.unit.BaseEntity;
-import shop.matjalalzz.domain.user.domain.enums.Gender;
-import shop.matjalalzz.domain.user.domain.enums.Role;
+import shop.matjalalzz.domain.user.entity.enums.Gender;
+import shop.matjalalzz.domain.user.entity.enums.Role;
 
 @Entity
 @Getter

@@ -9,8 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import shop.matjalalzz.user.domain.User;
-import shop.matjalalzz.user.domain.enums.Role;
+import shop.matjalalzz.domain.user.entity.User;
+import shop.matjalalzz.domain.user.entity.enums.Role;
 
 import java.util.Collection;
 import java.util.List;

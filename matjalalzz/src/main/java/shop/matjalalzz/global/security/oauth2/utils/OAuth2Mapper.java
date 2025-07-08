@@ -3,7 +3,7 @@ package shop.matjalalzz.global.security.oauth2.utils;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
 import shop.matjalalzz.global.security.oauth2.dto.OAuth2ResponseDto;
-import shop.matjalalzz.user.domain.User;
+import shop.matjalalzz.domain.user.entity.User;
 
 public class OAuth2Mapper {
     public static PrincipalUser toPrincipalUser(User user) {

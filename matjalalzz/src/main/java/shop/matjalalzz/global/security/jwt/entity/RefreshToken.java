@@ -14,7 +14,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.user.domain.User;
+import shop.matjalalzz.domain.user.entity.User;
 
 @Getter
 @Entity

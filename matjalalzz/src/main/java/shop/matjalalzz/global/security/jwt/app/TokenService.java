@@ -29,9 +29,9 @@ import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.utils.TokenMapper;
-import shop.matjalalzz.user.dao.UserRepository;
-import shop.matjalalzz.user.domain.User;
-import shop.matjalalzz.user.domain.enums.Role;
+import shop.matjalalzz.domain.user.dao.UserRepository;
+import shop.matjalalzz.domain.user.entity.User;
+import shop.matjalalzz.domain.user.entity.enums.Role;
 
 @Slf4j
 @Service
