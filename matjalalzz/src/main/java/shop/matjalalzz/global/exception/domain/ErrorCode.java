@@ -45,7 +45,8 @@ public enum ErrorCode {
 
 	// 404 Not Found
 	LOGIN_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "로그인 정보와 일치하는 사용자가 존재하지 않습니다."),
-
+	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."),
+	INVALID_RESERVATION_TIME(HttpStatus.BAD_REQUEST, "예약 시간이 유효하지 않습니다."),
 
 	EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
 
