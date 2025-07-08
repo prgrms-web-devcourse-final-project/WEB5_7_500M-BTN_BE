@@ -6,6 +6,6 @@ RUN gradle build -x test
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-COPY --from=build /app/build/libs/*.jar 500m_btn_be-0.0.1-SNAPSHOT.jar
+COPY --from=build /app/build/libs/*.jar 500m_btn_be_1-0.0.1-SNAPSHOT.jar
 
-ENTRYPOINT ["java", "-jar", "500m_btn_be-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "500m_btn_be_1-0.0.1-SNAPSHOT.jar"]
