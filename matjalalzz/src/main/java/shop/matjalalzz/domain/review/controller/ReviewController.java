@@ -25,9 +25,9 @@ import shop.matjalalzz.global.unit.BaseResponse;
 public class ReviewController {
 
     @Operation(summary = "리뷰 조회", description = "특정 가게의 리뷰 목록을 조회합니다.")
-    @GetMapping("/shops/{shoopId}/reviews")
+    @GetMapping("/shops/{shopId}/reviews")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<ReviewPageResponse> getReviews(@PathVariable Long shoopId) {
+    public BaseResponse<ReviewPageResponse> getReviews(@PathVariable Long shopId) {
         return BaseResponse.ok(ReviewPageResponse.builder()
             .nextCursor(1L)
             .reviews(List.of(ReviewMapper.toReviewResponse(Review.builder().build())))
