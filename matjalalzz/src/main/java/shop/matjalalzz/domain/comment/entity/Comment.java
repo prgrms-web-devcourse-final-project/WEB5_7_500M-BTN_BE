@@ -55,11 +55,11 @@ public class Comment extends BaseEntity {
     private List<Comment> children;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "party_id", nullable = false)
     private MockParty party;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "writer_id", nullable = false)
     private MockUser writer;
 
 

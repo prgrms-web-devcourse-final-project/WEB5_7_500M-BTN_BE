@@ -56,15 +56,15 @@ public class Review extends BaseEntity {
     private boolean deleted = false;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "shop_id", nullable = false)
     private MockShop shop;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "reservation_id", nullable = false)
     private MockReservation reservation;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "writer_id", nullable = false)
     private MockUser writer;
 
     @OneToMany(mappedBy = "review")
