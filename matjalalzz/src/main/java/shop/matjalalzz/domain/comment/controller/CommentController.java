@@ -6,6 +6,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,19 +19,22 @@ import shop.matjalalzz.domain.comment.dto.CommentCreateRequest;
 import shop.matjalalzz.domain.comment.dto.CommentResponse;
 import shop.matjalalzz.domain.comment.entity.Comment;
 import shop.matjalalzz.domain.comment.mapper.CommentMapper;
+import shop.matjalalzz.domain.comment.service.CommentService;
 import shop.matjalalzz.global.unit.BaseResponse;
+import shop.matjalalzz.user.adapter.UserDetail;
 
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "댓글 API", description = "댓글 관련 API")
 public class CommentController {
+    private final CommentService commentService;
 
     @Operation(summary = "댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.")
     @GetMapping("/parties/{partyId}/comments")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<List<CommentResponse>> getComments(
         @PathVariable Long partyId) {
-        return BaseResponse.ok(List.of(CommentMapper.toCommentResponse(Comment.builder().build())),
+        return BaseResponse.ok(commentService.findCommentsByParty(partyId),
             HttpStatus.OK);
     }
 
@@ -39,7 +44,8 @@ public class CommentController {
     public BaseResponse<Void> createComment(
         @PathVariable Long partyId,
         @RequestBody CommentCreateRequest request,
-        Authentication authentication) {
+        @AuthenticationPrincipal UserDetail userDetail) {
+        commentService.createComment(request,partyId,userDetail.getId());
         return BaseResponse.okOnlyStatus(HttpStatus.CREATED);
     }
 
@@ -48,7 +54,8 @@ public class CommentController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(
         @PathVariable Long commentId,
-        Authentication authentication) {
+        @AuthenticationPrincipal UserDetail userDetail) {
+        commentService.deleteComment(commentId,userDetail.getId());
     }
 
 }
