@@ -1,4 +1,4 @@
-package shop.matjalalzz.tosspay.controller;
+package shop.matjalalzz.tosspay.api;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
