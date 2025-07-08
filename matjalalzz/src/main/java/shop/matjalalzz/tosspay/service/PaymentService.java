@@ -14,9 +14,8 @@ import shop.matjalalzz.tosspay.config.TossApiClient;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmResponse;
-import shop.matjalalzz.user.app.UserContextService;
-import shop.matjalalzz.user.domain.User;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.domain.user.entity.User;
+import shop.matjalalzz.domain.user.dao.UserRepository;
 
 @Slf4j
 @Service
@@ -24,17 +23,15 @@ import shop.matjalalzz.user.dao.UserRepository;
 public class PaymentService {
 
 	private final TossApiClient tossApiClient;
-	private final UserContextService userContextService;
 	private final UserRepository userRepository;
 
 	@Value("${toss.secret-key}")
 	private String secretKey;
 
 	@Transactional
-	public PaymentSuccessResponse confirmPayment(TossPaymentConfirmRequest tossRequest) {
+	public PaymentSuccessResponse confirmPayment(TossPaymentConfirmRequest tossRequest, Long userId) {
 
 		//유저 검증
-		Long userId = userContextService.getCurrentUserId();
 		Optional<User> userOptional = userRepository.findById(userId);
 		if (userOptional.isEmpty()) {
 			throw new BusinessException(ErrorCode.USER_NOT_FOUND); //404
