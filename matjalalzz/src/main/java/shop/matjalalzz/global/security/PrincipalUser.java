@@ -1,42 +1,42 @@
-package shop.matjalalzz.user.adapter;
+package shop.matjalalzz.global.security;
 
 
-import java.util.Collection;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import shop.matjalalzz.user.domain.enums.Role;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import shop.matjalalzz.user.domain.User;
+import shop.matjalalzz.user.domain.enums.Role;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-@Slf4j
-@Accessors(chain = true)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 //구현 필수 메서드
-public class UserDetail implements UserDetails {
+public class PrincipalUser implements UserDetails, OAuth2User {
 
 	private long id;
 	private String email;
 	private String password;
 	private Role role;
+	private Map<String, Object> attributes;
 
 	@Builder
-	public UserDetail(String password, String email, Role role) {
+	public PrincipalUser(long id, String password, String email, Role role) {
+		this.id = id;
 		this.password = password;
 		this.email = email;
 		this.role = role;
 	}
 
-	public static UserDetail UserDetailsMake(User findUser) {
-		UserDetail userDetail = new UserDetail();
+	public static PrincipalUser UserDetailsMake(User findUser) {
+		PrincipalUser userDetail = new PrincipalUser();
 		userDetail.id = findUser.getId();
 		userDetail.email = findUser.getEmail();
 		userDetail.password = findUser.getPassword();
@@ -60,5 +60,9 @@ public class UserDetail implements UserDetails {
 		return this.email;
 	}
 
+	@Override
+	public String getName() {
+		return this.email;
+	}
 }
 
