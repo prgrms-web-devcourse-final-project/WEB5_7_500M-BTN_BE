@@ -101,8 +101,13 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             
+            echo "현재 위치:"
+            pwd
+            
+            echo "홈 디렉토리 내용:"
+            cd ~/matjalalzz
+            pwd
             ls -a
-            cd ~/WEB5_7_500M-BTN_BE/matjalalzz
-            ls -a
+           
             docker compose down
             docker compose up --build -d
