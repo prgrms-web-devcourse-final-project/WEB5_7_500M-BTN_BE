@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum ErrorCode {
+public enum ErrorCode implements BaseErrorCode{
 
 	/*
 	 * Commons : 공통 예외 처리
@@ -68,4 +68,8 @@ public enum ErrorCode {
 		this.message = message;
 	}
 
+	@Override
+	public String getCode() {
+		return this.name();
+	}
 }

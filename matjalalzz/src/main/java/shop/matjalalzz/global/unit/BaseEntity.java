@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@Getter
 public abstract class BaseEntity {
 
     @CreatedDate
@@ -27,13 +29,19 @@ public abstract class BaseEntity {
     @LastModifiedBy
     protected String updatedBy;
 
+    protected boolean deleted;
 
     //이거 그냥 setter 붙일지?
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public void setDeleted() {
+        this.deleted = true;
     }
 
 }
