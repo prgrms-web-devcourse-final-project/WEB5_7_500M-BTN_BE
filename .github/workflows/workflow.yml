@@ -31,6 +31,7 @@ jobs:
             gradle-${{ runner.os }}-
 
       - name: gradlew 실행 권한 부여
+
         run: chmod +x ./gradlew
 
       - name: 빌드
