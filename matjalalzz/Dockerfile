@@ -1,7 +1,8 @@
 FROM gradle:8.7.0-jdk21 AS build
 WORKDIR /app
-COPY --chown=gradle:gradle . .
-RUN gradle build -x test --no-build-cache
+# 저장소 루트가 아니라 matjalalzz 서브폴더만 복사
+COPY --chown=gradle:gradle matjalalzz/ .
+RUN gradle clean build --no-build-cache -x test
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
