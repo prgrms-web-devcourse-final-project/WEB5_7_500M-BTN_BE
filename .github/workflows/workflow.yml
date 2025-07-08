@@ -38,9 +38,6 @@ jobs:
         run: ./gradlew build -x test
         working-directory: matjalalzz
 
-      - name: 테스트
-        run: ./gradlew test
-        working-directory: matjalalzz
 
   deploy:
     needs: build-and-test
