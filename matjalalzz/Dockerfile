@@ -1,7 +1,7 @@
 FROM gradle:8.7.0-jdk21 AS build
 WORKDIR /app
 COPY --chown=gradle:gradle . .
-RUN gradle build -x test
+RUN gradle build -x test --no-build-cache
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
