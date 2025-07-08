@@ -101,11 +101,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             
-            echo "현재 위치:"
-            pwd
-            
-            echo "홈 디렉토리 내용:"
-            cd ~/matjalalzz
+
+            cd ~/matjalalzz/matjalalzz
             pwd
             ls -a
            
