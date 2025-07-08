@@ -3,8 +3,8 @@ package shop.matjalalzz.domain.review.mapper;
 import shop.matjalalzz.domain.mock.MockReservation;
 import shop.matjalalzz.domain.mock.MockShop;
 import shop.matjalalzz.domain.mock.MockUser;
-import shop.matjalalzz.domain.review.dto.entity.ReviewCreateRequest;
-import shop.matjalalzz.domain.review.dto.entity.ReviewResponse;
+import shop.matjalalzz.domain.review.dto.ReviewCreateRequest;
+import shop.matjalalzz.domain.review.dto.ReviewResponse;
 import shop.matjalalzz.domain.review.entity.Review;
 
 public class ReviewMapper {
