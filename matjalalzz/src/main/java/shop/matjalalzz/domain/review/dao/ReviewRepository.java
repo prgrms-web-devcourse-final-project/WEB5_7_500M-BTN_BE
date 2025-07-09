@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.review.repository;
+package shop.matjalalzz.domain.review.dao;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
