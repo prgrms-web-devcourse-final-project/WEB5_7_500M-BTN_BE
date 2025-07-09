@@ -34,8 +34,6 @@ public class PartyService {
     private final UserRepository userRepository;
     private final PartyUserRepository partyUserRepository;
 
-    private final PartyMapper partyMapper;
-
     @Transactional
     public void createParty(PartyCreateRequest request, long userId) {
 
@@ -70,7 +68,7 @@ public class PartyService {
             result, size);
 
         List<PartyListResponse> content = scroll.getCurrentScrollItems().stream()
-            .map(partyMapper::toListResponse)
+            .map(PartyMapper::toListResponse)
             .toList();
 
         Long nextCursor = scroll.isLastScroll() ? null : scroll.getNextCursor().getId();

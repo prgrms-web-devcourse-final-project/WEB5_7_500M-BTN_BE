@@ -1,6 +1,7 @@
 package shop.matjalalzz.party.mapper;
 
-import org.springframework.stereotype.Component;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
@@ -8,7 +9,7 @@ import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.mock.entity.MockShop;
 
-@Component
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PartyMapper {
 
     public static Party toEntity(PartyCreateRequest request, MockShop shop) {
@@ -51,7 +52,7 @@ public class PartyMapper {
             .build();
     }
 
-    public PartyListResponse toListResponse(Party party) {
+    public static PartyListResponse toListResponse(Party party) {
         return PartyListResponse.builder()
             .partyId(party.getId())
             .title(party.getTitle())
