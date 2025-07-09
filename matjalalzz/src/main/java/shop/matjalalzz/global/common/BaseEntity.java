@@ -1,4 +1,4 @@
-package shop.matjalalzz.global.unit;
+package shop.matjalalzz.global.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -29,13 +29,19 @@ public abstract class BaseEntity {
     @LastModifiedBy
     protected String updatedBy;
 
+    protected boolean deleted;
 
     //이거 그냥 setter 붙일지?
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
 }
