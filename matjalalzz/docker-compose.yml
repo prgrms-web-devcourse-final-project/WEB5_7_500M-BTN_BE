@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 500m_btn_be
+    env_file:
+      - .env
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_REDIRECT_BASE: ${JWT_REDIRECT_BASE}
+      JWT_EXP_ACCESS: ${JWT_EXP_ACCESS}
+      JWT_EXP_REFRESH: ${JWT_EXP_REFRESH}
+      JWT_ORIGIN_KEY: ${JWT_ORIGIN_KEY}
+      JWT_APP_KEY: ${JWT_APP_KEY}
+      TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
+      TOSS_CLIENT_KEY: ${TOSS_CLIENT_KEY}
+      SERVER_PORT: ${SERVER_PORT}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    restart: always
