@@ -1,69 +1,46 @@
 name: workflow.yml
-
 on:
-  pull_request:
-    branches: [dev]
   push:
-    branches: [dev]
-
+    branches: [main]   # main 브랜치에서만 작동
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - name: 코드 복사
         uses: actions/checkout@v4
-
       - name: JDK 설치
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '21'
-
-      - name: Gradle 캐시
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
       - name: gradlew 실행 권한 부여
         run: chmod +x ./gradlew
         working-directory: matjalalzz
-
       - name: 빌드
-        run: ./gradlew build -x test
+        run: ./gradlew clean build --no-build-cache -x test
         working-directory: matjalalzz
-
-
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-
     env:
-      SERVER_PORT: ${{ secrets.SERVER_PORT }}
-      DB_URL: ${{ secrets.DB_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      REDIS_HOST: ${{ secrets.REDIS_HOST }}
-      REDIS_PORT: ${{ secrets.REDIS_PORT }}
-      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-      JWT_REDIRECT_BASE: ${{ secrets.JWT_REDIRECT_BASE }}
-      JWT_EXP_ACCESS: ${{ secrets.JWT_EXP_ACCESS }}
-      JWT_EXP_REFRESH: ${{ secrets.JWT_EXP_REFRESH }}
-      JWT_ORIGIN_KEY: ${{ secrets.JWT_ORIGIN_KEY }}
-      JWT_APP_KEY: ${{ secrets.JWT_APP_KEY }}
-      TOSS_SECRET_KEY: ${{ secrets.TOSS_SECRET_KEY }}
-      TOSS_CLIENT_KEY: ${{ secrets.TOSS_CLIENT_KEY }}
-
+      SERVER_PORT:         ${{ secrets.SERVER_PORT }}
+      DB_URL:              ${{ secrets.DB_URL }}
+      DB_USERNAME:         ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD:         ${{ secrets.DB_PASSWORD }}
+      REDIS_HOST:          ${{ secrets.REDIS_HOST }}
+      REDIS_PORT:          ${{ secrets.REDIS_PORT }}
+      REDIS_PASSWORD:      ${{ secrets.REDIS_PASSWORD }}
+      JWT_REDIRECT_BASE:   ${{ secrets.JWT_REDIRECT_BASE }}
+      JWT_EXP_ACCESS:      ${{ secrets.JWT_EXP_ACCESS }}
+      JWT_EXP_REFRESH:     ${{ secrets.JWT_EXP_REFRESH }}
+      JWT_ORIGIN_KEY:      ${{ secrets.JWT_ORIGIN_KEY }}
+      JWT_APP_KEY:         ${{ secrets.JWT_APP_KEY }}
+      TOSS_SECRET_KEY:     ${{ secrets.TOSS_SECRET_KEY }}
+      TOSS_CLIENT_KEY:     ${{ secrets.TOSS_CLIENT_KEY }}
     steps:
       - name: 저장소 코드 Clone
         uses: actions/checkout@v4
-
-      - name: .env 파일 생성 (cat <<EOF 방식)
+      - name: .env 파일 생성
         run: |
           cat <<EOF > matjalalzz/.env
           SERVER_PORT=${SERVER_PORT}
@@ -81,30 +58,23 @@ jobs:
           TOSS_SECRET_KEY=${TOSS_SECRET_KEY}
           TOSS_CLIENT_KEY=${TOSS_CLIENT_KEY}
           EOF
-
       - name: 서버로 코드 전송
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host:     ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "."
-          target: "~/matjalalzz"
-
+          port:     ${{ secrets.SSH_PORT }}
+          source:   "."
+          target:   "~/matjalalzz"
       - name: 서버에서 배포 시작 (Docker Compose)
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host:     ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
+          port:     ${{ secrets.SSH_PORT }}
           script: |
-            
-
             cd ~/matjalalzz/matjalalzz
-            pwd
-            ls -a
-           
             docker compose down
             docker compose up --build -d
