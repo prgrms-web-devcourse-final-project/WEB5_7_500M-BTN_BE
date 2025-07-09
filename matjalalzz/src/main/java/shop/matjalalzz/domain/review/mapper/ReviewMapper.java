@@ -1,5 +1,7 @@
 package shop.matjalalzz.domain.review.mapper;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import shop.matjalalzz.domain.mock.MockReservation;
 import shop.matjalalzz.domain.mock.MockShop;
 import shop.matjalalzz.domain.mock.MockUser;
@@ -7,11 +9,8 @@ import shop.matjalalzz.domain.review.dto.entity.ReviewCreateRequest;
 import shop.matjalalzz.domain.review.dto.entity.ReviewResponse;
 import shop.matjalalzz.domain.review.entity.Review;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReviewMapper {
-
-    private ReviewMapper() {
-        // 유틸리티 클래스이므로 인스턴스화 방지
-    }
 
     public static ReviewResponse toReviewResponse(Review review) {
         return ReviewResponse.builder()
