@@ -18,12 +18,13 @@ public class MockDataInitializer {
 
     @PostConstruct
     public void initShop() {
-        mockShopRepository.save(new MockShop(1L));
+        mockShopRepository.save(new MockShop(1L, "수유 곱창집", "서울특별시 지은구 지은로"));
     }
 
     @PostConstruct
     public void initUser() {
         mockUserRepository.save(new MockUser(1L));
+        mockUserRepository.save(new MockUser(2L));
     }
 
 }

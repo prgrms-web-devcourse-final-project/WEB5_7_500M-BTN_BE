@@ -31,7 +31,8 @@ public class SecurityConfig {
         //, BlackListRepository blackListRepository
 
     ) throws Exception { //예외가 발생할 수 있는 코드 뜻
-        JwtAuthFilter jwtAuthFilter = new JwtAuthFilter(jwtTokenProvider, userService, stringRedisTemplate //, blackListRepository
+        JwtAuthFilter jwtAuthFilter = new JwtAuthFilter(jwtTokenProvider, userService,
+            stringRedisTemplate //, blackListRepository
         );
 
         return http
@@ -52,17 +53,18 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> {
                 auth
                     ///reissue-token을 호출하는 시점에는 엑세스 토큰이 이미 만료되어 있으니 넣어야 함
-                    .requestMatchers("/user/login", "/user/signup", "/user/reissue-token", "swagger-ui.html"
-                    ,"/v3/api-docs/**","/swagger-ui/**").permitAll()
+                    .requestMatchers("/user/login", "/user/signup", "/user/reissue-token",
+                        "swagger-ui.html"
+                        , "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
 
-
-                    //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
+//                    .anyRequest().permitAll(); //전부 다 허용하는 테스트용
 
                     .anyRequest().hasAnyRole("USER", "ADMIN"); //나머지 요청은 USER 또는 ADMiN 권한을 가져야 접근 가능
             })
 
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(
+                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }

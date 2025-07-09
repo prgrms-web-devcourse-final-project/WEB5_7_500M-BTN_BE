@@ -40,8 +40,8 @@ public abstract class BaseEntity {
         this.updatedBy = updatedBy;
     }
 
-    public void setDeleted() {
-        this.deleted = true;
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
 }

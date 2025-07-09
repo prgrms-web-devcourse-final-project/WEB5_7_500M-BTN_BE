@@ -20,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.matjalalzz.domain.party.mock.entity.MockShop;
 import shop.matjalalzz.global.unit.BaseEntity;
 
@@ -40,6 +41,7 @@ public class Party extends BaseEntity {
 
     private String description;
 
+    @Setter
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private PartyStatus status = PartyStatus.RECRUITING;
@@ -55,6 +57,7 @@ public class Party extends BaseEntity {
 
     private int maxAge;
 
+    @Enumerated(EnumType.STRING)
     private GenderCondition genderCondition;
 
     private LocalDateTime metAt;
