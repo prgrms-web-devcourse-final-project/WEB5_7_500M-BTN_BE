@@ -13,6 +13,7 @@ public enum ErrorCode {
 	INVALID_REQUEST_DATA(HttpStatus.BAD_REQUEST, "요청 데이터가 올바르지 않습니다. 입력 데이터를 확인해 주세요."),
 	INVALID_PAGINATION_PARAMETER(HttpStatus.BAD_REQUEST,
 		"요청 파라미터가 유효하지 않습니다. page는 1 이상, size는 1 이상 50 이하로 설정 해야 합니다."),
+	INVALID_RESERVATION_STATUS(HttpStatus.BAD_REQUEST, "잘못된 예약 상태입니다."),
 
 	// 401
 	AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요한 요청입니다. 로그인 해주세요."),
