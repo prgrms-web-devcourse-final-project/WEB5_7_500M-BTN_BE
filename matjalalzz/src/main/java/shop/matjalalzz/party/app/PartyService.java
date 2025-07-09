@@ -49,7 +49,6 @@ public class PartyService {
 
         Party party = PartyMapper.toEntity(request, shop);
 
-//        MockUser user = findOwnerById();
         PartyUser host = PartyUser.createHost(party, getUserById(userId));
         party.getPartyUsers().add(host);
 

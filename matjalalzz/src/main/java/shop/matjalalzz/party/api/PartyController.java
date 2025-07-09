@@ -34,6 +34,7 @@ public class PartyController {
 
     @Operation(summary = "파티 생성", description = "맛집 탐험 파티 모집 게시글을 작성합니다.")
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createParty(@RequestBody PartyCreateRequest partyCreateRequest,
         @AuthenticationPrincipal PrincipalUser userInfo) {
         partyService.createParty(partyCreateRequest, userInfo.getId());
@@ -42,6 +43,7 @@ public class PartyController {
 
     @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 게시글 상세 정보를 조회합니다.")
     @GetMapping("/{partyId}")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyDetailResponse> getPartyDetail(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
         PartyDetailResponse response = partyService.getPartyDetail(partyId);
@@ -50,6 +52,7 @@ public class PartyController {
 
     @Operation(summary = "파티 목록 조회", description = "파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다.")
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyScrollResponse> getParties(
         @RequestParam(required = false, defaultValue = "RECRUITING") PartyStatus status,
         @RequestParam(required = false) GenderCondition gender,
@@ -67,6 +70,7 @@ public class PartyController {
 
     @Operation(summary = "파티 참여", description = "맛집 탐험 파티를 참여합니다.")
     @PostMapping("/{partyId}/join")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> joinParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
         partyService.joinParty(partyId, userInfo.getId());
@@ -91,6 +95,7 @@ public class PartyController {
 
     @Operation(summary = "파티 모집 완료 상태 변경", description = "모집중인 파티를 모집종료 상태로 변경합니다.")
     @PatchMapping("/{partyId}/complete")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> completeParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
         partyService.completePartyRecruit(partyId);

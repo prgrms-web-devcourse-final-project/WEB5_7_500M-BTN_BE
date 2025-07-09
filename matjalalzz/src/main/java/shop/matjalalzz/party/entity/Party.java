@@ -12,8 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +39,6 @@ public class Party extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Size(max = 50)
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -51,43 +47,30 @@ public class Party extends BaseEntity {
     @Setter
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @NotNull
-    @Size(max = 15)
     private PartyStatus status = PartyStatus.RECRUITING;
 
     @Builder.Default
-    @NotNull
     private int currentCount = 1;
 
-    @NotNull
     private int minCount;
 
-    @NotNull
     private int maxCount;
 
-    @NotNull
     private int minAge;
 
-    @NotNull
     private int maxAge;
 
     @Enumerated(EnumType.STRING)
-    @NotNull
-    @Size(max = 1)
     private GenderCondition genderCondition;
 
-    @NotNull
     private LocalDateTime metAt;
 
-    @NotNull
     private LocalDateTime deadline;
 
-    @NotNull
     private int totalReservationFee;
 
     @ManyToOne
     @JoinColumn(name = "shop_id")
-    @NotNull
     private MockShop shop;
 
     @Builder.Default
