@@ -1,26 +1,26 @@
-package shop.matjalalzz.domain.party.app;
+package shop.matjalalzz.party.app;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.matjalalzz.domain.party.dao.PartyRepository;
-import shop.matjalalzz.domain.party.dto.PartyCreateRequest;
-import shop.matjalalzz.domain.party.dto.PartyDetailResponse;
-import shop.matjalalzz.domain.party.dto.PartyListResponse;
-import shop.matjalalzz.domain.party.dto.PartyScrollResponse;
-import shop.matjalalzz.domain.party.entity.GenderCondition;
-import shop.matjalalzz.domain.party.entity.Party;
-import shop.matjalalzz.domain.party.entity.PartyStatus;
-import shop.matjalalzz.domain.party.entity.PartyUser;
-import shop.matjalalzz.domain.party.mapper.PartyMapper;
-import shop.matjalalzz.domain.party.mock.dao.MockShopRepository;
-import shop.matjalalzz.domain.party.mock.dao.MockUserRepository;
-import shop.matjalalzz.domain.party.mock.entity.MockShop;
-import shop.matjalalzz.domain.party.mock.entity.MockUser;
-import shop.matjalalzz.domain.party.util.ScrollPaginationCollection;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.dto.PartyCreateRequest;
+import shop.matjalalzz.party.dto.PartyDetailResponse;
+import shop.matjalalzz.party.dto.PartyListResponse;
+import shop.matjalalzz.party.dto.PartyScrollResponse;
+import shop.matjalalzz.party.entity.GenderCondition;
+import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.party.entity.PartyStatus;
+import shop.matjalalzz.party.entity.PartyUser;
+import shop.matjalalzz.party.mapper.PartyMapper;
+import shop.matjalalzz.party.mock.dao.MockShopRepository;
+import shop.matjalalzz.party.mock.dao.MockUserRepository;
+import shop.matjalalzz.party.mock.entity.MockShop;
+import shop.matjalalzz.party.mock.entity.MockUser;
+import shop.matjalalzz.party.util.ScrollPaginationCollection;
 
 @Service
 @RequiredArgsConstructor

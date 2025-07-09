@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.party.mock.entity;
+package shop.matjalalzz.party.mock.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,16 +1,14 @@
-package shop.matjalalzz.domain.party.dto;
+package shop.matjalalzz.party.dto;
 
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import shop.matjalalzz.domain.party.entity.GenderCondition;
-import shop.matjalalzz.domain.party.entity.PartyStatus;
+import shop.matjalalzz.party.entity.GenderCondition;
+import shop.matjalalzz.party.entity.PartyStatus;
 
 @Builder
-public record PartyDetailResponse(
+public record PartyListResponse(
     Long partyId,
     String title,
-    String description,
     PartyStatus status,
     int maxCount,
     int minCount,
@@ -21,6 +19,9 @@ public record PartyDetailResponse(
     LocalDateTime metAt,
     LocalDateTime deadline,
     LocalDateTime createdAt,
-    Long hostId
+    Long hostId,
+    String shopName,
+    String shopAddress
 ) {
+
 }

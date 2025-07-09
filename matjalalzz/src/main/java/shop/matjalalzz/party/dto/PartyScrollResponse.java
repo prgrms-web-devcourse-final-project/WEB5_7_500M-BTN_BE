@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.party.dto;
+package shop.matjalalzz.party.dto;
 
 import java.util.List;
 

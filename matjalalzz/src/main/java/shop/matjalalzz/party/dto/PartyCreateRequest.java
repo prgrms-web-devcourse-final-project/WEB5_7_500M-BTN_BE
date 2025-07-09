@@ -1,9 +1,9 @@
-package shop.matjalalzz.domain.party.dto;
+package shop.matjalalzz.party.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
-import shop.matjalalzz.domain.party.entity.GenderCondition;
+import shop.matjalalzz.party.entity.GenderCondition;
 
 public record PartyCreateRequest(
     @NotBlank String title,

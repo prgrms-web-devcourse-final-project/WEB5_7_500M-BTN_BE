@@ -1,13 +1,13 @@
-package shop.matjalalzz.domain.party.mock;
+package shop.matjalalzz.party.mock;
 
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import shop.matjalalzz.domain.party.mock.dao.MockShopRepository;
-import shop.matjalalzz.domain.party.mock.dao.MockUserRepository;
-import shop.matjalalzz.domain.party.mock.entity.MockShop;
-import shop.matjalalzz.domain.party.mock.entity.MockUser;
+import shop.matjalalzz.party.mock.dao.MockShopRepository;
+import shop.matjalalzz.party.mock.dao.MockUserRepository;
+import shop.matjalalzz.party.mock.entity.MockShop;
+import shop.matjalalzz.party.mock.entity.MockUser;
 
 @Component
 @RequiredArgsConstructor

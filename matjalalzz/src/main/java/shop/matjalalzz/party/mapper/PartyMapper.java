@@ -1,12 +1,12 @@
-package shop.matjalalzz.domain.party.mapper;
+package shop.matjalalzz.party.mapper;
 
 import org.springframework.stereotype.Component;
-import shop.matjalalzz.domain.party.dto.PartyCreateRequest;
-import shop.matjalalzz.domain.party.dto.PartyDetailResponse;
-import shop.matjalalzz.domain.party.dto.PartyListResponse;
-import shop.matjalalzz.domain.party.entity.Party;
-import shop.matjalalzz.domain.party.entity.PartyUser;
-import shop.matjalalzz.domain.party.mock.entity.MockShop;
+import shop.matjalalzz.party.dto.PartyCreateRequest;
+import shop.matjalalzz.party.dto.PartyDetailResponse;
+import shop.matjalalzz.party.dto.PartyListResponse;
+import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.party.entity.PartyUser;
+import shop.matjalalzz.party.mock.entity.MockShop;
 
 @Component
 public class PartyMapper {

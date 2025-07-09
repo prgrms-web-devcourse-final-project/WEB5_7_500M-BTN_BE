@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.party.entity;
+package shop.matjalalzz.party.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,8 +21,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import shop.matjalalzz.domain.party.mock.entity.MockShop;
-import shop.matjalalzz.global.unit.BaseEntity;
+import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.party.mock.entity.MockShop;
 
 @Entity
 @Getter

@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.party.api;
+package shop.matjalalzz.party.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import shop.matjalalzz.domain.party.app.PartyService;
-import shop.matjalalzz.domain.party.dto.PartyCreateRequest;
-import shop.matjalalzz.domain.party.dto.PartyDetailResponse;
-import shop.matjalalzz.domain.party.dto.PartyScrollResponse;
-import shop.matjalalzz.domain.party.entity.GenderCondition;
-import shop.matjalalzz.domain.party.entity.PartyStatus;
-import shop.matjalalzz.global.unit.BaseResponse;
+import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.dto.PartyCreateRequest;
+import shop.matjalalzz.party.dto.PartyDetailResponse;
+import shop.matjalalzz.party.dto.PartyScrollResponse;
+import shop.matjalalzz.party.entity.GenderCondition;
+import shop.matjalalzz.party.entity.PartyStatus;
 
 @RestController
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.party.util;
+package shop.matjalalzz.party.util;
 
 import java.util.List;
 import lombok.AccessLevel;
