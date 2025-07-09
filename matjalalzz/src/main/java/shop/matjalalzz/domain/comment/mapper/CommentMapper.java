@@ -24,10 +24,12 @@ public class CommentMapper {
             .build();
     }
 
-    public static Comment fromCommentCreateRequest(CommentCreateRequest request, MockParty party,
+    public static Comment fromCommentCreateRequest(CommentCreateRequest request, Comment parent,
+        MockParty party,
         MockUser writer) {
         return Comment.builder()
             .content(request.content())
+            .parent(parent)
             .party(party)
             .writer(writer)
             .build();

@@ -49,9 +49,10 @@ public class Comment extends BaseEntity {
     private boolean deleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
     private Comment parent;
 
-    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> children;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -61,6 +62,5 @@ public class Comment extends BaseEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
     private MockUser writer;
-
 
 }

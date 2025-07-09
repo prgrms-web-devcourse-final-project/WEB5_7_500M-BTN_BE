@@ -25,7 +25,11 @@ public class CommentService {
         Long writerId) {
         MockParty party = MockParty.builder().id(partyId).build();
         MockUser writer = MockUser.builder().id(writerId).build();
-        Comment comment = CommentMapper.fromCommentCreateRequest(request, party, writer);
+        Comment parent = null;
+        if (request.parentId() != null) {
+            parent = getComment(request.parentId());
+        }
+        Comment comment = CommentMapper.fromCommentCreateRequest(request, parent, party, writer);
         commentRepository.save(comment);
         return CommentMapper.toCommentResponse(comment);
     }
