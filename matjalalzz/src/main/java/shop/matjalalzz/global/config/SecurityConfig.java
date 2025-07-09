@@ -14,8 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import shop.matjalalzz.global.security.jwt.TokenAuthenticationFilter;
-import shop.matjalalzz.global.security.oauth2.OAuth2SuccessHandler;
+import shop.matjalalzz.global.security.filter.TokenAuthenticationFilter;
+import shop.matjalalzz.global.security.handler.OAuth2SuccessHandler;
 import shop.matjalalzz.global.security.oauth2.app.OAuth2UserService;
 
 @Configuration
@@ -63,7 +63,7 @@ public class SecurityConfig {
                 auth -> auth
                     ///reissue-token을 호출하는 시점에는 엑세스 토큰이 이미 만료되어 있으니 넣어야 함
                     .requestMatchers("/login", "/user/signup", "/tokens/refresh", "swagger-ui.html"
-                        , "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        , "/v3/api-docs/**", "/swagger-ui/**", "/error", "/oauth2/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
