@@ -2,28 +2,31 @@ package shop.matjalalzz.user.mapper;
 
 
 import org.springframework.security.crypto.password.PasswordEncoder;
-import shop.matjalalzz.user.domain.User;
-import shop.matjalalzz.user.dto.Delete;
-import shop.matjalalzz.user.dto.DeleteUserRequest;
-import shop.matjalalzz.user.dto.SingUpRequest;
+import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.dto.OAuthSignUpRequest;
+import shop.matjalalzz.user.dto.SignUpRequest;
 
 public class UserMapper {
 
-	public static User toUser(SingUpRequest singUpRequest, PasswordEncoder passwordEncoder) {
+	public static User toUser(SignUpRequest signUpRequest, PasswordEncoder passwordEncoder) {
 		return User.builder()
-			.email(singUpRequest.email())
-			.password(passwordEncoder.encode(singUpRequest.password()))  // 암호화
-			.nickname(singUpRequest.nickname())
-			.phoneNumber(singUpRequest.phoneNumber())
-			.age(singUpRequest.age())
-			.name(singUpRequest.name())
-			.gender(singUpRequest.gender())
+			.email(signUpRequest.email())
+			.password(passwordEncoder.encode(signUpRequest.password()))  // 암호화
+			.nickname(signUpRequest.nickname())
+			.phoneNumber(signUpRequest.phoneNumber())
+			.age(signUpRequest.age())
+			.name(signUpRequest.name())
+			.gender(signUpRequest.gender())
 			.build();
 	}
 
-	public static Delete toDelete(DeleteUserRequest deleteUserRequest) {
-		return Delete.builder().email(deleteUserRequest.email())
-			.password(deleteUserRequest.password())
-			.build();
+	public static User toOAuthUser(OAuthSignUpRequest signUpRequest) {
+		return User.builder()
+				.nickname(signUpRequest.nickname())
+				.phoneNumber(signUpRequest.phoneNumber())
+				.age(signUpRequest.age())
+				.name(signUpRequest.name())
+				.gender(signUpRequest.gender())
+				.build();
 	}
 }
