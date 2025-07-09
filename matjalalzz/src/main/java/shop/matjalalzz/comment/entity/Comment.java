@@ -41,7 +41,7 @@ public class Comment extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 65_535, nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     @Lob
     private String content;
 

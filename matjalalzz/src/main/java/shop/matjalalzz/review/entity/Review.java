@@ -44,12 +44,11 @@ public class Review extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 65_535, nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     @Lob
     private String content;
 
     @Column(nullable = false)
-    @Digits(integer = 1, fraction = 2)
     private Double rating = 0D;
 
     @Column(nullable = false)
