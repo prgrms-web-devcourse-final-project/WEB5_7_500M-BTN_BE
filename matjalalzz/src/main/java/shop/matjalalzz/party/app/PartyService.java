@@ -1,26 +1,28 @@
 package shop.matjalalzz.party.app;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
-import shop.matjalalzz.party.entity.GenderCondition;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.party.entity.PartyStatus;
 import shop.matjalalzz.party.entity.PartyUser;
+import shop.matjalalzz.party.entity.enums.GenderCondition;
+import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.party.mock.dao.MockShopRepository;
-import shop.matjalalzz.party.mock.dao.MockUserRepository;
 import shop.matjalalzz.party.mock.entity.MockShop;
-import shop.matjalalzz.party.mock.entity.MockUser;
 import shop.matjalalzz.party.util.ScrollPaginationCollection;
+import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +31,13 @@ public class PartyService {
 
     private final MockShopRepository shopRepository;
     private final PartyRepository partyRepository;
-    private final MockUserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PartyUserRepository partyUserRepository;
 
     private final PartyMapper partyMapper;
 
     @Transactional
-    public void createParty(PartyCreateRequest request) {
+    public void createParty(PartyCreateRequest request, long userId) {
 
         if (request.deadline().isAfter(request.metAt())) {
             throw new BusinessException(ErrorCode.INVALID_DEADLINE);
@@ -46,8 +49,8 @@ public class PartyService {
 
         Party party = PartyMapper.toEntity(request, shop);
 
-        MockUser user = findOwnerById(); //todo
-        PartyUser host = PartyUser.createHost(party, user);
+//        MockUser user = findOwnerById();
+        PartyUser host = PartyUser.createHost(party, getUserById(userId));
         party.getPartyUsers().add(host);
 
         partyRepository.save(party);
@@ -77,23 +80,37 @@ public class PartyService {
     }
 
     @Transactional
-    public void joinParty(Long partyId) {
+    public void joinParty(Long partyId, long userId) {
         Party party = findById(partyId);
+        User user = getUserById(userId);
 
-        //todo 이미 파티에 참여중인 유저인지 검증 필요
-        MockUser user = findUserById(); //todo
+        HandlePartyUserJoin(party, user);
+    }
 
-        PartyUser partyUser = PartyUser.createUser(party, user);
-        party.getPartyUsers().add(partyUser);
+    //이미 파티에 참여중인 유저인지 검증
+    private void HandlePartyUserJoin(Party party, User user) {
+        Optional<PartyUser> existingPartyUser = partyUserRepository.findByUserIdAndPartyId(
+            user.getId(), party.getId());
+
+        if (existingPartyUser.isPresent()) {
+            PartyUser partyUser = existingPartyUser.get();
+            if (!partyUser.isDeleted()) {
+                throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
+            }
+            partyUser.setDeleted(false); //파티 탈퇴한 사람이 다시 파티 참여한 경우
+        } else {
+            PartyUser partyUser = PartyUser.createUser(party, user);
+            party.getPartyUsers().add(partyUser);
+        }
     }
 
     @Transactional
-    public void quitParty(Long partyId) {
+    public void quitParty(Long partyId, long userId) {
         Party party = findById(partyId);
 
         // todo 호스트는 파티 탈퇴를 못하게 할지?
         party.getPartyUsers().stream()
-            .filter(pu -> pu.getUser().getId().equals(2L))
+            .filter(pu -> pu.getUser().getId().equals(userId))
             .findFirst()
             .ifPresent(pu -> pu.setDeleted(true));
     }
@@ -117,13 +134,8 @@ public class PartyService {
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 
-    private MockUser findOwnerById() {
-        return userRepository.findById(1L).orElseThrow(() ->
-            new BusinessException(ErrorCode.DATA_NOT_FOUND));
-    }
-
-    private MockUser findUserById() {
-        return userRepository.findById(2L).orElseThrow(() ->
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
             new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 }

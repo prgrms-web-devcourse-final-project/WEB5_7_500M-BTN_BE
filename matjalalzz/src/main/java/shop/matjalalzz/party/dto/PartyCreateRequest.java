@@ -3,7 +3,7 @@ package shop.matjalalzz.party.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
-import shop.matjalalzz.party.entity.GenderCondition;
+import shop.matjalalzz.party.entity.enums.GenderCondition;
 
 public record PartyCreateRequest(
     @NotBlank String title,
@@ -13,7 +13,7 @@ public record PartyCreateRequest(
     @NotBlank GenderCondition genderCondition,
     @NotBlank @Min(value = 0) int minAge,
     @NotBlank int maxAge,
-    @NotBlank int minCount,
+    @NotBlank @Min(value = 1) int minCount,
     @NotBlank int maxCount,
     String description
 ) {

@@ -14,7 +14,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.common.BaseEntity;
-import shop.matjalalzz.party.mock.entity.MockUser;
+import shop.matjalalzz.user.entity.User;
 
 @Entity
 @Getter
@@ -37,9 +37,9 @@ public class PartyUser extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private MockUser user;
+    private User user;
 
-    public static PartyUser createHost(Party party, MockUser user) {
+    public static PartyUser createHost(Party party, User user) {
         return PartyUser.builder()
             .party(party)
             .user(user)
@@ -47,7 +47,7 @@ public class PartyUser extends BaseEntity {
             .build();
     }
 
-    public static PartyUser createUser(Party party, MockUser user) {
+    public static PartyUser createUser(Party party, User user) {
         return PartyUser.builder()
             .party(party)
             .user(user)

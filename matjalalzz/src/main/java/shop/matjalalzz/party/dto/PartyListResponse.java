@@ -2,8 +2,8 @@ package shop.matjalalzz.party.dto;
 
 import java.time.LocalDateTime;
 import lombok.Builder;
-import shop.matjalalzz.party.entity.GenderCondition;
-import shop.matjalalzz.party.entity.PartyStatus;
+import shop.matjalalzz.party.entity.enums.GenderCondition;
+import shop.matjalalzz.party.entity.enums.PartyStatus;
 
 @Builder
 public record PartyListResponse(
