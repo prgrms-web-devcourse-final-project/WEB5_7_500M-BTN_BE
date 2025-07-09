@@ -1,19 +1,21 @@
 package shop.matjalalzz.domain.party.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import shop.matjalalzz.domain.party.entity.GenderCondition;
 
 public record PartyCreateRequest(
-	String title,
-	Long shopId,
-	LocalDateTime metAt,
-	LocalDateTime deadline,
-	GenderCondition genderCondition,
-	int minAge,
-	int maxAge,
-	int minCount,
-	int maxCount,
-	String description
+    @NotBlank String title,
+    @NotBlank Long shopId,
+    @NotBlank LocalDateTime metAt,
+    @NotBlank LocalDateTime deadline,
+    @NotBlank GenderCondition genderCondition,
+    @NotBlank @Min(value = 0) int minAge,
+    @NotBlank int maxAge,
+    @NotBlank int minCount,
+    @NotBlank int maxCount,
+    String description
 ) {
 
 }
