@@ -3,9 +3,9 @@ spring:
     time-zone: Asia/Seoul
 
   datasource:
-    url: ${ DB_URL }
-    username: ${ DB_USERNAME }
-    password: ${ DB_PASSWORD }
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -27,21 +27,21 @@ spring:
 custom:
   jwt:
     redirection:
-      base: ${ JWT_REDIRECT_BASE }
+      base: ${JWT_REDIRECT_BASE}
     exp-time:
-      access: ${ JWT_EXP_ACCESS }
-      refresh: ${ JWT_EXP_REFRESH }
+      access: ${JWT_EXP_ACCESS}
+      refresh: ${JWT_EXP_REFRESH}
     secrets:
-      originkey: ${ JWT_ORIGIN_KEY }
-      appkey: ${ JWT_APP_KEY }
+      originkey: ${JWT_ORIGIN_KEY}
+      appkey: ${JWT_APP_KEY}
 
 toss:
-  secret-key: ${ TOSS_SECRET_KEY }
-  client-key: ${ TOSS_CLIENT_KEY }
+  secret-key: ${TOSS_SECRET_KEY}
+  client-key: ${TOSS_CLIENT_KEY}
 
 logging:
   level:
     root: INFO
 
 server:
-  port: ${ SERVER_PORT }
+  port: ${SERVER_PORT}
