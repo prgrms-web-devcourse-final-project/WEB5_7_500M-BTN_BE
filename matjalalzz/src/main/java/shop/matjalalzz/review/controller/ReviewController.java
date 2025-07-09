@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.review.controller;
+package shop.matjalalzz.review.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import shop.matjalalzz.domain.review.dto.entity.ReviewCreateRequest;
-import shop.matjalalzz.domain.review.dto.entity.ReviewPageResponse;
-import shop.matjalalzz.domain.review.entity.Review;
-import shop.matjalalzz.domain.review.mapper.ReviewMapper;
-import shop.matjalalzz.global.unit.BaseResponse;
+import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.review.dto.entity.ReviewCreateRequest;
+import shop.matjalalzz.review.dto.entity.ReviewPageResponse;
+import shop.matjalalzz.review.entity.Review;
+import shop.matjalalzz.review.mapper.ReviewMapper;
 
 @RestController
 @RequiredArgsConstructor

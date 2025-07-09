@@ -19,7 +19,7 @@ import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.party.mock.dao.MockShopRepository;
-import shop.matjalalzz.party.mock.entity.MockShop;
+import shop.matjalalzz.party.mock.entity.MockShop2;
 import shop.matjalalzz.party.util.ScrollPaginationCollection;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
@@ -42,7 +42,7 @@ public class PartyService {
         }
 
         // request.shopId()를 1L로 대체
-        MockShop shop = shopRepository.findById(1L).orElseThrow(() ->
+        MockShop2 shop = shopRepository.findById(1L).orElseThrow(() ->
             new BusinessException(ErrorCode.DATA_NOT_FOUND)); //todo 추후 shopService로 이동
 
         Party party = PartyMapper.toEntity(request, shop);

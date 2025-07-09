@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.comment.dto;
+package shop.matjalalzz.comment.dto;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

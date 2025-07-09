@@ -1,13 +1,13 @@
-package shop.matjalalzz.domain.review.mapper;
+package shop.matjalalzz.review.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.domain.mock.MockReservation;
-import shop.matjalalzz.domain.mock.MockShop;
-import shop.matjalalzz.domain.mock.MockUser;
-import shop.matjalalzz.domain.review.dto.entity.ReviewCreateRequest;
-import shop.matjalalzz.domain.review.dto.entity.ReviewResponse;
-import shop.matjalalzz.domain.review.entity.Review;
+import shop.matjalalzz.mock.MockReservation;
+import shop.matjalalzz.mock.MockShop;
+import shop.matjalalzz.mock.MockUser;
+import shop.matjalalzz.review.dto.entity.ReviewCreateRequest;
+import shop.matjalalzz.review.dto.entity.ReviewResponse;
+import shop.matjalalzz.review.entity.Review;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReviewMapper {

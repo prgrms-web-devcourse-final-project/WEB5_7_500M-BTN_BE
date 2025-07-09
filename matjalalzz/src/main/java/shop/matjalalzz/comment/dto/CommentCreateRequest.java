@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.comment.dto;
+package shop.matjalalzz.comment.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

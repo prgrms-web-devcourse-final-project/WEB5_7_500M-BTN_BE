@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.mock;
+package shop.matjalalzz.mock;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.domain.review.entity.Review;
+import shop.matjalalzz.review.entity.Review;
 
 @Getter
 @Entity

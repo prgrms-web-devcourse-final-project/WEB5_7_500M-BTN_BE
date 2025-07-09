@@ -1,12 +1,12 @@
-package shop.matjalalzz.domain.comment.mapper;
+package shop.matjalalzz.comment.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.domain.comment.dto.CommentCreateRequest;
-import shop.matjalalzz.domain.comment.dto.CommentResponse;
-import shop.matjalalzz.domain.comment.entity.Comment;
-import shop.matjalalzz.domain.mock.MockParty;
-import shop.matjalalzz.domain.mock.MockUser;
+import shop.matjalalzz.comment.dto.CommentCreateRequest;
+import shop.matjalalzz.comment.dto.CommentResponse;
+import shop.matjalalzz.comment.entity.Comment;
+import shop.matjalalzz.mock.MockParty;
+import shop.matjalalzz.mock.MockUser;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {

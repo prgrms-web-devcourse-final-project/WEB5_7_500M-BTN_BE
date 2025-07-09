@@ -7,12 +7,12 @@ import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
-import shop.matjalalzz.party.mock.entity.MockShop;
+import shop.matjalalzz.party.mock.entity.MockShop2;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PartyMapper {
 
-    public static Party toEntity(PartyCreateRequest request, MockShop shop) {
+    public static Party toEntity(PartyCreateRequest request, MockShop2 shop) {
 
         return Party.builder()
             .title(request.title())

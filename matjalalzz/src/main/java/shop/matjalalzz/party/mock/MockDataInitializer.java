@@ -5,7 +5,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import shop.matjalalzz.party.mock.dao.MockShopRepository;
-import shop.matjalalzz.party.mock.entity.MockShop;
+import shop.matjalalzz.party.mock.entity.MockShop2;
 
 @Component
 @RequiredArgsConstructor
@@ -15,7 +15,7 @@ public class MockDataInitializer {
 
     @PostConstruct
     public void initShop() {
-        mockShopRepository.save(new MockShop(1L, "수유 곱창집", "서울특별시 지은구 지은로"));
+        mockShopRepository.save(new MockShop2(1L, "수유 곱창집", "서울특별시 지은구 지은로"));
     }
 
 }

@@ -24,7 +24,7 @@ import lombok.Setter;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
-import shop.matjalalzz.party.mock.entity.MockShop;
+import shop.matjalalzz.party.mock.entity.MockShop2;
 
 @Entity
 @Getter
@@ -71,7 +71,7 @@ public class Party extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "shop_id")
-    private MockShop shop;
+    private MockShop2 shop;
 
     @Builder.Default
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.mock;
+package shop.matjalalzz.mock;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class MockShop {
+public class MockParty {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

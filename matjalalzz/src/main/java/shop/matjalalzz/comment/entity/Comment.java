@@ -1,5 +1,6 @@
-package shop.matjalalzz.domain.review.entity;
+package shop.matjalalzz.comment.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,28 +10,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.Digits;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.domain.mock.MockImage;
-import shop.matjalalzz.domain.mock.MockReservation;
-import shop.matjalalzz.domain.mock.MockShop;
-import shop.matjalalzz.domain.mock.MockUser;
-import shop.matjalalzz.global.unit.BaseEntity;
+import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.mock.MockParty;
+import shop.matjalalzz.mock.MockUser;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @AllArgsConstructor
-public class Review extends BaseEntity {
+public class Comment extends BaseEntity {
 
     @Id
-    @Column(name = "review_id")
+    @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -39,26 +37,21 @@ public class Review extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
-    @Digits(integer = 1, fraction = 2)
-    private Double rating = 0D;
-
-    @Column(nullable = false)
     private boolean deleted = false;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(nullable = false)
-    private MockShop shop;
+    @ManyToOne
+    private Comment parent;
+
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> children;
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
-    private MockReservation reservation;
+    private MockParty party;
 
     @ManyToOne(optional = false)
     @JoinColumn(nullable = false)
     private MockUser writer;
-
-    @OneToMany(mappedBy = "review")
-    private List<MockImage> images;
 
 
 }

@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.comment.controller;
+package shop.matjalalzz.comment.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import shop.matjalalzz.domain.comment.dto.CommentCreateRequest;
-import shop.matjalalzz.domain.comment.dto.CommentResponse;
-import shop.matjalalzz.domain.comment.entity.Comment;
-import shop.matjalalzz.domain.comment.mapper.CommentMapper;
-import shop.matjalalzz.global.unit.BaseResponse;
+import shop.matjalalzz.comment.dto.CommentCreateRequest;
+import shop.matjalalzz.comment.dto.CommentResponse;
+import shop.matjalalzz.comment.entity.Comment;
+import shop.matjalalzz.comment.mapper.CommentMapper;
+import shop.matjalalzz.global.common.BaseResponse;
 
 @RestController
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package shop.matjalalzz.domain.review.dto.entity;
+package shop.matjalalzz.review.dto.entity;
 
 import java.util.List;
 import lombok.Builder;

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MockShop {
+public class MockShop2 {
 
     @Id
     private Long id;
