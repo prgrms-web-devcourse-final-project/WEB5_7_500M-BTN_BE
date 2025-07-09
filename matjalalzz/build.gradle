@@ -57,8 +57,7 @@ dependencies {
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-
-    implementation("me.paulschwarz:spring-dotenv:3.0.0")
+    implementation("me.paulschwarz:spring-dotenv:3.0.0") // evn 파일에서 환경변수 가져오기
 }
 
 tasks.named('test') {
