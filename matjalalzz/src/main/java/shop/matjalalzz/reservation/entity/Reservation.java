@@ -14,9 +14,11 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.unit.BaseEntity;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -51,6 +53,9 @@ public class Reservation extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
 
 }
