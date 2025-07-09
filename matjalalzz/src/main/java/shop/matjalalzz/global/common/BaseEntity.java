@@ -1,4 +1,4 @@
-package shop.matjalalzz.global.unit;
+package shop.matjalalzz.global.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

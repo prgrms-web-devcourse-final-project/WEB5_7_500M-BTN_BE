@@ -1,6 +1,13 @@
 package shop.matjalalzz.user.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -70,7 +77,8 @@ public class User extends BaseEntity {
 
 
     @Builder
-    public User(String email, String oauthId, String password, String nickname, String phoneNumber, String name, long age, Gender gender, String bucketId, String profileImageUrl) {
+    public User(String email, String oauthId, String password, String nickname, String phoneNumber,
+        String name, long age, Gender gender, String bucketId, String profileImageUrl) {
         this.email = email;
         this.oauthId = oauthId;
         this.password = password;
@@ -94,7 +102,9 @@ public class User extends BaseEntity {
     }
 
     //나이 변경 메서드
-    public void updateAge(long age) { this.age = age;}
+    public void updateAge(long age) {
+        this.age = age;
+    }
 
     // point 변경 메서드
     public void updatePoint(Long point) {
