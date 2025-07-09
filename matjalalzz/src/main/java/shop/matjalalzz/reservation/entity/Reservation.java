@@ -16,7 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.global.unit.BaseEntity;
+import shop.matjalalzz.global.common.BaseEntity;
 
 @Getter
 @Entity
