@@ -12,22 +12,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import shop.matjalalzz.global.unit.BaseResponse;
+import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 
-@RestController("/shops/{shopId}/reservations")
+@RestController
 @RequiredArgsConstructor
 @Validated
+@RequestMapping("/shops/{shopId}/reservations")
 public class ReservationController {
 
-//    private final ReservationService reservationService;
+    private final ReservationService reservationService;
 
     @Operation(
-        summary = "예약 목록 조회",
+        summary = "식당 예약 목록 조회",
         description = "shopId에 해당하는 식당의 예약 목록을 필터와 커서 기반으로 조회한다.",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 목록 조회 성공",
@@ -44,7 +47,7 @@ public class ReservationController {
         @RequestParam(required = false, defaultValue = "10") int size
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
-            cursor);
+            cursor,size);
         return BaseResponse.ok(response, HttpStatus.OK);
     }
 
