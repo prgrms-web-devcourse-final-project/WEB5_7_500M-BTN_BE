@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.reservation.app.ReservationService;
@@ -35,12 +36,13 @@ public class ReservationController {
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 목록 조회 성공",
             content = @Content(schema = @Schema(implementation = ReservationListResponse.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 shopId",
-            content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 shopId")
         }
     )
+
     @GetMapping
-    public BaseResponse<ReservationListResponse> getReservations(
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<?> getReservations(
         @PathVariable Long shopId,
         @RequestParam(required = false, defaultValue = "TOTAL") String filter,
         @RequestParam(required = false) Long cursor,
@@ -48,6 +50,11 @@ public class ReservationController {
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
             cursor,size);
+
+        if (response == null || response.content().isEmpty()) {
+            return BaseResponse.errorOnlyStatus(HttpStatus.NOT_FOUND);
+        }
+
         return BaseResponse.ok(response, HttpStatus.OK);
     }
 
@@ -57,11 +64,10 @@ public class ReservationController {
         responses = {
             @ApiResponse(responseCode = "201", description = "예약 생성 성공",
             content = @Content(schema = @Schema(implementation = CreateReservationResponse.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
-            @ApiResponse(responseCode = "404", description = "식당을 찾을 수 없음")
         }
     )
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<CreateReservationResponse> createReservation(
         @PathVariable Long shopId,
         @Valid @RequestBody CreateReservationRequest request
