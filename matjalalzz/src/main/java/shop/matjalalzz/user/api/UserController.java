@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
@@ -24,30 +26,31 @@ import shop.matjalalzz.user.dto.SignUpRequest;
 @RestController
 @RequiredArgsConstructor
 @Validated
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
 
     @Operation(summary = "회원가입", description = "폼 로그인 회원가입")
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/user/signup")
+    @PostMapping("/signup")
     public BaseResponse<Void> signup(@RequestBody @Valid SignUpRequest signUpRequestDto) {
         userService.signup(signUpRequestDto);
-        return BaseResponse.okOnlyStatus(HttpStatus.CREATED);//201
+        return BaseResponse.ok(BaseStatus.CREATED);//201
     }
 
     @Operation(summary = "회원가입", description = "OAuth 추가 회원가입")
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/user/signup/oauth")
+    @PostMapping("/signup/oauth")
     public BaseResponse<Void> oauthSignup(
         @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestBody @Valid OAuthSignUpRequest oauthSignUpRequestDto) {
         userService.oauthSignup(userInfo.getEmail(), oauthSignUpRequestDto);
-        return BaseResponse.okOnlyStatus(HttpStatus.CREATED); //201
+        return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/user/delete")
+    @DeleteMapping("/delete")
     public void deleteUser(
         @AuthenticationPrincipal PrincipalUser userInfo,
         @CookieValue(name = "refreshToken") String refreshToken,
@@ -61,6 +64,6 @@ public class UserController {
     public BaseResponse<Void> login(@RequestBody @Valid LoginRequest loginRequest,
         HttpServletResponse response) {
         userService.login(loginRequest, response);
-        return BaseResponse.okOnlyStatus(HttpStatus.OK); //200
+        return BaseResponse.ok(BaseStatus.OK); //200
     }
 }

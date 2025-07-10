@@ -4,12 +4,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -17,6 +17,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.user.entity.User;
 
 @Getter
 @Entity
@@ -29,15 +32,7 @@ public class Reservation extends BaseEntity {
     @Column(name = "reservation_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    private Long clientId;
-
-    @Column(nullable = false)
-    private Long shopId;
-
-    private Long partyId;
-
+    
     @Column(nullable = false)
     private int headCount;
 
@@ -51,11 +46,16 @@ public class Reservation extends BaseEntity {
     @Column(nullable = false, length = 20)
     private ReservationStatus status = ReservationStatus.PENDING;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(nullable = false)
-    private boolean deleted = false;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "shop_id", nullable = false)
+    private Shop shop;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "party_id", nullable = false)
+    private Party party;
 
 }

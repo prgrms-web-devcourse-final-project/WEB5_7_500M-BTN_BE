@@ -62,7 +62,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(
                 auth -> auth
                     ///reissue-token을 호출하는 시점에는 엑세스 토큰이 이미 만료되어 있으니 넣어야 함
-                    .requestMatchers("/login", "/user/signup", "/tokens/refresh", "swagger-ui.html"
+                    .requestMatchers("/users/login", "/users/signup", "/users/reissue-token",
+                        "swagger-ui.html"
                         , "/v3/api-docs/**", "/swagger-ui/**", "/error", "/oauth2/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
 

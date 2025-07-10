@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 import shop.matjalalzz.comment.dto.CommentCreateRequest;
 import shop.matjalalzz.comment.dto.CommentResponse;
 import shop.matjalalzz.comment.entity.Comment;
-import shop.matjalalzz.mock.MockParty;
-import shop.matjalalzz.mock.MockUser;
+import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.user.entity.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {
@@ -24,10 +24,12 @@ public class CommentMapper {
             .build();
     }
 
-    public static Comment fromCommentCreateRequest(CommentCreateRequest request, MockParty party,
-        MockUser writer) {
+    public static Comment fromCommentCreateRequest(CommentCreateRequest request, Comment parent,
+        Party party,
+        User writer) {
         return Comment.builder()
             .content(request.content())
+            .parent(parent)
             .party(party)
             .writer(writer)
             .build();

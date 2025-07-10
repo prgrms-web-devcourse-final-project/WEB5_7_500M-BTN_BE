@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
@@ -35,27 +36,22 @@ public class ReservationController {
         description = "shopId에 해당하는 식당의 예약 목록을 필터와 커서 기반으로 조회한다.",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 목록 조회 성공",
-            content = @Content(schema = @Schema(implementation = ReservationListResponse.class))),
+                content = @Content(schema = @Schema(implementation = ReservationListResponse.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 shopId")
         }
     )
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<?> getReservations(
+    public BaseResponse<ReservationListResponse> getReservations(
         @PathVariable Long shopId,
         @RequestParam(required = false, defaultValue = "TOTAL") String filter,
         @RequestParam(required = false) Long cursor,
         @RequestParam(required = false, defaultValue = "10") int size
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
-            cursor,size);
+            cursor, size);
 
-        if (response == null || response.content().isEmpty()) {
-            return BaseResponse.errorOnlyStatus(HttpStatus.NOT_FOUND);
-        }
-
-        return BaseResponse.ok(response, HttpStatus.OK);
+        return BaseResponse.ok(response, BaseStatus.OK);
     }
 
     @Operation(
@@ -63,7 +59,7 @@ public class ReservationController {
         description = "shopId에 해당하는 식당에 예약을 생성한다.",
         responses = {
             @ApiResponse(responseCode = "201", description = "예약 생성 성공",
-            content = @Content(schema = @Schema(implementation = CreateReservationResponse.class))),
+                content = @Content(schema = @Schema(implementation = CreateReservationResponse.class))),
         }
     )
     @PostMapping
@@ -74,7 +70,7 @@ public class ReservationController {
     ) {
         CreateReservationResponse response = reservationService.createReservation(shopId, request);
 
-        return BaseResponse.ok(response, HttpStatus.CREATED);
+        return BaseResponse.ok(response, BaseStatus.CREATED);
 
     }
 

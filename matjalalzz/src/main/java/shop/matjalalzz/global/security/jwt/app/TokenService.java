@@ -15,7 +15,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import java.util.Date;
-import java.util.Optional;
 import javax.crypto.SecretKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,22 +53,19 @@ public class TokenService {
 
         String accessToken = issueAccessToken(found.getId(), found.getRole(), found.getEmail());
 
-        // 기존 유효한 리프레시 토큰이 있다면 해당 토큰 반환
-        Optional<RefreshToken> foundRefreshToken = refreshTokenRepository
-            .findByUser(found);
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
+            .orElseGet(() -> refreshTokenRepository.save(
+                TokenMapper.toRefreshToken(
+                    issueRefreshToken(found.getId()), found
+                )
+            ));
 
-        if (foundRefreshToken.isPresent()) {
-            return TokenMapper.toLoginTokenResponseDto(accessToken,
-                foundRefreshToken.get().getRefreshToken());
+        if (!validate(refreshToken.getRefreshToken())) {
+            String reissueRefreshToken = issueRefreshToken(found.getId());
+            refreshToken.updateRefreshToken(reissueRefreshToken);
         }
 
-        String refreshToken = issueRefreshToken(found.getId());
-
-        // 새로운 리프레시 토큰 저장
-        RefreshToken newRefreshToken = TokenMapper.toRefreshToken(refreshToken, found);
-        refreshTokenRepository.save(newRefreshToken);
-
-        return TokenMapper.toLoginTokenResponseDto(accessToken, refreshToken);
+        return TokenMapper.toLoginTokenResponseDto(accessToken, refreshToken.getRefreshToken());
     }
 
     //access 토큰 생성

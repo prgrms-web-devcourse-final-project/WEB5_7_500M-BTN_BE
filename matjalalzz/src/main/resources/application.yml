@@ -84,6 +84,5 @@ toss:
 logging:
   level:
     root: INFO
-
 server:
   port: ${SERVER_PORT}

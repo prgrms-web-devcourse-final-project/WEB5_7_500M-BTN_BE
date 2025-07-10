@@ -13,18 +13,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import shop.matjalalzz.user.dao.UserRepository;
-import shop.matjalalzz.user.entity.User;
-import shop.matjalalzz.user.dto.LoginRequest;
-import shop.matjalalzz.user.dto.OAuthSignUpRequest;
-import shop.matjalalzz.user.dto.SignUpRequest;
-import shop.matjalalzz.user.mapper.UserMapper;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
+import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.dto.LoginRequest;
+import shop.matjalalzz.user.dto.OAuthSignUpRequest;
+import shop.matjalalzz.user.dto.SignUpRequest;
+import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.mapper.UserMapper;
 
 @Slf4j
 @Service
@@ -43,21 +43,27 @@ public class UserService {
     public void login(LoginRequest dto, HttpServletResponse response) {
         //가입된 email과 password가 같은지 확인
         User found = userRepository.findByEmail(dto.email())
-                .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND));
 
         if (!passwordEncoder.matches(dto.password(), found.getPassword())) {
             throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);  //404
         }
 
-        String accessToken = tokenService.issueAccessToken(found.getId(), found.getRole(), found.getEmail());
+        String accessToken = tokenService.issueAccessToken(
+            found.getId(), found.getRole(), found.getEmail()
+        );
 
         RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
-                .orElseGet(() -> {
-                    String newRefreshToken = tokenService.issueRefreshToken(found.getId());
-                    return TokenMapper.toRefreshToken(newRefreshToken, found);
-                });
+            .orElseGet(() -> refreshTokenRepository.save(
+                TokenMapper.toRefreshToken(
+                    tokenService.issueRefreshToken(found.getId()), found
+                )
+            ));
 
-        refreshTokenRepository.save(refreshToken);
+        if (!tokenService.validate(refreshToken.getRefreshToken())) {
+            String reissueRefreshToken = tokenService.issueRefreshToken(found.getId());
+            refreshToken.updateRefreshToken(reissueRefreshToken);
+        }
 
         // http only 쿠키 방식으로 refresh Token을 클라이언트에게 줌
         response.setHeader("Authorization", "Bearer " + accessToken);
@@ -100,14 +106,13 @@ public class UserService {
 
     @Transactional
     public void deleteUser(Long userId, String refreshToken,
-                           HttpServletResponse response) {
+        HttpServletResponse response) {
         User tokenUser = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
 
         //refresh token 비교
         RefreshToken foundRefreshToken = refreshTokenRepository.findByUser(tokenUser)
-                .orElseThrow(() -> new BusinessException(INVALID_REFRESH_TOKEN));
-
+            .orElseThrow(() -> new BusinessException(INVALID_REFRESH_TOKEN));
 
         if (!foundRefreshToken.getRefreshToken().equals(refreshToken)) {
             throw new BusinessException(INVALID_REFRESH_TOKEN);  //401
