@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
@@ -24,6 +25,7 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final ReservationRepository reservationRepository;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
@@ -36,7 +38,8 @@ public class ReviewService {
     public ReviewResponse createReview(ReviewCreateRequest request, Long writerId) {
         User writer = userRepository.findById(writerId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
-        Reservation reservation = Reservation.builder().build(); //TODO: 개선
+        Reservation reservation = reservationRepository.findById(request.reservationId())
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); // TODO: 개선
         Shop shop = Shop.builder().build(); //TODO: 개선
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
