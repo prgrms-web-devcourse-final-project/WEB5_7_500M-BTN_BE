@@ -5,6 +5,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVAT
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
@@ -20,6 +21,10 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
 
+//    private final ClientService clientService;
+//    private final ShopService shopService;
+
+    @Transactional(readOnly = true)
     public ReservationListResponse getReservations(Long shopId, String filter, Long cursor,
         int size) {
         ReservationStatus status = parseFilter(filter);
@@ -36,10 +41,10 @@ public class ReservationService {
         List<ReservationListResponse.ReservationSummary> content = limitedResults.stream()
             .map(res -> ReservationListResponse.ReservationSummary.builder()
                 .reservationId(res.getId())
-                .shopName("ShopService 연동")
+                .shopName("ShopService 연동") //TODO: ShopService 연동 예정
                 .reservedAt(res.getReservedAt().toString())
                 .headCount(res.getHeadCount())
-                .phoneNumber("ClientService 연동")
+                .phoneNumber("ClientService 연동") //TODO: ClientService 연동 예정
                 .build())
             .toList();
 
