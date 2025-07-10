@@ -27,7 +27,6 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(CommentCreateRequest request, Long partyId,
         Long writerId) {
-        //TODO: 개선 필요
         Party party = partyRepository.findById(partyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
         User writer = userRepository.findById(writerId)
@@ -56,7 +55,8 @@ public class CommentService {
     public void deleteComment(Long commentId, Long userId) {
         Comment comment = getComment(commentId);
         validatePermission(comment, userId);
-        commentRepository.delete(comment);
+        comment.delete();
+        comment.getChildren().forEach(Comment::delete);
     }
 
     private void validatePermission(Comment comment, Long actorId) {

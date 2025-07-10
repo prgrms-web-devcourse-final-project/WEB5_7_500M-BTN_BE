@@ -29,7 +29,7 @@ public class ReviewService {
     public void deleteReview(Long reviewId, Long userId) {
         Review review = getReview(reviewId);
         validatePermission(review, userId);
-        reviewRepository.delete(review);
+        review.delete();
     }
 
     @Transactional
