@@ -6,7 +6,7 @@ import lombok.Builder;
 import shop.matjalalzz.shop.entity.FoodCategory;
 
 @Builder
-public record ShopResponse(
+public record ShopOwnerResponse(
     Long shopId,
     String name,
     FoodCategory category,
