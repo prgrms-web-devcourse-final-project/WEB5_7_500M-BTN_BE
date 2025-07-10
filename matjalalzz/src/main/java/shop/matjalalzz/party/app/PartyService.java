@@ -41,12 +41,10 @@ public class PartyService {
         }
 
         //todo: 추후 shopService로 이동 및 mockShop 제거
-        Shop mockShop = Shop.builder().id(1L).name("지은식당").address("서울시 지은구 지은로").build();
-        shopRepository.save(mockShop);
-//        Shop shop = shopRepository.findById(1L).orElseThrow(() ->
-//            new BusinessException(ErrorCode.DATA_NOT_FOUND));
+        Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
+            new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
-        Party party = PartyMapper.toEntity(request, mockShop);
+        Party party = PartyMapper.toEntity(request, shop);
 
         PartyUser host = PartyUser.createHost(party, getUserById(userId));
         party.getPartyUsers().add(host);

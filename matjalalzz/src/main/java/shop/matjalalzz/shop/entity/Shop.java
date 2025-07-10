@@ -68,8 +68,8 @@ public class Shop extends BaseEntity {
 
     @Column(nullable = false)
     private int reservationFee = 0;
-
-    @Column(nullable = false, precision = 3, scale = 2)
+    
+    @Column(nullable = false)
     private Double rating = 0.0;
 
     private LocalTime openTime;
