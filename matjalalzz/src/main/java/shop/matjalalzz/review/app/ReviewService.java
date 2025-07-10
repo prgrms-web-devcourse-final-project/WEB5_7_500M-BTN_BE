@@ -16,6 +16,7 @@ import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.entity.ShopRepository;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
 
@@ -26,6 +27,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
+    private final ShopRepository shopRepository;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
@@ -40,7 +42,8 @@ public class ReviewService {
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
         Reservation reservation = reservationRepository.findById(request.reservationId())
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); // TODO: 개선
-        Shop shop = Shop.builder().build(); //TODO: 개선
+        Shop shop = shopRepository.findById(request.shopId())
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
         reviewRepository.save(review);
