@@ -2,9 +2,11 @@ package shop.matjalalzz.shop.dto;
 
 import java.time.LocalTime;
 import lombok.Builder;
+import shop.matjalalzz.shop.entity.FoodCategory;
 
 @Builder
 public record ShopCreateRequest(
+    //이미지 없는 상태임
     String shopName,
     String roadAddress,
     String detailAddress,
@@ -12,7 +14,8 @@ public record ShopCreateRequest(
     Double latitude,
     Double longitude,
     String businessCode,
-    String category,
+    FoodCategory category,
+    String tel,
     int reservationFee,
     LocalTime openTime,
     LocalTime closeTime,

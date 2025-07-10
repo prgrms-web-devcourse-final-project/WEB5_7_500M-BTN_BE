@@ -24,8 +24,6 @@ import shop.matjalalzz.user.entity.User;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
-@AllArgsConstructor
 @Table(
     indexes = {
         @Index(name = "idx_shop_owner", columnList = "owner_id"),
@@ -39,45 +37,67 @@ public class Shop extends BaseEntity {
     private Long id;
 
     @Column(length = 50, nullable = false)
-    private String name;
+    private String shopName;
 
     @Column(nullable = false)
-    private String address;
+    private String roadAddress;
 
     @Column(length = 10, nullable = false)
     private String sido;
 
     @Column(nullable = false)
-    private Double latitude;
+    private Double latitude; //위도
 
     @Column(nullable = false)
-    private Double longitude;
+    private Double longitude; //경도
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String description;
+    private String description; //설명
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FoodCategory category;
 
     @Column(length = 20, nullable = false)
-    private String tel;
+    private String tel; //전화번호
 
     @Column(length = 10, nullable = false)
-    private String businessCode;
+    private String businessCode; //사업자 번호
 
     @Column(nullable = false)
-    private int reservationFee = 0;
+    private int reservationFee; //사장이 설정한 예약금
 
     @Column(nullable = false, precision = 3, scale = 2)
-    private Double rating = 0.0;
+    private Double rating; // 별점
 
-    private LocalTime openTime;
+    private LocalTime openTime; //영업 시간 00:00
 
-    private LocalTime closeTime;
+    private LocalTime closeTime; //영업 시간 00:00
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+
+    @Builder
+    public Shop(Long id, String shopName, String roadAddress, String sido, Double latitude,
+        Double longitude, String description, FoodCategory category, String tel,
+        String businessCode,
+        int reservationFee, LocalTime openTime, LocalTime closeTime, User owner) {
+        this.id = id;
+        this.shopName = shopName;
+        this.roadAddress = roadAddress;
+        this.sido = sido;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.description = description;
+        this.category = category;
+        this.tel = tel;
+        this.businessCode = businessCode;
+        this.reservationFee = reservationFee;
+        this.rating = 0.0;
+        this.openTime = openTime;
+        this.closeTime = closeTime;
+        this.owner = owner;
+    }
 }

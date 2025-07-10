@@ -65,8 +65,13 @@ public enum ErrorCode {
      * party
      */
     INVALID_DEADLINE(HttpStatus.BAD_REQUEST, "파티 마감일자는 모임일자보다 이전이어야 합니다."),
-    ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "이미 파티에 참여 중입니다.");
+    ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "이미 파티에 참여 중입니다."),
 
+
+
+
+
+    DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다.");
 
     private final HttpStatus status;
     private final String message;
