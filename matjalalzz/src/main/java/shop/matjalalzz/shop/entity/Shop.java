@@ -67,9 +67,11 @@ public class Shop extends BaseEntity {
     private String businessCode;
 
     @Column(nullable = false)
+    @Builder.Default
     private int reservationFee = 0;
-    
+
     @Column(nullable = false)
+    @Builder.Default
     private Double rating = 0.0;
 
     private LocalTime openTime;
