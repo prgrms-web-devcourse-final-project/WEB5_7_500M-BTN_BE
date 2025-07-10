@@ -17,9 +17,9 @@ public record ReviewCreateRequest(
     @NotBlank(message = "본문은 비어있을 수 없습니다.")
     String content,
 
-    @Schema(description = "별점(1.0~5.0)")
+    @Schema(description = "별점(0.5~5.0)")
     @NotNull(message = "별점은 필수입니다.")
-    @DecimalMin(value = "0.0", message = "별점은 최소 0.0 이상이어야 합니다.")
+    @DecimalMin(value = "0.5", message = "별점은 최소 0.5 이상이어야 합니다.")
     @DecimalMax(value = "5.0", message = "별점은 최대 5.0 이하여야 합니다.")
     @Digits(integer = 1, fraction = 2)
     Double rating,

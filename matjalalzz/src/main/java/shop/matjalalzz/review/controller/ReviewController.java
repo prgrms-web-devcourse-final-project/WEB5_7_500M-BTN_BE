@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.review.dto.entity.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.entity.ReviewPageResponse;
 import shop.matjalalzz.review.entity.Review;
@@ -31,7 +32,7 @@ public class ReviewController {
         return BaseResponse.ok(ReviewPageResponse.builder()
             .nextCursor(1L)
             .reviews(List.of(ReviewMapper.toReviewResponse(Review.builder().build())))
-            .build(), HttpStatus.OK);
+            .build(), BaseStatus.OK);
     }
 
     @Operation(summary = "리뷰 작성", description = "리뷰를 작성합니다.")
@@ -39,7 +40,7 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createReview(@RequestBody ReviewCreateRequest request,
         Authentication authentication) {
-        return BaseResponse.okOnlyStatus(HttpStatus.CREATED);
+        return BaseResponse.ok(BaseStatus.CREATED);
     }
 
     @Operation(summary = "리뷰 삭제", description = "특정 리뷰를 삭제합니다.")

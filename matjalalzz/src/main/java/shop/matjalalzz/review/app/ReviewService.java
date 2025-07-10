@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.mock.MockReservation;
 import shop.matjalalzz.mock.MockShop;
 import shop.matjalalzz.mock.MockUser;
@@ -14,8 +16,6 @@ import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
-import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.global.exception.domain.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +57,7 @@ public class ReviewService {
 
     private Review getReview(Long reviewId) {
         return reviewRepository.findById(reviewId).orElseThrow(
-            () -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+            () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
     }
 

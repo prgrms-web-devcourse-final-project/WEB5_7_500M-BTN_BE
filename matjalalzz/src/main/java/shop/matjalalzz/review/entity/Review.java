@@ -8,22 +8,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Digits;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.mock.MockImage;
-import shop.matjalalzz.mock.MockReservation;
-import shop.matjalalzz.mock.MockShop;
-import shop.matjalalzz.mock.MockUser;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.reservation.entity.Reservation;
+import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.user.entity.User;
 
 @Getter
 @Entity
@@ -33,7 +28,6 @@ import shop.matjalalzz.global.common.BaseEntity;
 @Table(
     indexes = {
         @Index(name = "idx_review_writer", columnList = "writer_id"),
-        @Index(name = "idx_review_reservation", columnList = "reservation_id"),
         @Index(name = "idx_review_shop", columnList = "shop_id")
     }
 )
@@ -50,22 +44,20 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     private Double rating = 0D;
 
-    @Column(nullable = false)
-    private boolean deleted = false;
-
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
-    private MockShop shop;
+    private Shop shop;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id", nullable = false)
-    private MockReservation reservation;
+    private Reservation reservation;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
-    private MockUser writer;
+    private User writer;
 
-    @OneToMany(mappedBy = "review")
-    private List<MockImage> images;
+    //TODO: image 속성 추가
+//    @OneToMany(mappedBy = "review")
+//    private List<MockImage> images;
 
 }

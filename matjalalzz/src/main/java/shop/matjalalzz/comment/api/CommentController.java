@@ -17,6 +17,7 @@ import shop.matjalalzz.comment.app.CommentService;
 import shop.matjalalzz.comment.dto.CommentCreateRequest;
 import shop.matjalalzz.comment.dto.CommentResponse;
 import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
 
 @RestController
@@ -32,7 +33,7 @@ public class CommentController {
     public BaseResponse<List<CommentResponse>> getComments(
         @PathVariable Long partyId) {
         return BaseResponse.ok(commentService.findCommentsByParty(partyId),
-            HttpStatus.OK);
+            BaseStatus.OK);
     }
 
     @Operation(summary = "댓글 작성", description = "특정 모임에 댓글을 작성합니다.")
@@ -43,7 +44,7 @@ public class CommentController {
         @RequestBody CommentCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
         commentService.createComment(request, partyId, principal.getId());
-        return BaseResponse.okOnlyStatus(HttpStatus.CREATED);
+        return BaseResponse.ok(BaseStatus.CREATED);
     }
 
     @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")

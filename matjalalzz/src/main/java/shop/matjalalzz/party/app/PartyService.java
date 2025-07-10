@@ -94,7 +94,7 @@ public class PartyService {
             if (!partyUser.isDeleted()) {
                 throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
             }
-            partyUser.setDeleted(false); //파티 탈퇴한 사람이 다시 파티 참여한 경우
+            partyUser.recover(); //파티 탈퇴한 사람이 다시 파티 참여한 경우
         } else {
             PartyUser partyUser = PartyUser.createUser(party, user);
             party.getPartyUsers().add(partyUser);
@@ -109,21 +109,21 @@ public class PartyService {
         party.getPartyUsers().stream()
             .filter(pu -> pu.getUser().getId().equals(userId))
             .findFirst()
-            .ifPresent(pu -> pu.setDeleted(true));
+            .ifPresent(pu -> pu.delete());
     }
 
     @Transactional
     public void deleteParty(Long partyId) {
         //todo 파티 삭제는 host만 가능
         Party party = findById(partyId);
-        party.setDeleted(true);
+        party.delete();
     }
 
     @Transactional
     public void completePartyRecruit(Long partyId) {
         //todo 파티 상태 변경은 host만 가능
         Party party = findById(partyId);
-        party.setStatus(PartyStatus.COMPLETED);
+        party.complete();
     }
 
     private Party findById(Long partyId) {

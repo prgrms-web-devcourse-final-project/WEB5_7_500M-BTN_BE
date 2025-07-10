@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
+import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.MyPartiesResponse;
@@ -37,8 +39,9 @@ public class UserInfoController {
         }
     )
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<MyInfoResponse> getMyInfo() {
-        // 이후 구현
+        // todo: 이후 구현
         MyInfoResponse data = MyInfoResponse.builder()
             .email("minji97@gmail.com")
             .nickname("맛잘알민지")
@@ -52,7 +55,7 @@ public class UserInfoController {
             .profile("https://s3.amazonaws.com/bucket/uploads/reviews/UUID_a.png")
             .build();
 
-        return BaseResponse.ok(data, HttpStatus.OK);
+        return BaseResponse.ok(data, BaseStatus.OK);
     }
 
     @Operation(
@@ -63,11 +66,12 @@ public class UserInfoController {
         }
     )
     @PatchMapping
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateMyInfo(
         @Valid @RequestBody MyInfoUpdateRequest request
     ) {
-        // 이후 구현
-        return BaseResponse.okOnlyStatus(HttpStatus.OK);
+        // todo: 이후 구현
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
     @Operation(
@@ -78,11 +82,12 @@ public class UserInfoController {
         }
     )
     @GetMapping("/reservations")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<MyReservationsResponse> getMyReservations(
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        // 이후 구현
+        // todo: 이후 구현
         MyReservationsResponse data = MyReservationsResponse.builder()
             .nextCursor(100L)
             .content(List.of(
@@ -97,7 +102,7 @@ public class UserInfoController {
                     .build()
             ))
             .build();
-        return BaseResponse.ok(data, HttpStatus.OK);
+        return BaseResponse.ok(data, BaseStatus.OK);
     }
 
     @Operation(
@@ -108,11 +113,12 @@ public class UserInfoController {
         }
     )
     @GetMapping("/parties")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<MyPartiesResponse> getMyParties(
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        // 이후 구현
+        // todo: 이후 구현
         MyPartiesResponse data = MyPartiesResponse.builder()
             .nextCursor(10L)
             .content(List.of(
@@ -133,7 +139,7 @@ public class UserInfoController {
             ))
             .build();
 
-        return BaseResponse.ok(data, HttpStatus.OK);
+        return BaseResponse.ok(data, BaseStatus.OK);
     }
 
     @Operation(
@@ -144,6 +150,7 @@ public class UserInfoController {
         }
     )
     @GetMapping("/reviews")
+    @ResponseStatus(HttpStatus.OK)
     public BaseResponse<MyReviewsResponse> getMyReviews(
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
@@ -165,6 +172,6 @@ public class UserInfoController {
             ))
             .build();
 
-        return BaseResponse.ok(data, HttpStatus.OK);
+        return BaseResponse.ok(data, BaseStatus.OK);
     }
 }

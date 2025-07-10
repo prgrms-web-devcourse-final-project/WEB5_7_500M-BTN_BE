@@ -5,6 +5,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 import lombok.Getter;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -13,10 +14,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @MappedSuperclass
+@SQLRestriction("deleted = false")
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 
     @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
@@ -31,17 +34,11 @@ public abstract class BaseEntity {
 
     protected boolean deleted;
 
-    //이거 그냥 setter 붙일지?
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void delete() {
+        this.deleted = true;
     }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
+    public void recover() {
+        this.deleted = false;
     }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
 }

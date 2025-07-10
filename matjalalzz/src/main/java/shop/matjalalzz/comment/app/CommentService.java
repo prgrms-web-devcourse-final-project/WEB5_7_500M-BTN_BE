@@ -9,10 +9,10 @@ import shop.matjalalzz.comment.dto.CommentCreateRequest;
 import shop.matjalalzz.comment.dto.CommentResponse;
 import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.comment.mapper.CommentMapper;
-import shop.matjalalzz.mock.MockParty;
-import shop.matjalalzz.mock.MockUser;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.mock.MockParty;
+import shop.matjalalzz.mock.MockUser;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,7 @@ public class CommentService {
 
     private Comment getComment(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(
-            () -> new BusinessException(ErrorCode.COMMENT_NOT_FOUND));
+            () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)

@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,7 +19,7 @@ import shop.matjalalzz.user.entity.enums.Role;
 
 @Entity
 @Getter
-@Table(name = "users")
+@Table(name = "`user`")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
@@ -29,43 +28,35 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Size(max = 255)
     @Column(unique = true)
     private String oauthId;
 
-    @NotNull
-    @Size(max = 255)
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @NotNull
-    @Size(max = 255)
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
-    @NotNull
-    @Size(max = 20)
+    @Column(nullable = false, length = 20)
     private String nickname;
 
-    @NotNull
-    @Size(max = 20)
+    @Column(nullable = false, length = 20)
     private String name;
 
-    private long age;
+    private int age;
 
-    @NotNull
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @NotNull
-    @Size(max = 20)
+    @Column(nullable = false, length = 20)
     private String phoneNumber;
 
-    private long point = 0;
-
-    private boolean deleted = false;
+    private int point = 0;
 
     @Size(max = 255)
     @Column(name = "bucket_id")
@@ -75,10 +66,9 @@ public class User extends BaseEntity {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
-
     @Builder
     public User(String email, String oauthId, String password, String nickname, String phoneNumber,
-        String name, long age, Gender gender, String bucketId, String profileImageUrl) {
+        String name, int age, Gender gender, String bucketId, String profileImageUrl) {
         this.email = email;
         this.oauthId = oauthId;
         this.password = password;
@@ -102,13 +92,13 @@ public class User extends BaseEntity {
     }
 
     //나이 변경 메서드
-    public void updateAge(long age) {
+    public void updateAge(int age) {
         this.age = age;
     }
 
     // point 변경 메서드
-    public void updatePoint(Long point) {
-        this.point = point;
+    public void updatePoint(int point) {
+        this.point += point;
     }
 
     //삭제 여부 변경 메서드

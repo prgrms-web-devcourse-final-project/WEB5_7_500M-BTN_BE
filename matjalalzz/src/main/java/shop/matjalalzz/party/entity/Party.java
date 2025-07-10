@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,11 +21,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
-import shop.matjalalzz.party.mock.entity.MockShop2;
+import shop.matjalalzz.shop.entity.Shop;
 
 @Entity
 @Getter
@@ -39,12 +39,12 @@ public class Party extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 50, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Setter
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private PartyStatus status = PartyStatus.RECRUITING;
@@ -69,12 +69,16 @@ public class Party extends BaseEntity {
 
     private int totalReservationFee;
 
-    @ManyToOne
-    @JoinColumn(name = "shop_id")
-    private MockShop2 shop;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "shop_id", nullable = false)
+    private Shop shop;
 
     @Builder.Default
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyUser> partyUsers = new ArrayList<>();
+
+    public void complete() {
+        status = PartyStatus.COMPLETED;
+    }
 
 }
