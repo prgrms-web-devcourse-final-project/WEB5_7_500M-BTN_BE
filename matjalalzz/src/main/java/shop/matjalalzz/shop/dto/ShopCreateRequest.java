@@ -6,16 +6,15 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 
 @Builder
 public record ShopCreateRequest(
-    //이미지 없는 상태임
     String shopName,
     String roadAddress,
     String detailAddress,
     String sido,
+    String tel,
     Double latitude,
     Double longitude,
     String businessCode,
     FoodCategory category,
-    String tel,
     int reservationFee,
     LocalTime openTime,
     LocalTime closeTime,

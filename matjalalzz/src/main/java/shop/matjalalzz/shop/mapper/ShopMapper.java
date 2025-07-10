@@ -4,11 +4,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.user.entity.User;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ShopMapper {
 
-    public static Shop createToShop(ShopCreateRequest request, Long userId) {
+    public static Shop createToShop(ShopCreateRequest request, User user) {
         return Shop.builder()
             .shopName(request.shopName())
             .roadAddress(request.roadAddress())
@@ -22,7 +23,7 @@ public class ShopMapper {
             .reservationFee(request.reservationFee())
             .openTime(request.openTime())
             .closeTime(request.closeTime())
-            .owner(userId)
+            .owner(user)
             .build();
     }
 
