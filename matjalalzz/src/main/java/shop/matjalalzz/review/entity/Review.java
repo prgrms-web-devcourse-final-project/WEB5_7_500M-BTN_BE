@@ -42,6 +42,7 @@ public class Review extends BaseEntity {
     private String content;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double rating = 0D;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
