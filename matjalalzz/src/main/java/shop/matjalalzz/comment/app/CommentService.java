@@ -11,20 +11,27 @@ import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.comment.mapper.CommentMapper;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.mock.MockParty;
-import shop.matjalalzz.mock.MockUser;
+import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final PartyRepository partyRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public CommentResponse createComment(CommentCreateRequest request, Long partyId,
         Long writerId) {
-        MockParty party = MockParty.builder().id(partyId).build();
-        MockUser writer = MockUser.builder().id(writerId).build();
+        //TODO: 개선 필요
+        Party party = partyRepository.findById(partyId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
+        User writer = userRepository.findById(writerId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
         Comment parent = null;
         if (request.parentId() != null) {
             parent = getComment(request.parentId());
