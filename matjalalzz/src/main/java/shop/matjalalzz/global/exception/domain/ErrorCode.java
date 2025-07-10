@@ -61,9 +61,14 @@ public enum ErrorCode {
 	 */
 
 	//400
-	ZERO_AMOUNT_PAYMENT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "0원 결제는 허용되지 않습니다.");
+	ZERO_AMOUNT_PAYMENT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "0원 결제는 허용되지 않습니다."),
 
-
+    /**
+     * party
+     */
+    INVALID_DEADLINE(HttpStatus.BAD_REQUEST, "파티 마감일자는 모임일자보다 이전이어야 합니다."),
+    DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 데이터가 존재합니다."),
+    ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "이미 파티에 참여 중입니다.");
 
 
 	private final HttpStatus status;

@@ -45,7 +45,6 @@ public class Review extends BaseEntity {
     private Long id;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    @Lob
     private String content;
 
     @Column(nullable = false)
@@ -68,6 +67,5 @@ public class Review extends BaseEntity {
 
     @OneToMany(mappedBy = "review")
     private List<MockImage> images;
-
 
 }

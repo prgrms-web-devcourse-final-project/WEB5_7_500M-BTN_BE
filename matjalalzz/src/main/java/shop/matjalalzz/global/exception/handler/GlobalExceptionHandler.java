@@ -12,22 +12,23 @@ import shop.matjalalzz.global.exception.dto.ErrorResponse;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	/**
-	 * 비즈니스 로직에서 발생한 예외 처리 (ErrorCode 기반)
-	 */
-	@ExceptionHandler(BusinessException.class)
-	public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e, HttpServletRequest request) {
-		ErrorCode code = e.getErrorCode();
+    /**
+     * 비즈니스 로직에서 발생한 예외 처리 (ErrorCode 기반)
+     */
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e,
+        HttpServletRequest request) {
+        ErrorCode code = e.getErrorCode();
 
-		String path = request.getMethod() + " " + request.getRequestURI();
+        String path = request.getMethod() + " " + request.getRequestURI();
 
-		return ResponseEntity.status(code.getStatus()).body(ErrorResponse.builder()
-			.status(code.getStatus().value())
-			.code(code.name())
-			.message(code.getMessage())
-			.path(path)
-			.build());
-	}
+        return ResponseEntity.status(code.getStatus()).body(ErrorResponse.builder()
+            .status(code.getStatus().value())
+            .code(code.name())
+            .message(code.getMessage())
+            .path(path)
+            .build());
+    }
 
 
 }

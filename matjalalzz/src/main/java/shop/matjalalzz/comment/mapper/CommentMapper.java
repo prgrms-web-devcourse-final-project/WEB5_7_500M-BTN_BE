@@ -1,15 +1,15 @@
 package shop.matjalalzz.comment.mapper;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import shop.matjalalzz.comment.dto.CommentCreateRequest;
 import shop.matjalalzz.comment.dto.CommentResponse;
 import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.mock.MockParty;
 import shop.matjalalzz.mock.MockUser;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {
-
-    private CommentMapper() {
-    }
 
     public static CommentResponse toCommentResponse(Comment comment) {
         return CommentResponse.builder()
@@ -23,7 +23,6 @@ public class CommentMapper {
                 .build())
             .build();
     }
-
     public static Comment fromCommentCreateRequest(CommentCreateRequest request, Comment parent,
         MockParty party,
         MockUser writer) {
