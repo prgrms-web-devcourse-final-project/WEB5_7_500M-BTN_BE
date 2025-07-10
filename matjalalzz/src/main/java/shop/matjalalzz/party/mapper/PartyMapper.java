@@ -2,17 +2,19 @@ package shop.matjalalzz.party.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
-import shop.matjalalzz.party.mock.entity.MockShop2;
+import shop.matjalalzz.shop.entity.Shop;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PartyMapper {
 
-    public static Party toEntity(PartyCreateRequest request, MockShop2 shop) {
+    public static Party toEntity(PartyCreateRequest request, Shop shop) {
 
         return Party.builder()
             .title(request.title())
@@ -47,8 +49,11 @@ public class PartyMapper {
                 .filter(PartyUser::isHost)
                 .map(pu -> pu.getUser().getId())
                 .findFirst()
-                .orElse(null) //todo 예외 던져주는 로직 필요
+                .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND))
             )
+            .shopId(party.getId())
+            .shopName(party.getShop().getName())
+            .shopAddress(party.getShop().getAddress())
             .build();
     }
 

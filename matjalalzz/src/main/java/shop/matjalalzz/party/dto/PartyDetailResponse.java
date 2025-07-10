@@ -20,7 +20,10 @@ public record PartyDetailResponse(
     LocalDateTime metAt,
     LocalDateTime deadline,
     LocalDateTime createdAt,
-    Long hostId
+    Long hostId,
+    Long shopId,
+    String shopName,
+    String shopAddress
 ) {
 
 }
