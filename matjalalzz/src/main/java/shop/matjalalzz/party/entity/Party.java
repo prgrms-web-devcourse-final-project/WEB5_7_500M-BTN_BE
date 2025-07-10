@@ -81,4 +81,10 @@ public class Party extends BaseEntity {
         status = PartyStatus.COMPLETED;
     }
 
+    // 연관된 PartyUser까지 cascade soft delete하는 메서드
+    public void deleteParty() {
+        super.delete();
+        this.partyUsers.forEach(pu -> pu.delete());
+    }
+
 }
