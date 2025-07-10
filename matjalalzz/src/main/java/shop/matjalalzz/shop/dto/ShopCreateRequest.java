@@ -38,7 +38,7 @@ public record ShopCreateRequest(
     String businessCode,
 
     @Schema(description = "음식 카테고리")
-    @NotBlank
+    @NotNull
     FoodCategory category,
 
     @Schema(description = "예약 수수료")
