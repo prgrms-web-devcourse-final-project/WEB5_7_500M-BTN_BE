@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
-import shop.matjalalzz.review.dto.entity.ReviewCreateRequest;
-import shop.matjalalzz.review.dto.entity.ReviewPageResponse;
+import shop.matjalalzz.review.dto.ReviewCreateRequest;
+import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
 
