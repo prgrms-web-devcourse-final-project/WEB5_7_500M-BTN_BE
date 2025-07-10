@@ -15,10 +15,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+<<<<<<<< HEAD:matjalalzz/src/main/java/shop/matjalalzz/review/api/ReviewController.java
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.review.app.ReviewService;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
+========
+import shop.matjalalzz.review.dto.entity.ReviewCreateRequest;
+import shop.matjalalzz.review.dto.entity.ReviewPageResponse;
+import shop.matjalalzz.review.entity.Review;
+import shop.matjalalzz.review.mapper.ReviewMapper;
+>>>>>>>> dev:matjalalzz/src/main/java/shop/matjalalzz/review/controller/ReviewController.java
 
 @RestController
 @RequiredArgsConstructor
@@ -30,19 +37,31 @@ public class ReviewController {
     @Operation(summary = "리뷰 조회", description = "특정 가게의 리뷰 목록을 조회합니다.")
     @GetMapping("/shops/{shopId}/reviews")
     @ResponseStatus(HttpStatus.OK)
+<<<<<<<< HEAD:matjalalzz/src/main/java/shop/matjalalzz/review/api/ReviewController.java
     public BaseResponse<ReviewPageResponse> getReviews(@PathVariable Long shopId,
         @RequestParam(defaultValue = "0") Long cursor,
         @RequestParam(defaultValue = "10") int size) {
         return BaseResponse.ok(reviewService.findReviewPageByShop(shopId, cursor, size),
             BaseStatus.OK);
+========
+    public BaseResponse<ReviewPageResponse> getReviews(@PathVariable Long shopId) {
+        return BaseResponse.ok(ReviewPageResponse.builder()
+            .nextCursor(1L)
+            .reviews(List.of(ReviewMapper.toReviewResponse(Review.builder().build())))
+            .build(), BaseStatus.OK);
+>>>>>>>> dev:matjalalzz/src/main/java/shop/matjalalzz/review/controller/ReviewController.java
     }
 
     @Operation(summary = "리뷰 작성", description = "리뷰를 작성합니다.")
     @PostMapping("/reviews")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createReview(@RequestBody ReviewCreateRequest request,
+<<<<<<<< HEAD:matjalalzz/src/main/java/shop/matjalalzz/review/api/ReviewController.java
         @AuthenticationPrincipal PrincipalUser principal) {
         reviewService.createReview(request, principal.getId());
+========
+        Authentication authentication) {
+>>>>>>>> dev:matjalalzz/src/main/java/shop/matjalalzz/review/controller/ReviewController.java
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 

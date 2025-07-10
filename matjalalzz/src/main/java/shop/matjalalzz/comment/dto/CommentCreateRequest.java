@@ -6,7 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record CommentCreateRequest(
-    
+
     @Schema(description = "부모 댓글 ID (대댓글인 경우)")
     Long parentId,
 
