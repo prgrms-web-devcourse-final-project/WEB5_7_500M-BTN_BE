@@ -56,6 +56,7 @@ public record ShopCreateRequest(
     String description
 
     //TODO: Image 추가
+
 ) {
 
 }
