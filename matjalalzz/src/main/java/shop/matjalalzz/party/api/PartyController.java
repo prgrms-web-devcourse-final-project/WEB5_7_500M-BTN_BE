@@ -2,6 +2,7 @@ package shop.matjalalzz.party.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +29,7 @@ import shop.matjalalzz.party.entity.enums.PartyStatus;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("parties")
-@Tag(name = "파티 API", description = "파티 관련 API")
+@Tag(name = "파티 API", description = "맛집 탐험 파티 관련 API")
 public class PartyController {
 
     private final PartyService partyService;
@@ -36,7 +37,7 @@ public class PartyController {
     @Operation(summary = "파티 생성", description = "맛집 탐험 파티 모집 게시글을 작성합니다.")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<Void> createParty(@RequestBody PartyCreateRequest partyCreateRequest,
+    public BaseResponse<Void> createParty(@Valid @RequestBody PartyCreateRequest partyCreateRequest,
         @AuthenticationPrincipal PrincipalUser userInfo) {
         partyService.createParty(partyCreateRequest, userInfo.getId());
         return BaseResponse.ok(BaseStatus.CREATED);
@@ -45,8 +46,7 @@ public class PartyController {
     @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 게시글 상세 정보를 조회합니다.")
     @GetMapping("/{partyId}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<PartyDetailResponse> getPartyDetail(@PathVariable Long partyId,
-        @AuthenticationPrincipal PrincipalUser userInfo) {
+    public BaseResponse<PartyDetailResponse> getPartyDetail(@PathVariable Long partyId) {
         PartyDetailResponse response = partyService.getPartyDetail(partyId);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
@@ -61,8 +61,7 @@ public class PartyController {
         @RequestParam(required = false) String category,
         @RequestParam(required = false) String query,
         @RequestParam(required = false, defaultValue = "0") Long cursor,
-        @RequestParam(required = false, defaultValue = "10") int size,
-        @AuthenticationPrincipal PrincipalUser userInfo
+        @RequestParam(required = false, defaultValue = "10") int size
     ) {
         PartyScrollResponse response = partyService.searchParties(status, gender,
             location, category, query, cursor, size);
@@ -91,7 +90,7 @@ public class PartyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.deleteParty(partyId);
+        partyService.deleteParty(partyId, userInfo.getId());
     }
 
     @Operation(summary = "파티 모집 완료 상태 변경", description = "모집중인 파티를 모집종료 상태로 변경합니다.")
@@ -99,7 +98,7 @@ public class PartyController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> completeParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.completePartyRecruit(partyId);
+        partyService.completePartyRecruit(partyId, userInfo.getId());
         return BaseResponse.ok(BaseStatus.OK);
     }
 
