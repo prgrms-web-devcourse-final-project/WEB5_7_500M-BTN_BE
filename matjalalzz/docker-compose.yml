@@ -23,6 +23,7 @@ services:
       TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
       TOSS_CLIENT_KEY: ${TOSS_CLIENT_KEY}
       SERVER_PORT: ${SERVER_PORT}
+      BACK_BASE_URL: ${BACK_BASE_URL}
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     restart: always
