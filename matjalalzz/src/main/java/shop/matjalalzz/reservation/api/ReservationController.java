@@ -1,6 +1,8 @@
 package shop.matjalalzz.reservation.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -56,16 +58,26 @@ public class ReservationController {
 
     @Operation(
         summary = "예약 생성",
-        description = "shopId에 해당하는 식당에 예약을 생성한다.",
+        description = "shopId에 해당하는 식당에 예약을 생성한다. 파티 예약인 경우 partyId를 쿼리 파라미터로 전달해야 한다.",
+        parameters = {
+            @Parameter(
+                name = "partyId",
+                description = "파티 ID (선택값). 파티 예약일 경우 전달.",
+                in = ParameterIn.QUERY,
+                required = false,
+                example = "3"
+            )
+        },
         responses = {
             @ApiResponse(responseCode = "201", description = "예약 생성 성공",
-                content = @Content(schema = @Schema(implementation = CreateReservationResponse.class))),
+                content = @Content(schema = @Schema(implementation = CreateReservationResponse.class)))
         }
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<CreateReservationResponse> createReservation(
         @PathVariable Long shopId,
+        @RequestParam(required = false) Long partyId, // party 여부 확인 및 party가 있는 경우 id 받아오는 용
         @Valid @RequestBody CreateReservationRequest request
     ) {
         CreateReservationResponse response = reservationService.createReservation(shopId, request);
