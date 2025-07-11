@@ -189,4 +189,77 @@ class ReviewServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
         }
     }
+
+    @Nested
+    @DisplayName("리뷰 삭제 테스트")
+    class DeleteReviewTest {
+
+        @Test
+        @DisplayName("리뷰 삭제 성공")
+        void deleteReview_success() {
+            // given
+            Long reviewId = 1L;
+            Long writerId = 1L;
+
+            User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
+
+            Review review = Review.builder()
+                .id(reviewId)
+                .content("맛있어요!")
+                .rating(4.5)
+                .writer(writer)
+                .build();
+
+            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+            // when
+            reviewService.deleteReview(reviewId, writerId);
+
+            // then
+            verify(reviewRepository).findById(reviewId);
+            // 삭제 여부 직접 검증은 어렵지만 메서드가 호출되었는지 확인
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 리뷰 삭제 실패")
+        void deleteReview_notFound_fail() {
+            // given
+            Long reviewId = 1L;
+            Long writerId = 1L;
+
+            when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> reviewService.deleteReview(reviewId, writerId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("작성자가 아닌 사용자가 리뷰 삭제 시도 실패")
+        void deleteReview_notWriter_fail() {
+            // given
+            Long reviewId = 1L;
+            Long writerId = 1L;
+            Long unauthorizedUserId = 2L;
+
+            User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
+
+            Review review = Review.builder()
+                .id(reviewId)
+                .content("맛있어요!")
+                .rating(4.5)
+                .writer(writer)
+                .build();
+
+            when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+            // when & then
+            assertThatThrownBy(() -> reviewService.deleteReview(reviewId, unauthorizedUserId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
 }
