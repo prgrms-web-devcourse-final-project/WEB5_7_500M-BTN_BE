@@ -65,7 +65,8 @@ public class ReviewService {
 
     }
 
-    private Review getReview(Long reviewId) {
+    @Transactional(readOnly = true)
+    public Review getReview(Long reviewId) {
         return reviewRepository.findById(reviewId).orElseThrow(
             () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
 

@@ -40,7 +40,8 @@ public class CommentService {
         return CommentMapper.toCommentResponse(comment);
     }
 
-    private Comment getComment(Long commentId) {
+    @Transactional(readOnly = true)
+    public Comment getComment(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(
             () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
