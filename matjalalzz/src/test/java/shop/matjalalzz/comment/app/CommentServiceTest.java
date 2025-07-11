@@ -8,6 +8,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -210,6 +212,116 @@ class CommentServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
 
             verify(commentRepository, never()).save(any(Comment.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("댓글 조회 테스트")
+    class FindCommentTest {
+
+        @Test
+        @DisplayName("단일 댓글 조회 성공")
+        void findComment_success() {
+            // given
+            Long commentId = 1L;
+            Long writerId = 1L;
+
+            Party party = mock(Party.class);
+
+            User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
+            when(writer.getNickname()).thenReturn("작성자");
+
+            Comment comment = Comment.builder()
+                .id(commentId)
+                .content("테스트 댓글")
+                .party(party)
+                .writer(writer)
+                .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+            // when
+            CommentResponse response = commentService.findComment(commentId);
+
+            // then
+            assertThat(response).isNotNull();
+            assertThat(response.commentId()).isEqualTo(commentId);
+            assertThat(response.content()).isEqualTo("테스트 댓글");
+            assertThat(response.writer().userId()).isEqualTo(writerId);
+            assertThat(response.writer().nickname()).isEqualTo("작성자");
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 댓글 조회 실패")
+        void findComment_notFound_fail() {
+            // given
+            Long commentId = 1L;
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> commentService.findComment(commentId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("모임별 댓글 목록 조회 성공")
+        void findCommentsByParty_success() {
+            // given
+            Long partyId = 1L;
+            Long writerId = 1L;
+
+            Party party = mock(Party.class);
+
+            User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
+
+            Comment comment1 = Comment.builder()
+                .id(1L)
+                .content("테스트 댓글 1")
+                .party(party)
+                .writer(writer)
+                .build();
+
+            Comment comment2 = Comment.builder()
+                .id(2L)
+                .content("테스트 댓글 2")
+                .party(party)
+                .writer(writer)
+                .build();
+
+            List<Comment> comments = Arrays.asList(comment1, comment2);
+
+            when(commentRepository.findAllByPartyId(partyId)).thenReturn(comments);
+
+            // when
+            List<CommentResponse> responses = commentService.findCommentsByParty(partyId);
+
+            // then
+            assertThat(responses).isNotNull();
+            assertThat(responses).hasSize(2);
+            assertThat(responses.get(0).commentId()).isEqualTo(1L);
+            assertThat(responses.get(0).content()).isEqualTo("테스트 댓글 1");
+            assertThat(responses.get(1).commentId()).isEqualTo(2L);
+            assertThat(responses.get(1).content()).isEqualTo("테스트 댓글 2");
+        }
+
+        @Test
+        @DisplayName("모임별 댓글이 없는 경우 빈 목록 반환")
+        void findCommentsByParty_emptyList() {
+            // given
+            Long partyId = 1L;
+
+            when(commentRepository.findAllByPartyId(partyId)).thenReturn(List.of());
+
+            // when
+            List<CommentResponse> responses = commentService.findCommentsByParty(partyId);
+
+            // then
+            assertThat(responses).isNotNull();
+            assertThat(responses).isEmpty();
         }
     }
 }
