@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.user.entity.User;
@@ -32,6 +33,7 @@ import shop.matjalalzz.user.entity.User;
         @Index(name = "idx_comment_party", columnList = "party_id")
     }
 )
+@SQLRestriction("deleted = false")
 public class Comment extends BaseEntity {
 
     @Id

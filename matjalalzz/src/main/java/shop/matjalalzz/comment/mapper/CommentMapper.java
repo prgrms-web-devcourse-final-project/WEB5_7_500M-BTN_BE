@@ -15,7 +15,7 @@ public class CommentMapper {
         return CommentResponse.builder()
             .commentId(comment.getId())
             .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
-            .content(comment.isDeleted() ? "삭제된 댓글입니다." : comment.getContent())
+            .content(comment.getContent())
             .createdAt(comment.getCreatedAt())
             .writer(CommentResponse.Writer.builder()
                 .userId(comment.getWriter().getId())

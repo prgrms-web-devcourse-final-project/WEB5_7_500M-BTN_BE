@@ -36,11 +36,12 @@ public class CommentService {
             parent = getComment(request.parentId());
         }
         Comment comment = CommentMapper.fromCommentCreateRequest(request, parent, party, writer);
-        commentRepository.save(comment);
-        return CommentMapper.toCommentResponse(comment);
+        Comment result = commentRepository.save(comment);
+        return CommentMapper.toCommentResponse(result);
     }
 
-    private Comment getComment(Long commentId) {
+    @Transactional(readOnly = true)
+    public Comment getComment(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(
             () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
