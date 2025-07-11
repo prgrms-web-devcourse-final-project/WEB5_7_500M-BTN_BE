@@ -35,7 +35,7 @@ public class ReservationController {
 
     @Operation(
         summary = "식당 예약 목록 조회",
-        description = "shopId에 해당하는 식당의 예약 목록을 필터와 커서 기반으로 조회한다.",
+        description = "shopId에 해당하는 식당의 예약 목록을 필터와 커서 기반으로 조회한다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 목록 조회 성공",
                 content = @Content(schema = @Schema(implementation = ReservationListResponse.class))),
@@ -58,7 +58,7 @@ public class ReservationController {
 
     @Operation(
         summary = "예약 생성",
-        description = "shopId에 해당하는 식당에 예약을 생성한다. 파티 예약인 경우 partyId를 쿼리 파라미터로 전달해야 한다.",
+        description = "shopId에 해당하는 식당에 예약을 생성한다. 파티 예약인 경우 partyId를 쿼리 파라미터로 전달해야 한다.(Completed)",
         parameters = {
             @Parameter(
                 name = "partyId",
