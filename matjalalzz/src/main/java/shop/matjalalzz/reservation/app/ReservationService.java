@@ -21,6 +21,7 @@ import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
+import shop.matjalalzz.reservation.mapper.ReservationMapper;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
@@ -36,6 +37,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final PartyRepository partyRepository;
     private final AuditorAwareImpl auditor;
+    private final ReservationMapper reservationMapper;
 
     @Transactional(readOnly = true)
     public ReservationListResponse getReservations(Long shopId, String filter, Long cursor,
@@ -51,20 +53,10 @@ public class ReservationService {
 
         Long nextCursor = hasNext ? limitedResults.get(size - 1).getId() : null;
 
-        List<ReservationListResponse.ReservationSummary> content = limitedResults.stream()
-            .map(res -> ReservationListResponse.ReservationSummary.builder()
-                .reservationId(res.getId())
-                .shopName("ShopService 연동") //TODO: ShopService 연동 예정
-                .reservedAt(res.getReservedAt().toString())
-                .headCount(res.getHeadCount())
-                .phoneNumber("ClientService 연동") //TODO: ClientService 연동 예정
-                .build())
-            .toList();
-
-        return ReservationListResponse.builder()
-            .content(content)
-            .nextCursor(nextCursor)
-            .build();
+        List<ReservationListResponse.ReservationSummary> content =
+            reservationMapper.toReservationSummaries(limitedResults);
+        
+        return reservationMapper.toReservationListResponse(content, nextCursor);
     }
 
     @Transactional
@@ -92,32 +84,23 @@ public class ReservationService {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
         }
 
-        Reservation reservation = Reservation.builder()
-            .headCount(request.headCount())
-            .reservationFee(request.reservationFee())
-            .reservedAt(reservedAt)
-            .status(ReservationStatus.PENDING)
-            .shop(reservationShop)
-            .user(reservationUser)
-            .party(reservationParty)
-            .build();
+        Reservation reservation = reservationMapper.toEntity(
+            request,
+            reservedAt,
+            reservationShop,
+            reservationUser,
+            reservationParty
+        );
 
         Reservation savedReservation = null;
 
         try {
-            reservationRepository.save(reservation);
+            savedReservation = reservationRepository.save(reservation);
+            return reservationMapper.toCreateReservationResponse(savedReservation);
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
         }
 
-
-        return CreateReservationResponse.builder()
-            .reservationId(savedReservation.getId())
-            .shopName(savedReservation.getShop().getName())
-            .dateTime(savedReservation.getReservedAt().toString())
-            .headCount(savedReservation.getHeadCount())
-            .status(savedReservation.getStatus().name())
-            .build();
     }
 
     private ReservationStatus parseFilter(String filter) {
