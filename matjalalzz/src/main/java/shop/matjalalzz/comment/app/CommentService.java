@@ -36,8 +36,8 @@ public class CommentService {
             parent = getComment(request.parentId());
         }
         Comment comment = CommentMapper.fromCommentCreateRequest(request, parent, party, writer);
-        commentRepository.save(comment);
-        return CommentMapper.toCommentResponse(comment);
+        Comment result = commentRepository.save(comment);
+        return CommentMapper.toCommentResponse(result);
     }
 
     @Transactional(readOnly = true)
