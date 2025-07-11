@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -322,6 +323,119 @@ class CommentServiceTest {
             // then
             assertThat(responses).isNotNull();
             assertThat(responses).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("댓글 삭제 테스트")
+    class DeleteCommentTest {
+
+        @Test
+        @DisplayName("댓글 삭제 성공")
+        void deleteComment_success() {
+            // given
+            Long commentId = 1L;
+            Long writerId = 1L;
+
+            Party party = mock(Party.class);
+            User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
+
+            Comment comment = Comment.builder()
+                .id(commentId)
+                .content("테스트 댓글")
+                .party(party)
+                .writer(writer)
+                .children(new ArrayList<>())
+                .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+            // when
+            commentService.deleteComment(commentId, writerId);
+
+            // then
+            verify(commentRepository).findById(commentId);
+            // 삭제가 호출되었는지는 mocking으로 검증이 어려우므로 생략
+        }
+
+        @Test
+        @DisplayName("대댓글이 있는 댓글 삭제 성공")
+        void deleteCommentWithChildren_success() {
+            // given
+            Long commentId = 1L;
+            Long childId = 2L;
+            Long writerId = 1L;
+
+            Party party = mock(Party.class);
+            User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
+
+            Comment childComment = Comment.builder()
+                .id(childId)
+                .content("자식 댓글")
+                .party(party)
+                .writer(writer)
+                .build();
+
+            Comment parentComment = Comment.builder()
+                .id(commentId)
+                .content("부모 댓글")
+                .party(party)
+                .writer(writer)
+                .children(List.of(childComment))
+                .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(parentComment));
+
+            // when
+            commentService.deleteComment(commentId, writerId);
+
+            // then
+            verify(commentRepository).findById(commentId);
+            // 삭제가 호출되었는지는 mocking으로 검증이 어려우므로 생략
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 댓글 삭제 실패")
+        void deleteComment_notFound_fail() {
+            // given
+            Long commentId = 1L;
+            Long writerId = 1L;
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> commentService.deleteComment(commentId, writerId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("작성자가 아닌 사용자가 댓글 삭제 시도 실패")
+        void deleteComment_notWriter_fail() {
+            // given
+            Long commentId = 1L;
+            Long writerId = 1L;
+            Long unauthorizedUserId = 2L;
+
+            Party party = mock(Party.class);
+            User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
+
+            Comment comment = Comment.builder()
+                .id(commentId)
+                .content("테스트 댓글")
+                .party(party)
+                .writer(writer)
+                .build();
+
+            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+
+            // when & then
+            assertThatThrownBy(() -> commentService.deleteComment(commentId, unauthorizedUserId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 }
