@@ -25,9 +25,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("""
-        INSERT 
-        INTO Reservation r
-        VALUES()
+        SELECT COUNT(r) > 0
+        FROM Reservation r
+        WHERE r.shop.id = :shopId
+          AND r.reservedAt = :reservedAt
         """)
-    void createReservation(CreateReservationRequest createReservationRequest);
+    boolean existsByShopIdAndReservationAt(
+        @Param("shopId") Long shopId,
+        @Param("reservedAt") LocalDateTime reservedAt
+    );
+
 }
