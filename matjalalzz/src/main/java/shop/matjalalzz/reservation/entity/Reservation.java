@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.shop.entity.Shop;
@@ -26,6 +27,7 @@ import shop.matjalalzz.user.entity.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@SQLRestriction("deleted = false")
 public class Reservation extends BaseEntity {
 
     @Id

@@ -14,7 +14,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @MappedSuperclass
-@SQLRestriction("deleted = false")
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 
