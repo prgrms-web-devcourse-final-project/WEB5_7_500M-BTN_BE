@@ -53,6 +53,9 @@ public enum ErrorCode {
 
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
 
+    // 409 Conflict
+    DUPLICATE_DATA(HttpStatus.CONFLICT, "데이터가 중복 되었습니다."),
+
 
     /*
      * toss pay
