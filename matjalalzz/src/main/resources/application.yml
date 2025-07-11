@@ -70,8 +70,6 @@ custom:
     allowed-origin: ${FRONT_BASE_URL}
     backend-origin: ${BACK_BASE_URL}
   jwt:
-    redirection:
-      base: ${JWT_REDIRECT_BASE}
     token-validity-time: # 초 단위
       access: ${ACCESS_TOKEN_TTL} # 10분
       refresh: ${REFRESH_TOKEN_TTL} # 7일
