@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,6 +30,12 @@ import shop.matjalalzz.user.entity.User;
 @AllArgsConstructor
 @Builder
 @SQLRestriction("deleted = false")
+@Table(
+    name = "reservation",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"shop_id", "reserved_at"})
+    }
+)
 public class Reservation extends BaseEntity {
 
     @Id

@@ -8,6 +8,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -85,6 +86,7 @@ public class ReservationService {
             reservationParty = partyRepository.findById(partyId)
                 .orElseThrow(() -> new BusinessException(PARTY_NOT_FOUND));
         }
+
         // 중복 예약 검사
         if (reservationRepository.existsByShopIdAndReservationAt(shopId, reservedAt)) {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
@@ -100,7 +102,14 @@ public class ReservationService {
             .party(reservationParty)
             .build();
 
-        Reservation savedReservation = reservationRepository.save(reservation);
+        Reservation savedReservation = null;
+
+        try {
+            reservationRepository.save(reservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessException(INVALID_RESERVATION_STATUS);
+        }
+
 
         return CreateReservationResponse.builder()
             .reservationId(savedReservation.getId())
