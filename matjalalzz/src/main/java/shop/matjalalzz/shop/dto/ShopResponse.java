@@ -8,11 +8,11 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 @Builder
 public record ShopResponse(
     Long shopId,
-    String name,
+    String shopName,
     FoodCategory category,
     String description,
-    String address,
-    String phone,
+    String roadAddress,
+    String tel,
     LocalTime openTime,
     LocalTime closeTime,
     Double rating,

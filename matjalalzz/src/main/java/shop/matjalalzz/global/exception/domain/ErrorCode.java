@@ -66,7 +66,6 @@ public enum ErrorCode {
      */
     INVALID_DEADLINE(HttpStatus.BAD_REQUEST, "파티 마감일자는 모임일자보다 이전이어야 합니다."),
     ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "이미 파티에 참여 중입니다."),
-
     NOT_JOIN_PARTY(HttpStatus.BAD_REQUEST, "파티에 참여 중이 아닙니다."),
     HOST_CANNOT_QUIT_PARTY(HttpStatus.BAD_REQUEST, "호스트는 파티에 탈퇴할 수 없습니다."),
     CANNOT_DELETE_PARTY(HttpStatus.BAD_REQUEST, "호스트만 파티를 삭제할 수 있습니다."),
@@ -75,9 +74,13 @@ public enum ErrorCode {
 
 
 
+    /**
+     * shop
+     */
+    DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다."),
+    NOT_FIND_SHOP(HttpStatus.NO_CONTENT,"음식점 정보가 존재하지 않습니다.");
 
 
-    DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -52,8 +52,8 @@ public class PartyMapper {
                 .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND))
             )
             .shopId(party.getId())
-            .shopName(party.getShop().getName())
-            .shopAddress(party.getShop().getAddress())
+            .shopName(party.getShop().getShopName())
+            .shopAddress(party.getShop().getRoadAddress())
             .build();
     }
 
@@ -77,8 +77,8 @@ public class PartyMapper {
                 .findFirst()
                 .orElse(null)
             )
-            .shopName(party.getShop().getName())
-            .shopAddress(party.getShop().getAddress())
+            .shopName(party.getShop().getShopName())
+            .shopAddress(party.getShop().getRoadAddress())
             .build();
     }
 

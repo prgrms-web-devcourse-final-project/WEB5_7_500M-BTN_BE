@@ -3,6 +3,8 @@ package shop.matjalalzz.shop.mapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
+import shop.matjalalzz.shop.dto.ShopResponse;
+import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 
@@ -20,11 +22,15 @@ public class ShopMapper {
             .category(request.category())
             .tel(request.tel())
             .businessCode(request.businessCode())
-            .reservationFee(request.reservationFee())
             .openTime(request.openTime())
             .closeTime(request.closeTime())
             .owner(user)
             .build();
+    }
+
+    public static ShopResponse getToShopResponse (Shop shop) {
+        ShopResponse.builder()
+            .
     }
 
 

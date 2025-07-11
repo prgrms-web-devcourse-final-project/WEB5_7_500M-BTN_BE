@@ -29,7 +29,6 @@ import shop.matjalalzz.user.app.UserService;
 @Tag(name = "상점 API", description = "상점 관련 API")
 public class ShopController {
     private final ShopService shopService;
-    private final UserService userService;
 
     @Operation(summary = "상점 생성", description = "새로운 상점을 생성합니다.")
     @PostMapping("/shops")
@@ -45,7 +44,9 @@ public class ShopController {
     @GetMapping("/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopResponse> getShop(@PathVariable Long shopId) {
-        return BaseResponse.ok(ShopResponse.builder().build(), BaseStatus.OK);
+
+        ShopResponse response = shopService.getShop(shopId);
+        return BaseResponse.ok(response, BaseStatus.OK);
     }
 
 

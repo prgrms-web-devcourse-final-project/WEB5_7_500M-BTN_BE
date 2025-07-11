@@ -82,7 +82,6 @@ toss:
   client-key: ${TOSS_CLIENT_KEY}
 
 logging:
-  level:
     root: INFO
 server:
   port: ${SERVER_PORT}
