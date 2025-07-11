@@ -80,7 +80,7 @@ public class ReservationController {
         @RequestParam(required = false) Long partyId, // party 여부 확인 및 party가 있는 경우 id 받아오는 용
         @Valid @RequestBody CreateReservationRequest request
     ) {
-        CreateReservationResponse response = reservationService.createReservation(shopId, request);
+        CreateReservationResponse response = reservationService.createReservation(shopId, partyId, request);
 
         return BaseResponse.ok(response, BaseStatus.CREATED);
 
