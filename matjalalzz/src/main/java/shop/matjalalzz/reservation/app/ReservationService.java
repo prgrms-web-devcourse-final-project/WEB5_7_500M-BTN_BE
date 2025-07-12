@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -44,9 +46,11 @@ public class ReservationService {
         int size) {
         ReservationStatus status = parseFilter(filter);
 
+        Pageable pageable = PageRequest.of(0, size + 1);
+
         // 데이터 모두 가져오고 limit 처리
         List<Reservation> allResults = reservationRepository.findByShopIdWithFilterAndCursor(shopId,
-            status, cursor);
+            status, cursor, pageable);
 
         boolean hasNext = allResults.size() > size;
         List<Reservation> limitedResults = hasNext ? allResults.subList(0, size) : allResults;
@@ -60,12 +64,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public CreateReservationResponse createReservation(Long shopId, Long partyId,
+    public CreateReservationResponse createReservation(Long userId, Long shopId, Long partyId,
         CreateReservationRequest request) {
         LocalDateTime reservedAt = LocalDateTime.parse(request.date() + "T" + request.time());
-
-        Long userId = auditor.getCurrentUserId()
-            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
 
         User reservationUser = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
