@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
@@ -32,6 +33,7 @@ import shop.matjalalzz.shop.entity.Shop;
 @Table(name = "parties")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@SQLRestriction("deleted = false")
 public class Party extends BaseEntity {
 
     @Id
