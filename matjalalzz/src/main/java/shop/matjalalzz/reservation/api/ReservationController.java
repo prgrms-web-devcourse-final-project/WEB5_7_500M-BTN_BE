@@ -47,7 +47,7 @@ public class ReservationController {
     public BaseResponse<ReservationListResponse> getReservations(
         @PathVariable Long shopId,
         @RequestParam(defaultValue = "TOTAL") String filter,
-        @RequestParam Long cursor,
+        @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
