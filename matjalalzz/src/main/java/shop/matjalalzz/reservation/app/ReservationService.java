@@ -38,7 +38,6 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final PartyRepository partyRepository;
     private final AuditorAwareImpl auditor;
-    private final ReservationMapper reservationMapper;
 
     @Transactional(readOnly = true)
     public ReservationListResponse getReservations(Long shopId, String filter, Long cursor,
@@ -55,9 +54,9 @@ public class ReservationService {
         Long nextCursor = hasNext ? limitedResults.get(size - 1).getId() : null;
 
         List<ReservationContent> content =
-            reservationMapper.toReservationContent(limitedResults);
+            ReservationMapper.toReservationContent(limitedResults);
         
-        return reservationMapper.toReservationListResponse(content, nextCursor);
+        return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
 
     @Transactional
@@ -85,7 +84,7 @@ public class ReservationService {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
         }
 
-        Reservation reservation = reservationMapper.toEntity(
+        Reservation reservation = ReservationMapper.toEntity(
             request,
             reservedAt,
             reservationShop,
@@ -95,7 +94,7 @@ public class ReservationService {
 
         try {
             Reservation savedReservation = reservationRepository.save(reservation);
-            return reservationMapper.toCreateReservationResponse(savedReservation);
+            return ReservationMapper.toCreateReservationResponse(savedReservation);
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
         }
