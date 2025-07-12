@@ -40,11 +40,9 @@ public class PartyService {
     @Transactional
     public void createParty(PartyCreateRequest request, long userId) {
 
-        if (request.deadline().isAfter(request.metAt())) {
-            throw new BusinessException(ErrorCode.INVALID_DEADLINE);
-        }
+        validateCreateRequest(request);
 
-        //todo: 추후 shopService로 이동 및 mockShop 제거
+        //todo: 추후 shopService로 이동
         Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
             new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
@@ -55,6 +53,7 @@ public class PartyService {
 
         partyRepository.save(party);
     }
+
 
     @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
@@ -131,6 +130,19 @@ public class PartyService {
             throw new BusinessException(ErrorCode.CANNOT_COMPLETE_PARTY);
         }
     }
+
+    private void validateCreateRequest(PartyCreateRequest request) {
+        if (request.deadline().isAfter(request.metAt())) {
+            throw new BusinessException(ErrorCode.INVALID_DEADLINE);
+        }
+        if (request.minAge() > request.maxAge()) {
+            throw new BusinessException(ErrorCode.INVALID_AGE_CONDITION);
+        }
+        if (request.minCount() > request.maxCount()) {
+            throw new BusinessException(ErrorCode.INVALID_COUNT_CONDITION);
+        }
+    }
+
 
     //이미 파티에 참여중인 유저인지 검증
     private void HandlePartyUserJoin(Party party, User user) {
