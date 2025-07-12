@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
@@ -48,7 +50,8 @@ public class ReservationController {
         @PathVariable Long shopId,
         @RequestParam(defaultValue = "TOTAL") String filter,
         @RequestParam(required = false) Long cursor,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @AuthenticationPrincipal PrincipalUser userInfo
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
             cursor, size);
@@ -78,9 +81,11 @@ public class ReservationController {
     public BaseResponse<CreateReservationResponse> createReservation(
         @PathVariable Long shopId,
         @RequestParam(required = false) Long partyId, // party 여부 확인 및 party가 있는 경우 id 받아오는 용
-        @Valid @RequestBody CreateReservationRequest request
+        @Valid @RequestBody CreateReservationRequest request,
+        @AuthenticationPrincipal PrincipalUser userInfo
     ) {
-        CreateReservationResponse response = reservationService.createReservation(shopId, partyId, request);
+        CreateReservationResponse response = reservationService.createReservation(userInfo.getId(),
+            shopId, partyId, request);
 
         return BaseResponse.ok(response, BaseStatus.CREATED);
 

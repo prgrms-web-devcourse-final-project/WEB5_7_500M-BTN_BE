@@ -1,6 +1,7 @@
 package shop.matjalalzz.reservation.dao;
 
 import java.time.LocalDateTime;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,7 +22,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByShopIdWithFilterAndCursor(
         @Param("shopId") Long shopId,
         @Param("status") ReservationStatus status,
-        @Param("cursor") Long cursor
+        @Param("cursor") Long cursor,
+        Pageable pageable
     );
 
     @Query("""
