@@ -38,7 +38,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
         }
 
         PrincipalUser user = (PrincipalUser) principal;
-        return Optional.of(user.getUserId());
+        return Optional.of(user.getId());
     }
 
 }
