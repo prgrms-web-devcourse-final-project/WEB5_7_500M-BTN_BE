@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import shop.matjalalzz.comment.app.CommentService;
 import shop.matjalalzz.comment.dto.CommentCreateRequest;
 import shop.matjalalzz.comment.dto.CommentResponse;
 import shop.matjalalzz.global.common.BaseResponse;
@@ -27,7 +26,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @Operation(summary = "댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.")
+    @Operation(summary = "댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.(Completed)")
     @GetMapping("/parties/{partyId}/comments")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<List<CommentResponse>> getComments(
@@ -36,7 +35,7 @@ public class CommentController {
             BaseStatus.OK);
     }
 
-    @Operation(summary = "댓글 작성", description = "특정 모임에 댓글을 작성합니다.")
+    @Operation(summary = "댓글 작성", description = "특정 모임에 댓글을 작성합니다.(Completed)")
     @PostMapping("/parties/{partyId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createComment(
@@ -47,7 +46,7 @@ public class CommentController {
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
-    @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
+    @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.(Completed)")
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(

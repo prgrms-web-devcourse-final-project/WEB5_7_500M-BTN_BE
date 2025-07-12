@@ -9,7 +9,7 @@ import lombok.Builder;
 public record ReservationListResponse(
 
     @Schema(description = "예약 요약 정보 리스트")
-    List<ReservationSummary> content,
+    List<ReservationContent> content,
 
     @Schema(description = "다음 페이지 커서. 더 이상 없으면 null", example = "103")
     Long nextCursor
@@ -18,7 +18,7 @@ public record ReservationListResponse(
 
     @Builder
     @Schema(description = "예약 요약 정보 DTO")
-    public record ReservationSummary(
+    public record ReservationContent(
 
         @Schema(description = "예약 ID", example = "101")
         Long reservationId,
