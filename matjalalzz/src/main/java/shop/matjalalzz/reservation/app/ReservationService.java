@@ -19,6 +19,7 @@ import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
+import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -53,8 +54,8 @@ public class ReservationService {
 
         Long nextCursor = hasNext ? limitedResults.get(size - 1).getId() : null;
 
-        List<ReservationListResponse.ReservationSummary> content =
-            reservationMapper.toReservationSummaries(limitedResults);
+        List<ReservationContent> content =
+            reservationMapper.toReservationContent(limitedResults);
         
         return reservationMapper.toReservationListResponse(content, nextCursor);
     }
@@ -92,10 +93,8 @@ public class ReservationService {
             reservationParty
         );
 
-        Reservation savedReservation = null;
-
         try {
-            savedReservation = reservationRepository.save(reservation);
+            Reservation savedReservation = reservationRepository.save(reservation);
             return reservationMapper.toCreateReservationResponse(savedReservation);
         } catch (DataIntegrityViolationException e) {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
