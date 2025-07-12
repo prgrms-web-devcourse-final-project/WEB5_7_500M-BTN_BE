@@ -3,22 +3,26 @@ package shop.matjalalzz.party.app;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.dao.PartySpecification;
 import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
+import shop.matjalalzz.party.dto.PartySearchCondition;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
-import shop.matjalalzz.party.entity.enums.GenderCondition;
-import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
-import shop.matjalalzz.party.util.ScrollPaginationCollection;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
@@ -58,21 +62,26 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public PartyScrollResponse searchParties(PartyStatus status, GenderCondition gender,
-        String location,
-        String category, String query, Long cursor, int size) {
+    public PartyScrollResponse searchParties(PartySearchCondition condition, int size,
+        long userId) {
+        User user = getUserById(userId);
+        Specification<Party> spec = PartySpecification.createSpecification(condition,
+            user.getAge());
 
-//        Pageable pageable = PageRequest.of(0, size + 1, Sort.by(Direction.DESC, "id"));
-        List<Party> result = partyRepository.findAll();//todo 필터링한 결과값으로 변경
+        Pageable pageable = PageRequest.of(0, size + 1, Sort.by(Direction.DESC, "id"));
+        List<Party> partyList = partyRepository.findAll(spec, pageable).getContent();
 
-        ScrollPaginationCollection<Party> scroll = ScrollPaginationCollection.of(
-            result, size);
+        boolean hasNext = partyList.size() > size;
+        Long nextCursor = null;
 
-        List<PartyListResponse> content = scroll.getCurrentScrollItems().stream()
+        if (hasNext) {
+            nextCursor = partyList.get(size - 1).getId();
+            partyList = partyList.subList(0, size);
+        }
+
+        List<PartyListResponse> content = partyList.stream()
             .map(PartyMapper::toListResponse)
             .toList();
-
-        Long nextCursor = scroll.isLastScroll() ? null : scroll.getNextCursor().getId();
 
         return new PartyScrollResponse(content, nextCursor);
     }
