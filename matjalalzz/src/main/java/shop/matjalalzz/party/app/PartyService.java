@@ -18,18 +18,17 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
-import shop.matjalalzz.party.mock.dao.MockShopRepository;
-import shop.matjalalzz.party.mock.entity.MockShop2;
 import shop.matjalalzz.party.util.ScrollPaginationCollection;
+import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class PartyService {
 
-    private final MockShopRepository shopRepository;
+    private final ShopRepository shopRepository;
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
     private final PartyUserRepository partyUserRepository;
@@ -41,9 +40,9 @@ public class PartyService {
             throw new BusinessException(ErrorCode.INVALID_DEADLINE);
         }
 
-        // request.shopId()를 1L로 대체
-        MockShop2 shop = shopRepository.findById(1L).orElseThrow(() ->
-            new BusinessException(ErrorCode.DATA_NOT_FOUND)); //todo 추후 shopService로 이동
+        //todo: 추후 shopService로 이동 및 mockShop 제거
+        Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
+            new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
         Party party = PartyMapper.toEntity(request, shop);
 
@@ -53,10 +52,12 @@ public class PartyService {
         partyRepository.save(party);
     }
 
+    @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
         return PartyMapper.toDetailResponse(findById(partyId));
     }
 
+    @Transactional(readOnly = true)
     public PartyScrollResponse searchParties(PartyStatus status, GenderCondition gender,
         String location,
         String category, String query, Long cursor, int size) {
@@ -84,6 +85,47 @@ public class PartyService {
         HandlePartyUserJoin(party, user);
     }
 
+    @Transactional
+    public void quitParty(Long partyId, long userId) {
+        Party party = findById(partyId);
+        getUserById(userId); //검증용
+        PartyUser partyUser = findPartyUser(userId, party);
+
+        // 호스트인 경우 파티 탈퇴 불가능
+        if (partyUser.isHost()) {
+            throw new BusinessException(ErrorCode.HOST_CANNOT_QUIT_PARTY);
+        }
+        partyUser.delete();
+    }
+
+    @Transactional
+    public void deleteParty(Long partyId, long userId) {
+        Party party = findById(partyId);
+        getUserById(userId); //검증용
+        PartyUser partyUser = findPartyUser(userId, party);
+
+        // 호스트인 경우만 파티 삭제 가능
+        if (partyUser.isHost()) {
+            party.deleteParty(); //파티 유저까지 cascade 삭제
+        } else {
+            throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY);
+        }
+    }
+
+    @Transactional
+    public void completePartyRecruit(Long partyId, long userId) {
+        Party party = findById(partyId);
+        getUserById(userId); //검증용
+        PartyUser partyUser = findPartyUser(userId, party);
+
+        // 호스트인 경우만 파티 상태 변경 가능
+        if (partyUser.isHost()) {
+            party.complete();
+        } else {
+            throw new BusinessException(ErrorCode.CANNOT_COMPLETE_PARTY);
+        }
+    }
+
     //이미 파티에 참여중인 유저인지 검증
     private void HandlePartyUserJoin(Party party, User user) {
         Optional<PartyUser> existingPartyUser = partyUserRepository.findByUserIdAndPartyId(
@@ -101,29 +143,11 @@ public class PartyService {
         }
     }
 
-    @Transactional
-    public void quitParty(Long partyId, long userId) {
-        Party party = findById(partyId);
-
-        // todo 호스트는 파티 탈퇴를 못하게 할지?
-        party.getPartyUsers().stream()
+    private PartyUser findPartyUser(long userId, Party party) {
+        return party.getPartyUsers().stream()
             .filter(pu -> pu.getUser().getId().equals(userId))
             .findFirst()
-            .ifPresent(pu -> pu.delete());
-    }
-
-    @Transactional
-    public void deleteParty(Long partyId) {
-        //todo 파티 삭제는 host만 가능
-        Party party = findById(partyId);
-        party.delete();
-    }
-
-    @Transactional
-    public void completePartyRecruit(Long partyId) {
-        //todo 파티 상태 변경은 host만 가능
-        Party party = findById(partyId);
-        party.complete();
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_JOIN_PARTY));
     }
 
     private Party findById(Long partyId) {
@@ -133,6 +157,6 @@ public class PartyService {
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
-            new BusinessException(ErrorCode.DATA_NOT_FOUND));
+            new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }
