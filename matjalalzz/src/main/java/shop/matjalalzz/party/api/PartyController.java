@@ -56,11 +56,9 @@ public class PartyController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyScrollResponse> getParties(
         @ModelAttribute PartySearchCondition condition,
-        @RequestParam(required = false, defaultValue = "10") int size,
-        @AuthenticationPrincipal PrincipalUser userInfo
+        @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        PartyScrollResponse response = partyService.searchParties(condition, size,
-            userInfo.getId());
+        PartyScrollResponse response = partyService.searchParties(condition, size);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 

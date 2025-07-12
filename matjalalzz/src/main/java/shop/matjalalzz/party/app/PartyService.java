@@ -62,11 +62,8 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public PartyScrollResponse searchParties(PartySearchCondition condition, int size,
-        long userId) {
-        User user = getUserById(userId);
-        Specification<Party> spec = PartySpecification.createSpecification(condition,
-            user.getAge());
+    public PartyScrollResponse searchParties(PartySearchCondition condition, int size) {
+        Specification<Party> spec = PartySpecification.createSpecification(condition);
 
         Pageable pageable = PageRequest.of(0, size + 1, Sort.by(Direction.DESC, "id"));
         List<Party> partyList = partyRepository.findAll(spec, pageable).getContent();
