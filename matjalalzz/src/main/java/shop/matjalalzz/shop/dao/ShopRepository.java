@@ -6,6 +6,6 @@ import shop.matjalalzz.shop.entity.Shop;
 
 public interface ShopRepository extends JpaRepository<Shop, Long> {
 
-    Optional<Shop> findByBusinessCodeOrRoadAddress(String businessCode, String roadAddress);
+    Optional<Shop> findByBusinessCodeOrRoadAddress(long businessCode, String roadAddress);
 
 }

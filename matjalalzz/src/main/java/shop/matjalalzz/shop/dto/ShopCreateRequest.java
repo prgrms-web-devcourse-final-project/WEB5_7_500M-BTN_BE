@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.Builder;
 import shop.matjalalzz.shop.entity.FoodCategory;
 
@@ -35,7 +36,7 @@ public record ShopCreateRequest(
 
     @Schema(description = "사업자 등록번호")
     @NotBlank
-    String businessCode,
+    long businessCode,
 
     @Schema(description = "음식 카테고리")
     @NotNull
@@ -57,9 +58,9 @@ public record ShopCreateRequest(
 
     @Schema(description = "전화번호")
     @NotNull
-    String tel
+    String tel,
 
-    //TODO: Image 추가
+    int shopImageCount
 
 ) {
 

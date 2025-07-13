@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
@@ -26,21 +27,22 @@ import shop.matjalalzz.user.app.UserService;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "상점 API", description = "상점 관련 API")
+@Tag(name = "식당 API", description = "식당 관련 API")
 public class ShopController {
     private final ShopService shopService;
 
-    @Operation(summary = "상점 생성", description = "새로운 상점을 생성합니다.")
-    @PostMapping("/shops")
+    @Operation(summary = "식당 생성", description = "새로운 식당을 생성합니다.")
+    @PostMapping("/shops/presigned-urls")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<Void> createShop(@RequestBody ShopCreateRequest request,
+    //식당을 생성하며 프리사이드 url 반환 (만약 식당은 생성이 되어도 이미지 저장 실패 시 식당 수정에서 이미지를 넣게 유도해야 할 듯)
+    public BaseResponse<PreSignedUrlResponse> createShop(@RequestBody ShopCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
-        shopService.newShop(principal.getId(), request);
-        return BaseResponse.ok(BaseStatus.CREATED);
+        PreSignedUrlResponse preSignedUrlResponse = shopService.newShop(principal.getId(), request);
+        return BaseResponse.ok(preSignedUrlResponse,BaseStatus.CREATED);
     }
 
 
-    @Operation(summary = "상점 상세 조회", description = "특정 상점의 상세 정보를 조회합니다.")
+    @Operation(summary = "식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다.")
     @GetMapping("/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopResponse> getShop(@PathVariable Long shopId) {
@@ -51,7 +53,7 @@ public class ShopController {
 
 
 
-    @Operation(summary = "상점 목록 조회", description = "위치 기반으로 상점 목록을 조회합니다.")
+    @Operation(summary = "식당 목록 조회", description = "위치 기반으로 식당 목록을 조회합니다.")
     @GetMapping("/shops")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShops(ShopLocationSearchParam param,
@@ -61,7 +63,7 @@ public class ShopController {
         return BaseResponse.ok(ShopPageResponse.builder().build(), BaseStatus.OK);
     }
 
-    @Operation(summary = "상점 검색", description = "키워드로 상점을 검색합니다.")
+    @Operation(summary = "식당 검색", description = "키워드로 식당을 검색합니다.")
     @GetMapping("/shops/search")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShopsBySearch(@RequestParam String query,
@@ -71,7 +73,7 @@ public class ShopController {
         return BaseResponse.ok(ShopPageResponse.builder().build(), BaseStatus.OK);
     }
 
-    @Operation(summary = "점주용 상점 조회", description = "점주가 자신의 상점 정보를 조회합니다.")
+    @Operation(summary = "점주용 식당 조회", description = "점주가 자신의 식당 정보를 조회합니다.")
     @GetMapping("/owner/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopOwnerResponse> getShopOwner(@PathVariable Long shopId,
@@ -80,7 +82,7 @@ public class ShopController {
         return BaseResponse.ok(ShopOwnerResponse.builder().build(), BaseStatus.OK);
     }
 
-    @Operation(summary = "상점 정보 수정", description = "상점 정보를 수정합니다.")
+    @Operation(summary = "식당 정보 수정", description = "식당 정보를 수정합니다.")
     @PatchMapping("/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateShop(@PathVariable Long shopId,

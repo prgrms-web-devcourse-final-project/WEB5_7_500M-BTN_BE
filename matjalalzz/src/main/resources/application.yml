@@ -77,6 +77,16 @@ custom:
       refresh: ${REFRESH_TOKEN_TTL} # 7일
     secret: ${JWT_SECRET}
     redirect-login-success: ${custom.cors.allowed-origin}/auth/callback
+aws:
+  credentials:
+    AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+    AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+    AWS_BASE_URL: ${AWS_BASE_URL}
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    path: ${AWS_S3_PATH}
+
 
 toss:
   secret-key: ${TOSS_SECRET_KEY}

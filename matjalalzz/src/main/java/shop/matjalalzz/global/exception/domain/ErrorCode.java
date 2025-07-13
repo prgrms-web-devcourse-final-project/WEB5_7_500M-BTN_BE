@@ -77,10 +77,16 @@ public enum ErrorCode {
     /**
      * shop
      */
-    DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다."),
-    NOT_FIND_SHOP(HttpStatus.NO_CONTENT,"음식점 정보가 존재하지 않습니다.");
+    DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다 수정으로 정보를 넣어주세요."),
+    NOT_FIND_SHOP(HttpStatus.NO_CONTENT,"음식점 정보가 존재하지 않습니다."),
 
 
+
+    /**
+     * image
+     */
+    // 여러 이미지 저장 시 하나의 이미지라도 저장에 실패하면 안됨
+    IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, "이미지 저장에 실패하였습니다.");
 
     private final HttpStatus status;
     private final String message;

@@ -24,7 +24,7 @@ import shop.matjalalzz.user.entity.User;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(indexes = {@Index(name = "idx_shop_owner", columnList = "owner_id") }
+@Table(indexes = {@Index(name = "idx_shop_user", columnList = "user_id") }
 )
 public class Shop extends BaseEntity {
 
@@ -59,7 +59,7 @@ public class Shop extends BaseEntity {
     private String tel; //전화번호
 
     @Column(length = 10, nullable = false)
-    private String businessCode; //사업자 번호
+    private long businessCode; //사업자 번호
 
     @Column(nullable = false)
     private int reservationFee; //사장이 설정한 예약금
@@ -72,15 +72,17 @@ public class Shop extends BaseEntity {
     private LocalTime closeTime; //영업 시간 00:00
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false)
+    int imageCount;
 
 
     @Builder
-    public Shop(Long id, String shopName, String roadAddress, String sido, Double latitude,
+    public Shop( String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
-        String businessCode, LocalTime openTime, LocalTime closeTime, User owner) {
-        this.id = id;
+        long businessCode, LocalTime openTime, LocalTime closeTime, User user, Integer imageCount) {
         this.shopName = shopName;
         this.roadAddress = roadAddress;
         this.sido = sido;
@@ -94,6 +96,7 @@ public class Shop extends BaseEntity {
         this.rating = 0.0;
         this.openTime = openTime;
         this.closeTime = closeTime;
-        this.owner = owner;
+        this.user = user;
+        this.imageCount = imageCount;
     }
 }
