@@ -15,7 +15,7 @@ import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationMapper {
 
     public static Reservation toEntity(CreateReservationRequest request, LocalDateTime reservedAt,
