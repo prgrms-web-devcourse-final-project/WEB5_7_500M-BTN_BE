@@ -49,6 +49,9 @@ public class PartyService {
         Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
             new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
+//        Shop shop = shopRepository.findById(1L).orElseThrow(() ->
+//            new BusinessException(ErrorCode.DATA_NOT_FOUND)); //테스트용
+
         Party party = PartyMapper.toEntity(request, shop);
 
         PartyUser host = PartyUser.createHost(party, getUserById(userId));
@@ -97,7 +100,7 @@ public class PartyService {
     }
 
 
-    //TODO: 예약금 차감에 대한 로직 필요
+    //TODO: 예약금 차감에 대한 로직 필요 (totalReservationFee 내려줘야함)
     @Transactional
     public void quitParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -112,6 +115,7 @@ public class PartyService {
         party.decreaseCurrentCount();
     }
 
+    // TODO: 예약금 환불 로직 필요
     @Transactional
     public void deleteParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -148,7 +152,7 @@ public class PartyService {
 
     private void validateJoinParty(Party party, User user) {
         // 1. 모집 상태 확인
-        if (party.getStatus().equals(PartyStatus.RECRUITING)) {
+        if (!party.getStatus().equals(PartyStatus.RECRUITING)) {
             throw new BusinessException(ErrorCode.NOT_RECRUITING_PARTY);
         }
 
@@ -164,18 +168,18 @@ public class PartyService {
 
         // 4. 성별 조건 확인
         GenderCondition condition = party.getGenderCondition();
-        if (condition.equals(GenderCondition.A) &&
+        if (!condition.equals(GenderCondition.A) &&
             !user.getGender().name().equals(condition.name())) {
             throw new BusinessException(ErrorCode.NOT_MATCH_GENDER);
         }
 
         // 5. 나이 조건 확인
-        int userAge = user.getAge(); // 보통 birthYear 기준 age 계산 로직 필요
+        int userAge = user.getAge();
         if (userAge < party.getMinAge() || userAge > party.getMaxAge()) {
             throw new BusinessException(ErrorCode.NOT_MATCH_AGE);
         }
     }
-    
+
     private void validateCreateParty(PartyCreateRequest request) {
         if (request.deadline().isAfter(request.metAt())) {
             throw new BusinessException(ErrorCode.INVALID_DEADLINE);

@@ -3,6 +3,7 @@ package shop.matjalalzz.party.dao;
 import static org.springframework.util.StringUtils.hasText;
 
 import jakarta.persistence.criteria.Predicate;
+import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import shop.matjalalzz.party.dto.PartySearchCondition;
 import shop.matjalalzz.party.entity.Party;
@@ -52,9 +53,14 @@ public class PartySpecification {
             hasText(sido) ? cb.equal(root.get("shop").get("sido"), sido) : null;
     }
 
-    public static Specification<Party> containsCategory(FoodCategory category) {
-        return (root, query, cb) ->
-            category != null ? cb.equal(root.get("shop").get("category"), category) : null;
+    public static Specification<Party> containsCategories(List<FoodCategory> categories) {
+        return (root, query, cb) -> {
+            if (categories == null || categories.isEmpty()) {
+                return null;
+            }
+
+            return root.get("shop").get("category").in(categories);
+        };
     }
 
     public static Specification<Party> containsQuery(String queryStr) {
@@ -74,7 +80,7 @@ public class PartySpecification {
 //            .and(matchesAge(condition.ageFilter(), userAge))
             .and(matchesAgeRange(condition.minAge(), condition.maxAge()))
             .and(containsSido(condition.location()))
-            .and(containsCategory(condition.category()))
+            .and(containsCategories(condition.categories()))
             .and(containsQuery(condition.query()))
             .and(lessThanCursor(condition.cursor()));
     }

@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,10 +28,8 @@ import shop.matjalalzz.shop.entity.Shop;
 
 @Entity
 @Getter
-@Builder
 @Table(name = "parties")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @SQLRestriction("deleted = false")
 public class Party extends BaseEntity {
 
@@ -47,12 +44,10 @@ public class Party extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Builder.Default
     @Enumerated(EnumType.STRING)
-    private PartyStatus status = PartyStatus.RECRUITING;
+    private PartyStatus status;
 
-    @Builder.Default
-    private int currentCount = 1;
+    private int currentCount;
 
     private int minCount;
 
@@ -75,9 +70,28 @@ public class Party extends BaseEntity {
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
 
-    @Builder.Default
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PartyUser> partyUsers = new ArrayList<>();
+    private List<PartyUser> partyUsers;
+
+    @Builder
+    public Party(String title, String description, int minCount, int maxCount, int minAge,
+        int maxAge,
+        GenderCondition genderCondition, LocalDateTime metAt, LocalDateTime deadline, Shop shop) {
+        this.title = title;
+        this.description = description;
+        this.minCount = minCount;
+        this.maxCount = maxCount;
+        this.minAge = minAge;
+        this.maxAge = maxAge;
+        this.genderCondition = genderCondition;
+        this.metAt = metAt;
+        this.deadline = deadline;
+        this.shop = shop;
+        status = PartyStatus.RECRUITING;
+        currentCount = 1;
+        partyUsers = new ArrayList<>();
+
+    }
 
     public void complete() {
         status = PartyStatus.COMPLETED;

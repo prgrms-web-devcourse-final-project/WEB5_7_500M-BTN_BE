@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,8 +20,6 @@ import shop.matjalalzz.user.entity.User;
 @Entity
 @Getter
 @Table(name = "party_users")
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted = false")
 public class PartyUser extends BaseEntity {
@@ -41,6 +38,13 @@ public class PartyUser extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Builder
+    public PartyUser(boolean isHost, Party party, User user) {
+        this.isHost = isHost;
+        this.party = party;
+        this.user = user;
+    }
 
     public static PartyUser createHost(Party party, User user) {
         return PartyUser.builder()
