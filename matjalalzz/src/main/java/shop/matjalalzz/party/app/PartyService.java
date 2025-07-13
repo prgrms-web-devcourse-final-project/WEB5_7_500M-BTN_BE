@@ -1,5 +1,6 @@
 package shop.matjalalzz.party.app;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ import shop.matjalalzz.party.dto.PartyScrollResponse;
 import shop.matjalalzz.party.dto.PartySearchCondition;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
+import shop.matjalalzz.party.entity.enums.GenderCondition;
+import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
@@ -40,7 +43,7 @@ public class PartyService {
     @Transactional
     public void createParty(PartyCreateRequest request, long userId) {
 
-        validateCreateRequest(request);
+        validateCreateParty(request);
 
         //todo: 추후 shopService로 이동
         Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
@@ -82,14 +85,19 @@ public class PartyService {
         return new PartyScrollResponse(content, nextCursor);
     }
 
+    //TODO: 예약금 지불에 대한 로직 필요 (totalReservationFee 올려줘야함)
     @Transactional
     public void joinParty(Long partyId, long userId) {
         Party party = findById(partyId);
         User user = getUserById(userId);
 
+        validateJoinParty(party, user);
+
         HandlePartyUserJoin(party, user);
     }
 
+
+    //TODO: 예약금 차감에 대한 로직 필요
     @Transactional
     public void quitParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -101,6 +109,7 @@ public class PartyService {
             throw new BusinessException(ErrorCode.HOST_CANNOT_QUIT_PARTY);
         }
         partyUser.delete();
+        party.decreaseCurrentCount();
     }
 
     @Transactional
@@ -117,9 +126,15 @@ public class PartyService {
         }
     }
 
+    //TODO: party의 최소 인원이 다 채워지지 않아도 임의로 모집완료 변경이 가능하게 할건지?
     @Transactional
     public void completePartyRecruit(Long partyId, long userId) {
         Party party = findById(partyId);
+
+        if (!party.getStatus().equals(PartyStatus.RECRUITING)) {
+            throw new BusinessException(ErrorCode.ALREADY_COMPLETE_PARTY);
+        }
+
         getUserById(userId); //검증용
         PartyUser partyUser = findPartyUser(userId, party);
 
@@ -131,7 +146,37 @@ public class PartyService {
         }
     }
 
-    private void validateCreateRequest(PartyCreateRequest request) {
+    private void validateJoinParty(Party party, User user) {
+        // 1. 모집 상태 확인
+        if (party.getStatus().equals(PartyStatus.RECRUITING)) {
+            throw new BusinessException(ErrorCode.NOT_RECRUITING_PARTY);
+        }
+
+        // 2. 정원 확인
+        if (party.getCurrentCount() >= party.getMaxCount()) {
+            throw new BusinessException(ErrorCode.FULL_COUNT_PARTY);
+        }
+
+        // 3. 모집 마감 시간 확인
+        if (LocalDateTime.now().isAfter(party.getDeadline())) {
+            throw new BusinessException(ErrorCode.DEADLINE_GONE);
+        }
+
+        // 4. 성별 조건 확인
+        GenderCondition condition = party.getGenderCondition();
+        if (condition.equals(GenderCondition.A) &&
+            !user.getGender().name().equals(condition.name())) {
+            throw new BusinessException(ErrorCode.NOT_MATCH_GENDER);
+        }
+
+        // 5. 나이 조건 확인
+        int userAge = user.getAge(); // 보통 birthYear 기준 age 계산 로직 필요
+        if (userAge < party.getMinAge() || userAge > party.getMaxAge()) {
+            throw new BusinessException(ErrorCode.NOT_MATCH_AGE);
+        }
+    }
+    
+    private void validateCreateParty(PartyCreateRequest request) {
         if (request.deadline().isAfter(request.metAt())) {
             throw new BusinessException(ErrorCode.INVALID_DEADLINE);
         }
@@ -142,7 +187,6 @@ public class PartyService {
             throw new BusinessException(ErrorCode.INVALID_COUNT_CONDITION);
         }
     }
-
 
     //이미 파티에 참여중인 유저인지 검증
     private void HandlePartyUserJoin(Party party, User user) {
@@ -159,6 +203,7 @@ public class PartyService {
             PartyUser partyUser = PartyUser.createUser(party, user);
             party.getPartyUsers().add(partyUser);
         }
+        party.increaseCurrentCount();
     }
 
     private PartyUser findPartyUser(long userId, Party party) {
