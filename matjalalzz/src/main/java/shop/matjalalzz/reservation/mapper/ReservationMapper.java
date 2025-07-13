@@ -47,7 +47,7 @@ public class ReservationMapper {
             .shopName(reservation.getShop().getName())
             .dateTime(reservation.getReservedAt().toString())
             .headCount(reservation.getHeadCount())
-            .status(reservation.getStatus().name())
+            .status(reservation.getStatus())
             .build();
     }
 

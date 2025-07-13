@@ -2,6 +2,7 @@ package shop.matjalalzz.reservation.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 
 @Builder
 @Schema(description = "예약 생성 응답 DTO")
@@ -20,7 +21,7 @@ public record CreateReservationResponse(
     int headCount,
 
     @Schema(description = "예약 상태", example = "PENDING")
-    String status
+    ReservationStatus status
 
 ) {
 
