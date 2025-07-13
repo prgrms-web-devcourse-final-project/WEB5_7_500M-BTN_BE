@@ -63,7 +63,16 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
-        return PartyMapper.toDetailResponse(findById(partyId));
+        Party party = findById(partyId);
+
+        // party host인 유저의 id 찾기
+        Long hostId = party.getPartyUsers().stream()
+            .filter(PartyUser::isHost)
+            .map(pu -> pu.getUser().getId())
+            .findFirst()
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+
+        return PartyMapper.toDetailResponse(party, hostId);
     }
 
     @Transactional(readOnly = true)
