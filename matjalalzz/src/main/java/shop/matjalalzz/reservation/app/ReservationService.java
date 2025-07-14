@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -39,26 +42,24 @@ public class ReservationService {
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final PartyRepository partyRepository;
-    private final AuditorAwareImpl auditor;
 
     @Transactional(readOnly = true)
     public ReservationListResponse getReservations(Long shopId, String filter, Long cursor,
         int size) {
         ReservationStatus status = parseFilter(filter);
 
-        Pageable pageable = PageRequest.of(0, size + 1);
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
 
-        // 데이터 모두 가져오고 limit 처리
-        List<Reservation> allResults = reservationRepository.findByShopIdWithFilterAndCursor(shopId,
-            status, cursor, pageable);
+        Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursor(
+            shopId, status, cursor, pageable
+        );
 
-        boolean hasNext = allResults.size() > size;
-        List<Reservation> limitedResults = hasNext ? allResults.subList(0, size) : allResults;
+        List<Reservation> reservations = slice.getContent();
 
-        Long nextCursor = hasNext ? limitedResults.get(size - 1).getId() : null;
+        Long nextCursor = slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
 
         List<ReservationContent> content =
-            ReservationMapper.toReservationContent(limitedResults);
+            ReservationMapper.toReservationContent(reservations);
         
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
