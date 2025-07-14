@@ -42,6 +42,10 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse createReview(ReviewCreateRequest request, Long writerId) {
+        if (reviewRepository.existsByReservationIdAndWriterId(request.reservationId(), writerId)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_DATA);
+        }
+
         User writer = userService.getUserById(writerId);
         Reservation reservation = reservationService.getReservationById(request.reservationId());
 
