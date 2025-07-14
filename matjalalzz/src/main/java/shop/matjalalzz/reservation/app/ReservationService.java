@@ -23,11 +23,15 @@ import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
+import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
+import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
@@ -62,6 +66,19 @@ public class ReservationService {
             ReservationMapper.toReservationContent(reservations);
         
         return ReservationMapper.toReservationListResponse(content, nextCursor);
+    }
+
+    @Transactional(readOnly = true)
+    public MyReviewPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
+        Slice<MyReservationResponse> comments = reservationRepository.findByUserIdAndCursor(userId, cursor,
+            PageRequest.of(0, size));
+
+        Long nextCursor = null;
+        if (comments.hasNext()) {
+            nextCursor = comments.getContent().getLast().reservationId();
+        }
+
+        return ReservationMapper.toMyReviewPageResponse(nextCursor, comments);
     }
 
     @Transactional
