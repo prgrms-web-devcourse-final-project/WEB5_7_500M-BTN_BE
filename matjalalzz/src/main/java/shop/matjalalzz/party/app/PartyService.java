@@ -229,6 +229,11 @@ public class PartyService {
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
+    public List<PartyUser> getPartyUsers(Long partyId) {
+        return partyUserRepository.findAllByPartyId(partyId);
+    }
+
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
             new BusinessException(ErrorCode.USER_NOT_FOUND));

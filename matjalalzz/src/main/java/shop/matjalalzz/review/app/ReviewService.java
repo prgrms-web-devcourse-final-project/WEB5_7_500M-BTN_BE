@@ -1,5 +1,6 @@
 package shop.matjalalzz.review.app;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dao.ReviewRepository;
@@ -27,6 +30,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserService userService;
     private final ReservationService reservationService;
+    private final PartyService partyService;
     private final ShopRepository shopRepository;
 
     @Transactional
@@ -40,6 +44,9 @@ public class ReviewService {
     public ReviewResponse createReview(ReviewCreateRequest request, Long writerId) {
         User writer = userService.getUserById(writerId);
         Reservation reservation = reservationService.getReservationById(request.reservationId());
+
+        validateReservationPermission(reservation, writerId);
+
         Shop shop = shopRepository.findById(request.shopId())
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
 
@@ -72,6 +79,20 @@ public class ReviewService {
 
     private void validatePermission(Review review, Long actorId) {
         if (!review.getWriter().getId().equals(actorId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    private void validateReservationPermission(Reservation reservation, Long actorId) {
+        if (reservation.getParty() != null) {
+            // Party 프록시를 초기화시키지 않고 PartyUsers조회 -> 쿼리 1개 감소
+            List<PartyUser> partyUsers = partyService.getPartyUsers(reservation.getParty().getId());
+            List<Long> partyUserIds = partyUsers.stream().map(pu ->
+                pu.getUser().getId()).toList();
+            if (!partyUserIds.contains(actorId)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+        } else if (!reservation.getUser().getId().equals(actorId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
