@@ -52,7 +52,7 @@ public class ShopService {
         shopRepository.save(newShop);
 
         // 프리사이드 url 링크 반환
-        return preSignedProvider.generateShopPresignedUrl(newShop.getShopName(), newShop.getImageCount(), newShop.getId());
+        return preSignedProvider.generateShopPresignedUrl(newShop.getShopName(), shopCreateRequest.imageCount(), newShop.getId());
 
     }
 
@@ -139,7 +139,8 @@ public class ShopService {
 
 
         //새롭게 프리사이드 URL 발급
-        return preSignedProvider.generateShopPresignedUrl(getShop.getShopName(), getShop.getImageCount(), getShop.getId());
+        return preSignedProvider.generateShopPresignedUrl(getShop.getShopName(),
+            updateRequest.imageCount(), getShop.getId());
 
     }
 

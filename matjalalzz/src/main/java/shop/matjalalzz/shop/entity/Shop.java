@@ -80,8 +80,6 @@ public class Shop extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    int imageCount;
 
 
     @Builder
@@ -102,7 +100,6 @@ public class Shop extends BaseEntity {
         this.openTime = openTime;
         this.closeTime = closeTime;
         this.user = user;
-        this.imageCount = imageCount;
         this.detailAddress = detailAddress;
     }
 
@@ -118,7 +115,6 @@ public class Shop extends BaseEntity {
         this.businessCode = dto.businessCode();
         this.openTime = dto.openTime();
         this.closeTime = dto.closeTime();
-        this.imageCount = dto.imageCount(); // 새 이미지 개수로 갱신
         this.detailAddress = dto.detailAddress();
     }
 
