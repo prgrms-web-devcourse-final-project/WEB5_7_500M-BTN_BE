@@ -17,9 +17,9 @@ public class PartyScheduler {
 
     @Transactional
     @Scheduled(cron = "0 0 0 * * *") //매일 자정
+//    @Scheduled(fixedDelay = 30000) //30초마다 실행(테스트용)
     public void updatePartyStatus() {
-        LocalDate today = LocalDate.now();
-        List<Party> parties = partyRepository.findPartiesDeadlineToday(today);
+        List<Party> parties = partyRepository.findPartiesDeadlineToday(LocalDate.now());
 
         for (Party party : parties) {
             if (party.getCurrentCount() >= party.getMinCount()) {

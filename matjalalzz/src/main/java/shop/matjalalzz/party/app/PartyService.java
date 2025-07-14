@@ -1,6 +1,6 @@
 package shop.matjalalzz.party.app;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -168,7 +168,7 @@ public class PartyService {
         }
 
         // 3. 모집 마감 시간 확인
-        if (LocalDateTime.now().isAfter(party.getDeadline())) {
+        if (LocalDate.now().isAfter(party.getDeadline())) {
             throw new BusinessException(ErrorCode.DEADLINE_GONE);
         }
 
@@ -187,7 +187,7 @@ public class PartyService {
     }
 
     private void validateCreateParty(PartyCreateRequest request) {
-        if (request.deadline().isAfter(request.metAt())) {
+        if (request.deadline().isAfter(request.metAt().toLocalDate())) {
             throw new BusinessException(ErrorCode.INVALID_DEADLINE);
         }
         if (request.minAge() > request.maxAge()) {
