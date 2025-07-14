@@ -2,6 +2,7 @@ package shop.matjalalzz.user.api;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 
+@Tag(name = "User", description = "사용자 관련 API")
 @RestController
 @RequiredArgsConstructor
 @Validated
@@ -36,7 +38,7 @@ public class UserController {
     @PostMapping("/signup")
     public BaseResponse<Void> signup(@RequestBody @Valid SignUpRequest signUpRequestDto) {
         userService.signup(signUpRequestDto);
-        return BaseResponse.ok(BaseStatus.CREATED);//201
+        return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 
     @Operation(summary = "회원가입", description = "OAuth 추가 회원가입")
@@ -49,6 +51,7 @@ public class UserController {
         return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 
+    @Operation(summary = "회원탈퇴", description = "회원 탈퇴 기능")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/delete")
     public void deleteUser(
@@ -58,8 +61,11 @@ public class UserController {
         userService.deleteUser(userInfo.getId(), refreshToken, response);
     }
 
+    @Operation(
+        summary = "Form 로그인",
+        description = "폼 로그인으로 로그인합니다. 성공 시 액세스 토큰은 헤더, 리프레시 토큰은 쿠키에 포함됩니다."
+    )
     @ResponseStatus(HttpStatus.OK)
-    //반환으로 헤더에 토큰값을 넣어줘야 하니깐 HttpServletResponse
     @PostMapping("/login")
     public BaseResponse<Void> login(@RequestBody @Valid LoginRequest loginRequest,
         HttpServletResponse response) {

@@ -32,7 +32,7 @@ public class Reservation extends BaseEntity {
     @Column(name = "reservation_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false)
     private int headCount;
 
@@ -44,6 +44,7 @@ public class Reservation extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private ReservationStatus status = ReservationStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
