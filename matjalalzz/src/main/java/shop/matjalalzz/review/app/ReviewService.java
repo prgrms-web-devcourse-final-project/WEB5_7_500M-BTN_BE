@@ -3,6 +3,7 @@ package shop.matjalalzz.review.app;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -10,6 +11,8 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dao.ReviewRepository;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
@@ -52,7 +55,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
-        Page<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
+        Slice<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
             PageRequest.of(0, size));
         Long nextCursor = null;
         if (comments.hasNext()) {
@@ -62,7 +65,19 @@ public class ReviewService {
             .nextCursor(nextCursor)
             .reviews(comments.stream().map(ReviewMapper::toReviewResponse).toList())
             .build();
+    }
 
+    @Transactional(readOnly = true)
+    public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
+        Slice<MyReviewResponse> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
+            PageRequest.of(0, size));
+
+        Long nextCursor = null;
+        if (comments.hasNext()) {
+            nextCursor = comments.getContent().getLast().reviewId();
+        }
+
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, comments);
     }
 
     private Review getReview(Long reviewId) {
