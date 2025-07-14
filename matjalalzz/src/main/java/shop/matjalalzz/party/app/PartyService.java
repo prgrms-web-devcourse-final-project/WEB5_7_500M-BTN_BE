@@ -223,7 +223,8 @@ public class PartyService {
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_JOIN_PARTY));
     }
 
-    private Party findById(Long partyId) {
+    @Transactional(readOnly = true)
+    public Party findById(Long partyId) {
         return partyRepository.findById(partyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
