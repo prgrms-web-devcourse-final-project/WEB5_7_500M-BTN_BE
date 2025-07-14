@@ -35,7 +35,7 @@ public class PartyController {
 
     private final PartyService partyService;
 
-    @Operation(summary = "파티 생성", description = "맛집 탐험 파티 모집 게시글을 작성합니다.")
+    @Operation(summary = "파티 생성", description = "맛집 탐험 파티 모집 게시글을 작성합니다.(Completed)")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createParty(@Valid @RequestBody PartyCreateRequest partyCreateRequest,
@@ -44,7 +44,7 @@ public class PartyController {
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
-    @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 게시글 상세 정보를 조회합니다.")
+    @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 게시글 상세 정보를 조회합니다.(Completed)")
     @GetMapping("/{partyId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyDetailResponse> getPartyDetail(@PathVariable Long partyId) {
@@ -52,7 +52,7 @@ public class PartyController {
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
-    @Operation(summary = "파티 목록 조회", description = "파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다.")
+    @Operation(summary = "파티 목록 조회", description = "파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다.(Inprogress)")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyScrollResponse> getParties(
@@ -63,7 +63,7 @@ public class PartyController {
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
-    @Operation(summary = "파티 참여", description = "맛집 탐험 파티를 참여합니다.")
+    @Operation(summary = "파티 참여", description = "맛집 탐험 파티를 참여합니다.(Completed)")
     @PostMapping("/{partyId}/join")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> joinParty(@PathVariable Long partyId,
@@ -72,7 +72,7 @@ public class PartyController {
         return BaseResponse.ok(BaseStatus.OK);
     }
 
-    @Operation(summary = "파티 탈퇴", description = "맛집 탐험 파티를 참여를 취소합니다.")
+    @Operation(summary = "파티 탈퇴", description = "맛집 탐험 파티를 참여를 취소합니다.(Completed)")
     @PostMapping("/{partyId}/quit")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void quitParty(@PathVariable Long partyId,
@@ -80,7 +80,7 @@ public class PartyController {
         partyService.quitParty(partyId, userInfo.getId());
     }
 
-    @Operation(summary = "파티 삭제", description = "맛집 탐험 파티 게시글을 삭제합니다.")
+    @Operation(summary = "파티 삭제", description = "맛집 탐험 파티 게시글을 삭제합니다.(Completed)")
     @DeleteMapping("/{partyId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteParty(@PathVariable Long partyId,
@@ -88,7 +88,7 @@ public class PartyController {
         partyService.deleteParty(partyId, userInfo.getId());
     }
 
-    @Operation(summary = "파티 모집 완료 상태 변경", description = "모집중인 파티를 모집종료 상태로 변경합니다.")
+    @Operation(summary = "파티 모집 완료 상태 변경", description = "모집중인 파티를 모집종료 상태로 변경합니다.(Completed)")
     @PatchMapping("/{partyId}/complete")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> completeParty(@PathVariable Long partyId,
