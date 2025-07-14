@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,9 +24,8 @@ import shop.matjalalzz.review.app.ReviewService;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
-import shop.matjalalzz.user.dto.MyPartiesResponse;
+import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.user.dto.PartyResponse;
 
 @Tag(name = "User MyPage", description = "마이페이지 관련 API")
 @RestController
@@ -83,10 +81,11 @@ public class UserInfoController {
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<MyReservationPageResponse> getMyReservations(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyReservationPageResponse result = reservationService.
+        MyReservationPageResponse result = reservationService.findMyReservationPage(userInfo.getId(), cursor, size);
 
         return BaseResponse.ok(result, BaseStatus.OK);
     }
@@ -100,32 +99,15 @@ public class UserInfoController {
     )
     @GetMapping("/parties")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyPartiesResponse> getMyParties(
+    public BaseResponse<MyPartyPageResponse> getMyParties(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        // todo: 이후 구현
-        MyPartiesResponse data = MyPartiesResponse.builder()
-            .nextCursor(10L)
-            .content(List.of(
-                PartyResponse.builder()
-                    .partyId(9L)
-                    .title("신전떡볶이 먹을 사람?")
-                    .shopName("신전떡볶이 강남점")
-                    .metAt("2025-07-10T18:00:00")
-                    .deadline("2025-07-09T18:00:00")
-                    .status("COMPLETED")
-                    .maxCount(5)
-                    .minCount(2)
-                    .currentCount(3)
-                    .genderCondition("M")
-                    .ageCondition(20)
-                    .discription("신전떡볶이 강남점은 뭔가 맛이 다르다는데, 가보실 분 구합니다!")
-                    .build()
-            ))
-            .build();
+        MyPartyPageResponse result = partyService.findMyReservationPage(
+            userInfo.getId(), cursor, size);
 
-        return BaseResponse.ok(data, BaseStatus.OK);
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 
     @Operation(
