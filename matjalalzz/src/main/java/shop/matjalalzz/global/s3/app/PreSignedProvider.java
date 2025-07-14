@@ -96,48 +96,6 @@ public class PreSignedProvider  {
         return new PreSignedUrlResponse(items, id);
     }
 
-    //TODO 이거 서비스 코드로 빼야 함
-    // 프리사이드 url에 이미지가 성공적으로 저장 되었는지 확인 후 image db에 저장
-    @Transactional
-    // 발급 된 프리사이드 url에 이미지가 확실하게 저장되면 image DB에 저장, 여러 이미지 중 하나라도 false가 있으면 s3에 있던 이미지 전체 삭제
-    public void imageCompletion (PreSignedCompledRequest request){
-
-        shopRepository.findById(request.shopId()).orElseThrow(()-> new  BusinessException((ErrorCode.NOT_FIND_SHOP)));
-
-        int size = request.preSignedCompledItemList().size();
-
-        List<String> allKeys = request.preSignedCompledItemList().stream().map(
-            PreSignedCompledItem::key).toList();
-
-        for (int i = 0; i < size; i++) {
-                if (!request.preSignedCompledItemList().get(i).completion()){
-                    //s3에 올라간 이미지들 전체 삭제 후 에러 반환
-                    deleteImg(allKeys);
-                    throw new BusinessException(ErrorCode.IMAGE_SAVE_FAILED);
-                }
-        }
-
-        // TODO 실제로 s3 객체 사진이 실제로 존재하는지 확인 여부 필요
-
-        //mapper로 빼기
-        List<Image> images =new ArrayList<>();
-        //false가 없이 전부 다 성공이면 image db에 저장
-        for (int i = 0; i < size; i++) {
-            Image image = Image.builder()
-                .imageIndex(i)
-                .s3Key(request.preSignedCompledItemList().get(i).key())
-                .completed(true)
-                .shopId(request.shopId())
-                .build();
-            images.add(image);
-        }
-        imageRepository.saveAll(images);
-
-    }
-
-
-
-
 
 
     // 이미지 경로 생성

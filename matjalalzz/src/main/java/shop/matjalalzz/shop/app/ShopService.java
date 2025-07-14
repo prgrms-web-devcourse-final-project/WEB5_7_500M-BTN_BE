@@ -12,10 +12,12 @@ import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
+import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
-import shop.matjalalzz.shop.dto.ShopResponse;
+import shop.matjalalzz.shop.dto.ShopDetailResponse;
+import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
@@ -29,6 +31,7 @@ public class ShopService {
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+    private final ReviewRepository reviewRepository;
 
     private final PreSignedProvider preSignedProvider;
 
@@ -52,18 +55,40 @@ public class ShopService {
 
     }
 
-
-
     @Transactional(readOnly = true)
-    // 사장이 자신의 shop을 조회 한 경우 수정 허용되게
-    public ShopResponse getShop(Long shopId, Long userId) {
+    public ShopDetailResponse getShop(Long shopId) {
 
         // 해당 상점이 없으면 에러
         Shop shop = shopRepository.findById(shopId)
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
 
         //유저의 경우 로그인 한 사람, 안한 사람, 사장 3명이 존재하니 상점 주인인 경우 boolean값을 true로 반환하여 수정 버튼이 생기도록 반환
-        boolean canEdit = userId != null && shop.getUser().getId().equals(userId);
+        boolean canEdit = false;
+
+
+        List<String> imageUrllList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
+            .orElse(List.of())
+            .stream()
+            .map(image -> BASE_URL + image.getS3Key()).toList();
+
+        //리뷰 갯수가 몇개인지 보내줘야 함
+        int reviewCount = reviewRepository.findReviewCount(shop.getId());
+
+        return ShopMapper.shopDetailResponse(shop, imageUrllList, canEdit, reviewCount);
+
+    }
+
+
+    @Transactional(readOnly = true)
+    // 사장이 자신의 shop을 조회 한 경우 수정 허용되게
+    public ShopOwnerDetailResponse getShopOwner(Long shopId, Long userId) {
+
+        // 해당 상점이 없으면 에러
+        Shop shop = shopRepository.findById(shopId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
+
+        //유저의 경우 로그인 한 사람, 안한 사람, 사장 3명이 존재하니 상점 주인인 경우 boolean값을 true로 반환하여 수정 버튼이 생기도록 반환
+        boolean canEdit = shop.getUser().getId().equals(userId);
 
 
         //사진 리스트로 가져왔을 때 없어도 에러는 반환 X    이거 mapper로 이동해야 함
@@ -72,25 +97,14 @@ public class ShopService {
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
 
-        return ShopMapper.shopDetailResponse(shop, imageUrllList, canEdit);
+        //리뷰 갯수가 몇개인지 보내줘야 함
+        int reviewCount = reviewRepository.findReviewCount(shop.getId());
+
+        return ShopMapper.shopOwnerDetailResponse(shop, imageUrllList, canEdit, reviewCount);
 
     }
 
 
-
-    @Transactional(readOnly = true)
-    //TODO 조건에 맞춰서 shop들 검색 (void 아님 귀찬항서)
-    public void getShops(ShopLocationSearchParam param, String sort, Long cursor, int size) {
-
-        double latitude = param.latitude();
-        double longitude = param.longitude();
-        double radius = param.radius();
-        List<FoodCategory> foodCategories = param.category();
-
-        //shopRepository.(latitude,longitude,radius,foodCategories,sort,cursor,size+1);
-
-
-    }
 
     // shop 수정
     @Transactional
@@ -128,6 +142,22 @@ public class ShopService {
 
         //새롭게 프리사이드 URL 발급
         return preSignedProvider.generateShopPresignedUrl(getShop.getShopName(), getShop.getImageCount(), getShop.getId());
+
+    }
+
+
+
+    @Transactional(readOnly = true)
+    //TODO 조건에 맞춰서 shop들 검색 (void 아님 귀찬항서)
+    public void getShops(ShopLocationSearchParam param, String sort, Long cursor, int size) {
+
+        double latitude = param.latitude();
+        double longitude = param.longitude();
+        double radius = param.radius();
+        List<FoodCategory> foodCategories = param.category();
+
+        //shopRepository.(latitude,longitude,radius,foodCategories,sort,cursor,size+1);
+
 
     }
 }

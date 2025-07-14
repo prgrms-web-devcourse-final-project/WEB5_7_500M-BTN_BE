@@ -35,8 +35,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        RequestMatcher shopDetailMatcher = new RegexRequestMatcher("^/shops/\\d+$", "GET");
-
         return http
             .cors(cors -> cors.configurationSource(
                 request -> {
@@ -74,9 +72,10 @@ public class SecurityConfig {
                     .requestMatchers("/admin/**").hasRole("ADMIN")
 
 
-                    .requestMatchers(shopDetailMatcher).permitAll()
+                    .requestMatchers(HttpMethod.GET,"/shops/{shopId}").permitAll()
                     .requestMatchers(HttpMethod.POST, "/shops").permitAll()
                     .requestMatchers(HttpMethod.POST, "/shops/search").permitAll()
+                    .requestMatchers("/owner/**").hasAnyRole("OWNER","ADMIN")
 
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용

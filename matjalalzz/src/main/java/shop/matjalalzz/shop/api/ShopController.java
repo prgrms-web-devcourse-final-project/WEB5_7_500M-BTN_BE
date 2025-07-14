@@ -2,6 +2,7 @@ package shop.matjalalzz.shop.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,11 +21,10 @@ import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
-import shop.matjalalzz.shop.dto.ShopOwnerResponse;
+import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
-import shop.matjalalzz.shop.dto.ShopResponse;
+import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
-import shop.matjalalzz.user.app.UserService;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,12 +45,17 @@ public class ShopController {
     @Operation(summary = "식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다.")
     @GetMapping("/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<ShopResponse> getDetailShop(@PathVariable Long shopId,
-        @AuthenticationPrincipal PrincipalUser principal) {
-        //로그인 안한 유저도 get 가능하게 로그인하지 않은 경우 null
-        Long userId = (principal != null) ? principal.getId() : null;
+    public BaseResponse<ShopDetailResponse> getDetailShop(@PathVariable Long shopId) {
+        ShopDetailResponse response = shopService.getShop(shopId);
+        return BaseResponse.ok(response, BaseStatus.OK);
+    }
 
-        ShopResponse response = shopService.getShop(shopId,userId);
+    @Operation(summary = "사장의 식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다.")
+    @GetMapping("/owner/shops/{shopId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<ShopOwnerDetailResponse> getDetailShopOwner(@PathVariable Long shopId,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        ShopOwnerDetailResponse response = shopService.getShopOwner(shopId, principal.getId());
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
@@ -60,7 +65,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PreSignedUrlResponse> updateShop(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal,
-        @RequestBody ShopUpdateRequest shopUpdateRequest) {
+        @RequestBody @Valid ShopUpdateRequest shopUpdateRequest) {
         PreSignedUrlResponse urlResponse = shopService.editShop(shopId, principal.getId(), shopUpdateRequest);
         return BaseResponse.ok(urlResponse, BaseStatus.OK);
     }

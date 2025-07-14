@@ -3,10 +3,9 @@ package shop.matjalalzz.shop.mapper;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
-import shop.matjalalzz.shop.dto.ShopResponse;
-import shop.matjalalzz.shop.dto.ShopUpdateRequest;
+import shop.matjalalzz.shop.dto.ShopDetailResponse;
+import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 
@@ -32,16 +31,9 @@ public class ShopMapper {
             .build();
     }
 
-    public static Image shopCreateToImage(String key,long index, long shopId) {
-        return Image.builder()
-            .s3Key(key)
-            .imageIndex(index)
-            .shopId(shopId)
-            .build();
-    }
 
-    public static ShopResponse shopDetailResponse (Shop shop, List<String> imageListUrl, boolean canEdit) {
-        return ShopResponse.builder()
+    public static ShopDetailResponse shopDetailResponse (Shop shop, List<String> imageListUrl, boolean canEdit, int reviewCount) {
+        return ShopDetailResponse.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
             .category(shop.getCategory())
@@ -52,7 +44,7 @@ public class ShopMapper {
             .closeTime(shop.getCloseTime())
             .rating(shop.getRating())
             .reservationFee(shop.getReservationFee())
-            .reviewCount(5)   //TODO 임시임 바꿔야 함
+            .reviewCount(reviewCount)
             .images(imageListUrl)
             .canEdit(canEdit)
             .detailAddress(shop.getDetailAddress())
@@ -61,5 +53,26 @@ public class ShopMapper {
 
 
 
+
+
+    public static ShopOwnerDetailResponse shopOwnerDetailResponse (Shop shop, List<String> imageListUrl, boolean canEdit, int reviewCount) {
+        return ShopOwnerDetailResponse.builder()
+            .shopId(shop.getId())
+            .shopName(shop.getShopName())
+            .category(shop.getCategory())
+            .description(shop.getDescription())
+            .roadAddress(shop.getRoadAddress())
+            .tel(shop.getTel())
+            .openTime(shop.getOpenTime())
+            .closeTime(shop.getCloseTime())
+            .rating(shop.getRating())
+            .reservationFee(shop.getReservationFee())
+            .reviewCount(reviewCount)
+            .images(imageListUrl)
+            .canEdit(canEdit)
+            .detailAddress(shop.getDetailAddress())
+            .businessCode(shop.getBusinessCode())
+            .build();
+    }
 
 }

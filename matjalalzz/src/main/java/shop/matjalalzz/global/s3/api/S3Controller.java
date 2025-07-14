@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
+import shop.matjalalzz.global.s3.app.PreSignedService;
 import shop.matjalalzz.global.s3.dto.PreSignedCompledRequest;
 import shop.matjalalzz.global.security.PrincipalUser;
 
@@ -16,12 +17,12 @@ import shop.matjalalzz.global.security.PrincipalUser;
 @RequiredArgsConstructor
 public class S3Controller {
 
-    private final PreSignedProvider preSignedProvider;
+    private final PreSignedService preSignedService;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/presigned-urls")
     public void presignedCompleted(@RequestBody PreSignedCompledRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
-        preSignedProvider.imageCompletion(request);
+        preSignedService.imageCompletion(request);
     }
 }

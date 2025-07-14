@@ -22,11 +22,9 @@ import lombok.NoArgsConstructor;
 @Table(
     indexes = {
         @Index(name = "image_idx", columnList = "shop_id"),
-        @Index(name = "image_idx", columnList = "review_id"),
-        @Index(name = "image_idx", columnList = "user_id")
+        @Index(name = "image_idx", columnList = "review_id")
     }
 )
-//@Check(constraints = "(shop_id IS NULL) <> (review_id IS NULL)")
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,9 +46,6 @@ public class Image {
     @Column(name = "review_id",  nullable = true)
     private Long reviewId;
 
-    // 프로필 사진으로 일단 기본 사진이 없으니 true로 합니다
-    @Column(name = "profile_id",  nullable = true)
-    private Long userId;
 
     //이미지 저장 성공 여부
     private boolean completed = false;
