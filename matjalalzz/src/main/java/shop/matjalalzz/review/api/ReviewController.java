@@ -32,8 +32,8 @@ public class ReviewController {
     @GetMapping("/shops/{shopId}/reviews")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReviewPageResponse> getReviews(@PathVariable Long shopId,
-        @RequestParam(defaultValue = "0") Long cursor,
-        @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(required = false) Long cursor,
+        @RequestParam(defaultValue = "10", required = false) int size) {
         return BaseResponse.ok(reviewService.findReviewPageByShop(shopId, cursor, size),
             BaseStatus.OK);
     }
