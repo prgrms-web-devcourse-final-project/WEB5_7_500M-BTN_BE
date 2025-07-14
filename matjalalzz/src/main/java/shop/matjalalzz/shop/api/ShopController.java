@@ -60,8 +60,8 @@ public class ShopController {
     }
 
 
-    @Operation(summary = "식당 정보 수정", description = "식당 정보를 수정합니다.")
-    @PatchMapping("/shops/{shopId}")
+    @Operation(summary = "사장 식당 정보 수정", description = "식당 정보를 수정합니다.")
+    @PatchMapping("/owner/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PreSignedUrlResponse> updateShop(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal,

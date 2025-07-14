@@ -27,7 +27,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @Operation(summary = "리뷰 조회", description = "특정 가게의 리뷰 목록을 조회합니다.")
+    @Operation(summary = "리뷰 조회", description = "특정 가게의 리뷰 목록을 조회합니다.(Completed)")
     @GetMapping("/shops/{shopId}/reviews")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReviewPageResponse> getReviews(@PathVariable Long shopId,
@@ -37,7 +37,7 @@ public class ReviewController {
             BaseStatus.OK);
     }
 
-    @Operation(summary = "리뷰 작성", description = "리뷰를 작성합니다.")
+    @Operation(summary = "리뷰 작성", description = "리뷰를 작성합니다.(Completed)")
     @PostMapping("/reviews")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createReview(@RequestBody ReviewCreateRequest request,
@@ -46,7 +46,7 @@ public class ReviewController {
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
-    @Operation(summary = "리뷰 삭제", description = "특정 리뷰를 삭제합니다.")
+    @Operation(summary = "리뷰 삭제", description = "특정 리뷰를 삭제합니다.(Completed)")
     @DeleteMapping("/reviews/{reviewId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReview(@PathVariable Long reviewId,

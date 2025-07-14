@@ -22,7 +22,6 @@ public enum ErrorCode {
     // 500
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "예기치 못한 오류가 발생했습니다."),
 
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
 
 
 
@@ -53,6 +52,12 @@ public enum ErrorCode {
 
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다."),
 
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    SHOP_NOT_FOUND(HttpStatus.NOT_FOUND, "음식점을 찾을 수 없습니다."),
+    PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "파티를 찾을 수 없습니다."),
+    // 409 Conflict
+    DUPLICATE_DATA(HttpStatus.CONFLICT, "데이터가 중복 되었습니다."),
+
 
     /*
      * toss pay
@@ -70,7 +75,14 @@ public enum ErrorCode {
     HOST_CANNOT_QUIT_PARTY(HttpStatus.BAD_REQUEST, "호스트는 파티에 탈퇴할 수 없습니다."),
     CANNOT_DELETE_PARTY(HttpStatus.BAD_REQUEST, "호스트만 파티를 삭제할 수 있습니다."),
     CANNOT_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "호스트만 파티 상태 변경이 가능합니다."),
-
+    INVALID_AGE_CONDITION(HttpStatus.BAD_REQUEST, "최대 나이는 최소 나이보다 많아야 합니다."),
+    INVALID_COUNT_CONDITION(HttpStatus.BAD_REQUEST, "최대 인원은 최소 인원보다 많아야 합니다."),
+    NOT_RECRUITING_PARTY(HttpStatus.BAD_REQUEST, "현재 모집 중인 파티가 아닙니다."),
+    FULL_COUNT_PARTY(HttpStatus.BAD_REQUEST, "파티 정원이 이미 가득 찼습니다."),
+    DEADLINE_GONE(HttpStatus.BAD_REQUEST, "파티 모집 마감 시간이 지났습니다."),
+    NOT_MATCH_GENDER(HttpStatus.BAD_REQUEST, "요청자의 성별이 파티 조건과 맞지 않습니다."),
+    NOT_MATCH_AGE(HttpStatus.BAD_REQUEST, "요청자의 나이가 파티 조건에 맞지 않습니다."),
+    ALREADY_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "이미 모집 완료되었거나 종료된 파티입니다."),
 
 
 
@@ -80,8 +92,6 @@ public enum ErrorCode {
     DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다 수정으로 정보를 넣어주세요."),
     NOT_FIND_SHOP(HttpStatus.NO_CONTENT,"음식점 정보가 존재하지 않습니다."),
     NOT_SHOP_OWNER(HttpStatus.NOT_FOUND, "상점 주인이 아닙니다"),
-
-
 
     /**
      * image
