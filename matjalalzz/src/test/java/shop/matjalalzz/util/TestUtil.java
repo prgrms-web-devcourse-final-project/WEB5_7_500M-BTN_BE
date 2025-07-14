@@ -3,10 +3,8 @@ package shop.matjalalzz.util;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
-
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
-import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.entity.Review;
@@ -14,7 +12,6 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Gender;
-import shop.matjalalzz.user.entity.enums.Role;
 
 public class TestUtil {
 
@@ -56,8 +53,6 @@ public class TestUtil {
         return Party.builder()
             .title("맛집 원정대")
             .description("같이 먹어요!")
-            .status(PartyStatus.RECRUITING)
-            .currentCount(1)
             .minCount(2)
             .maxCount(4)
             .minAge(20)
@@ -65,12 +60,12 @@ public class TestUtil {
             .genderCondition(GenderCondition.A)
             .metAt(LocalDateTime.now().plusDays(1))
             .deadline(LocalDateTime.now().plusHours(3))
-            .totalReservationFee(4000)
             .shop(shop)
             .build();
     }
 
-    public static Reservation createReservation(Shop shop, User user, Party party, LocalDateTime reservedAt) {
+    public static Reservation createReservation(Shop shop, User user, Party party,
+        LocalDateTime reservedAt) {
         return Reservation.builder()
             .shop(shop)
             .user(user)
@@ -82,7 +77,8 @@ public class TestUtil {
             .build();
     }
 
-    public static Review createReview(String content, Double rating, Shop shop, Reservation reservation, User writer) {
+    public static Review createReview(String content, Double rating, Shop shop,
+        Reservation reservation, User writer) {
         return Review.builder()
             .content(content)
             .rating(rating)
