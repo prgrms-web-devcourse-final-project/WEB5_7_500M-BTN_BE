@@ -29,7 +29,7 @@ import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
-import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -47,7 +47,7 @@ class ReviewServiceTest {
     private ReservationService reservationService;
 
     @Mock
-    private ShopRepository shopRepository;
+    private ShopService shopService;
 
     @InjectMocks
     private ReviewService reviewService;
@@ -93,7 +93,7 @@ class ReviewServiceTest {
                 .build();
 
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
+            when(shopService.getShopById(shopId)).thenReturn(shop);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
             when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
@@ -190,7 +190,7 @@ class ReviewServiceTest {
 
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
-            when(shopRepository.findById(shopId)).thenThrow(
+            when(shopService.getShopById(shopId)).thenThrow(
                 new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
@@ -225,8 +225,6 @@ class ReviewServiceTest {
             Reservation reservation = mock(Reservation.class);
             when(reservation.getUser()).thenReturn(reservationUser);
             when(reservation.getParty()).thenReturn(null); // 파티 예약이 아닌 경우
-
-            Shop shop = mock(Shop.class);
 
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(
