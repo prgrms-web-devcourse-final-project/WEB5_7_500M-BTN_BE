@@ -17,6 +17,7 @@ public class ShopMapper {
         return Shop.builder()
             .shopName(request.shopName())
             .roadAddress(request.roadAddress())
+            .detailAddress(request.detailAddress())
             .sido(request.sido())
             .latitude(request.latitude())
             .longitude(request.longitude())
@@ -27,7 +28,7 @@ public class ShopMapper {
             .openTime(request.openTime())
             .closeTime(request.closeTime())
             .user(user)
-            .imageCount(request.shopImageCount())
+            .imageCount(request.imageCount())
             .build();
     }
 
@@ -39,7 +40,7 @@ public class ShopMapper {
             .build();
     }
 
-    public static ShopResponse shopDetailResponse (Shop shop, List<String> imageListUrl) {
+    public static ShopResponse shopDetailResponse (Shop shop, List<String> imageListUrl, boolean canEdit) {
         return ShopResponse.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
@@ -51,10 +52,14 @@ public class ShopMapper {
             .closeTime(shop.getCloseTime())
             .rating(shop.getRating())
             .reservationFee(shop.getReservationFee())
-            .reviewCount(5)//임시임
+            .reviewCount(5)   //TODO 임시임 바꿔야 함
             .images(imageListUrl)
+            .canEdit(canEdit)
+            .detailAddress(shop.getDetailAddress())
             .build();
     }
+
+
 
 
 }

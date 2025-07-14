@@ -19,7 +19,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.user.entity.User;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
 
 @Getter
 @Entity
@@ -38,6 +40,9 @@ public class Shop extends BaseEntity {
 
     @Column(nullable = false)
     private String roadAddress;
+
+    @Column(nullable = false)
+    private String detailAddress;
 
     @Column(length = 10, nullable = false)
     private String sido;
@@ -82,7 +87,7 @@ public class Shop extends BaseEntity {
     @Builder
     public Shop( String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
-        long businessCode, LocalTime openTime, LocalTime closeTime, User user, Integer imageCount) {
+        long businessCode, LocalTime openTime, LocalTime closeTime, User user, Integer imageCount, String detailAddress) {
         this.shopName = shopName;
         this.roadAddress = roadAddress;
         this.sido = sido;
@@ -98,5 +103,23 @@ public class Shop extends BaseEntity {
         this.closeTime = closeTime;
         this.user = user;
         this.imageCount = imageCount;
+        this.detailAddress = detailAddress;
     }
+
+    public void updateShop(ShopUpdateRequest dto) {
+        this.shopName = dto.shopName();
+        this.roadAddress = dto.roadAddress();
+        this.sido = dto.sido();
+        this.latitude = dto.latitude();
+        this.longitude = dto.longitude();
+        this.description = dto.description();
+        this.category = dto.category();
+        this.tel = dto.tel();
+        this.businessCode = dto.businessCode();
+        this.openTime = dto.openTime();
+        this.closeTime = dto.closeTime();
+        this.imageCount = dto.imageCount(); // 새 이미지 개수로 갱신
+        this.detailAddress = dto.detailAddress();
+    }
+
 }

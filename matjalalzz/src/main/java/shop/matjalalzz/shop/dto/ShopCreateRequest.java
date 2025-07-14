@@ -60,7 +60,7 @@ public record ShopCreateRequest(
     @NotNull
     String tel,
 
-    int shopImageCount
+    int imageCount
 
 ) {
 

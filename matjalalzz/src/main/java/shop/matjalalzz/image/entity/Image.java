@@ -2,7 +2,6 @@ package shop.matjalalzz.image.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +22,8 @@ import lombok.NoArgsConstructor;
 @Table(
     indexes = {
         @Index(name = "image_idx", columnList = "shop_id"),
-        @Index(name = "image_idx", columnList = "review_id")
+        @Index(name = "image_idx", columnList = "review_id"),
+        @Index(name = "image_idx", columnList = "user_id")
     }
 )
 //@Check(constraints = "(shop_id IS NULL) <> (review_id IS NULL)")
@@ -41,30 +41,20 @@ public class Image {
     private long imageIndex;
 
 
-    @Column(name = "shop_id", nullable = false)
-    private long shopId;
+    @Column(name = "shop_id",  nullable = true)
+    private Long shopId;
 
 
-    @Column(name = "review_id", nullable = false)
-    private long reviewId;
+    @Column(name = "review_id",  nullable = true)
+    private Long reviewId;
+
+    // 프로필 사진으로 일단 기본 사진이 없으니 true로 합니다
+    @Column(name = "profile_id",  nullable = true)
+    private Long userId;
 
     //이미지 저장 성공 여부
     private boolean completed = false;
 
 
-
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "shop_id")
-//    private Shop shop;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name="review_id")
-//    private Review review;
-
-
-    //필요가 없을 거 같아서
-//    @Column(nullable = false)
-//    private String bucketId;
 
 }

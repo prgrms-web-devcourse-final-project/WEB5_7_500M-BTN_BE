@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -13,6 +14,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import shop.matjalalzz.global.security.filter.TokenAuthenticationFilter;
 import shop.matjalalzz.global.security.handler.OAuth2SuccessHandler;
@@ -31,6 +34,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        RequestMatcher shopDetailMatcher = new RegexRequestMatcher("^/shops/\\d+$", "GET");
+
         return http
             .cors(cors -> cors.configurationSource(
                 request -> {
@@ -66,6 +72,12 @@ public class SecurityConfig {
                         "swagger-ui.html"
                         , "/v3/api-docs/**", "/swagger-ui/**", "/error", "/oauth2/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
+
+
+                    .requestMatchers(shopDetailMatcher).permitAll()
+                    .requestMatchers(HttpMethod.POST, "/shops").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/shops/search").permitAll()
+
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
 

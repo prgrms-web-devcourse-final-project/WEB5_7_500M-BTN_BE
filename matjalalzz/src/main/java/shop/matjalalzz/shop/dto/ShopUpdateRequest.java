@@ -8,7 +8,7 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 @Builder
 public record ShopUpdateRequest(
     @Schema(description = "상점 이름")
-    String name,
+    String shopName,
 
     @Schema(description = "도로명 주소")
     String roadAddress,
@@ -26,7 +26,7 @@ public record ShopUpdateRequest(
     Double longitude,
 
     @Schema(description = "사업자 등록번호")
-    String businessCode,
+    long businessCode,
 
     @Schema(description = "음식 카테고리")
     FoodCategory category,
@@ -41,9 +41,14 @@ public record ShopUpdateRequest(
     LocalTime closeTime,
 
     @Schema(description = "상점 설명")
-    String description
+    String description,
 
-    //TODO: Image 추가
+    @Schema(description = "전화번호")
+    String tel,
+
+    //업데이트 겸 프릿사이드 url 요청
+    @Schema(description = "이미지 개수")
+    int imageCount
 ) {
 
 }

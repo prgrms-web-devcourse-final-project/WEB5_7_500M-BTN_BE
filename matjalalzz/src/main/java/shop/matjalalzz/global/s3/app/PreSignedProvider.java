@@ -83,7 +83,7 @@ public class PreSignedProvider  {
 
 
     // 반환되는 프리사이드 url
-    public PreSignedUrlResponse generatePresignedUrl(String name, int imageCount, Long id) {
+    public PreSignedUrlResponse generateShopPresignedUrl(String name, int imageCount, Long id) {
         List<PreSignedItem> items = new ArrayList<>();
 
         for (int i = 0; i < imageCount; i++) {
@@ -93,11 +93,10 @@ public class PreSignedProvider  {
             items.add(new PreSignedItem(key, url.toString()));
         }
 
-
-        return new PreSignedUrlResponse(items,id);
+        return new PreSignedUrlResponse(items, id);
     }
 
-
+    //TODO 이거 서비스 코드로 빼야 함
     // 프리사이드 url에 이미지가 성공적으로 저장 되었는지 확인 후 image db에 저장
     @Transactional
     // 발급 된 프리사이드 url에 이미지가 확실하게 저장되면 image DB에 저장, 여러 이미지 중 하나라도 false가 있으면 s3에 있던 이미지 전체 삭제
@@ -147,6 +146,7 @@ public class PreSignedProvider  {
         if ("SHOP_IMG".equals(standard)) {
             return String.format("%s/%s/%s", prefix, userName, userName + "_" + subpath1);
         }
+        // 프로필 이미지의 경우 여기서 경로 새롭게 생성 후 사용하면 될 듯
 
         return String.format("%s/%s", prefix, userName); // fallback
     }

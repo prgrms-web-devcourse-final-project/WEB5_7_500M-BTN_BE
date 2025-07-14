@@ -12,13 +12,15 @@ public record ShopResponse(
     FoodCategory category,
     String description,
     String roadAddress,
+    String detailAddress,
     String tel,
     LocalTime openTime,
     LocalTime closeTime,
     Double rating,
     int reservationFee,
     int reviewCount,
-    List<String> images
+    List<String> images,
+    boolean canEdit
 ) {
 
 }
