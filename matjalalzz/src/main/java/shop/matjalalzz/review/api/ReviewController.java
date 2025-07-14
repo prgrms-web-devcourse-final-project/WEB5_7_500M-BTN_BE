@@ -2,6 +2,7 @@ package shop.matjalalzz.review.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,7 +41,7 @@ public class ReviewController {
     @Operation(summary = "리뷰 작성", description = "리뷰를 작성합니다.(Completed)")
     @PostMapping("/reviews")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<Void> createReview(@RequestBody ReviewCreateRequest request,
+    public BaseResponse<Void> createReview(@Valid @RequestBody ReviewCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
         reviewService.createReview(request, principal.getId());
         return BaseResponse.ok(BaseStatus.CREATED);
