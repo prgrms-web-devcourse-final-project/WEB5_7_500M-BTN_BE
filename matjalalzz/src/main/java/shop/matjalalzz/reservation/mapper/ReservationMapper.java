@@ -57,8 +57,8 @@ public class ReservationMapper {
                 .reservationId(res.getId())
                 .shopName(
                     res.getShop().getName())                      // ← N+1 가능성 있음, fetch join 필요
-                    .reservedAt(res.getReservedAt())
-                    .headCount(res.getHeadCount())
+                .reservedAt(res.getReservedAt())
+                .headCount(res.getHeadCount())
                 .phoneNumber(
                     res.getUser().getPhoneNumber())           // ← N+1 가능성 있음, fetch join 필요
                 .build())

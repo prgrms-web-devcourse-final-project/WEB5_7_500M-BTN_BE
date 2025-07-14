@@ -42,7 +42,6 @@ public class ReservationService {
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final PartyRepository partyRepository;
-
     @Transactional(readOnly = true)
     public ReservationListResponse getReservations(Long shopId, String filter, Long cursor,
         int size) {
@@ -60,9 +59,10 @@ public class ReservationService {
 
         List<ReservationContent> content =
             ReservationMapper.toReservationContent(reservations);
-        
+
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
+
 
     @Transactional
     public CreateReservationResponse createReservation(Long userId, Long shopId, Long partyId,
