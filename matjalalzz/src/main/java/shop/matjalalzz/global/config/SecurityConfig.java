@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -37,6 +38,7 @@ public class SecurityConfig {
                     CorsConfiguration configuration = new CorsConfiguration();
 
                     configuration.setAllowedOrigins(List.of(allowedOrigin));
+                    configuration.setAllowedOriginPatterns(List.of("*"));
                     configuration.setAllowedMethods(
                         List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                     configuration.setAllowCredentials(true);
@@ -65,6 +67,7 @@ public class SecurityConfig {
                     .requestMatchers("/users/login", "/users/signup", "/users/reissue-token",
                         "swagger-ui.html", "users/authorization-info", "/v3/api-docs/**",
                         "/swagger-ui/**", "/error", "/oauth2/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/parties/{partyId}", "/parties").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
