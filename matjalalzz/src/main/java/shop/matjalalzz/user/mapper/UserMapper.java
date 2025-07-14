@@ -1,7 +1,10 @@
 package shop.matjalalzz.user.mapper;
 
 
+import java.util.function.Consumer;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import shop.matjalalzz.user.dto.MyInfoResponse;
+import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
@@ -28,5 +31,36 @@ public class UserMapper {
 				.name(signUpRequest.name())
 				.gender(signUpRequest.gender())
 				.build();
+	}
+
+	public static MyInfoResponse toMyInfoResponse(User user) {
+		return MyInfoResponse.builder()
+			.email(user.getEmail())
+			.nickname(user.getNickname())
+			.role(user.getRole())
+			.name(user.getName())
+			.age(user.getAge())
+			.gender(user.getGender())
+			.point(user.getPoint())
+			.phoneNumber(user.getPhoneNumber())
+			.bucketId(user.getBucketId())
+			.profile(user.getProfileImageUrl())
+			.build();
+	}
+
+	public static void update(User user, MyInfoUpdateRequest dto) {
+		applyIfNotNull(dto.nickname(), user::updateNickname);
+		applyIfNotNull(dto.age(), user::updateAge);
+		applyIfNotNull(dto.phoneNumber(), user::updatePhoneNumber);
+
+		if (dto.bucketId() != null && dto.profile() != null) {
+			user.updateProfileImage(dto.bucketId(), dto.profile());
+		}
+	}
+
+	private static <T> void applyIfNotNull(T value, Consumer<T> consumer) {
+		if (value != null) {
+			consumer.accept(value);
+		}
 	}
 }
