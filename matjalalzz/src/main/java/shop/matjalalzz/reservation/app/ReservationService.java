@@ -17,21 +17,18 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.global.util.AuditorAwareImpl;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.review.dto.MyReviewResponse;
-import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
@@ -69,16 +66,16 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public MyReviewPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
-        Slice<MyReservationResponse> comments = reservationRepository.findByUserIdAndCursor(userId, cursor,
+    public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
+        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(userId, cursor,
             PageRequest.of(0, size));
 
         Long nextCursor = null;
-        if (comments.hasNext()) {
-            nextCursor = comments.getContent().getLast().reservationId();
+        if (reservations.hasNext()) {
+            nextCursor = reservations.getContent().getLast().reservationId();
         }
 
-        return ReservationMapper.toMyReviewPageResponse(nextCursor, comments);
+        return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
     }
 
     @Transactional

@@ -1,18 +1,14 @@
 package shop.matjalalzz.reservation.dao;
 
 import java.time.LocalDateTime;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.repository.query.Param;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import shop.matjalalzz.reservation.dto.CreateReservationRequest;
+import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.review.dto.MyReviewResponse;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -41,9 +37,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("reservedAt") LocalDateTime reservedAt
     );
 
+    // 회원이 진행한 예약과 회원이 속한 파티가 진행한 예약을 조회
     @Query("""
         select new shop.matjalalzz.reservation.dto.MyReservationResponse(
-                r.id, s.name, u.name, r.reservedAt, r.headCount, r.reservationFee, r.status)
+                r.id, s.shopName, u.name, r.reservedAt, r.headCount, r.reservationFee, r.status
+        )
         from Reservation r
             join r.shop  s
             join r.user  u
