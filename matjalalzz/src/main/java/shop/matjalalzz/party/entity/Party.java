@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ public class Party extends BaseEntity {
 
     private LocalDateTime metAt;
 
-    private LocalDateTime deadline;
+    private LocalDate deadline;
 
     private int totalReservationFee;
 
@@ -76,7 +77,7 @@ public class Party extends BaseEntity {
     @Builder
     public Party(String title, String description, int minCount, int maxCount, int minAge,
         int maxAge,
-        GenderCondition genderCondition, LocalDateTime metAt, LocalDateTime deadline, Shop shop) {
+        GenderCondition genderCondition, LocalDateTime metAt, LocalDate deadline, Shop shop) {
         this.title = title;
         this.description = description;
         this.minCount = minCount;
@@ -95,6 +96,10 @@ public class Party extends BaseEntity {
 
     public void complete() {
         status = PartyStatus.COMPLETED;
+    }
+
+    public void cancel() {
+        status = PartyStatus.CANCELED;
     }
 
     // 연관된 PartyUser까지 cascade soft delete하는 메서드
