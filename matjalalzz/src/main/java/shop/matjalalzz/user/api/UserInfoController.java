@@ -20,16 +20,14 @@ import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.review.app.ReviewService;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.MyPartiesResponse;
-import shop.matjalalzz.user.dto.MyReservationsResponse;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.user.dto.PartyResponse;
-import shop.matjalalzz.user.dto.ReservationResponse;
-import shop.matjalalzz.review.dto.MyReviewResponse;
 
 @Tag(name = "User MyPage", description = "마이페이지 관련 API")
 @RestController
@@ -84,26 +82,13 @@ public class UserInfoController {
     )
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyReservationsResponse> getMyReservations(
+    public BaseResponse<MyReservationPageResponse> getMyReservations(
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        // todo: 이후 구현
-        MyReservationsResponse data = MyReservationsResponse.builder()
-            .nextCursor(100L)
-            .content(List.of(
-                ReservationResponse.builder()
-                    .reservationId(90L)
-                    .shopName("신전떡볶이 강남점")
-                    .name("이초롱")
-                    .reservedAt("2025-07-10T18:00:00")
-                    .headCount(2)
-                    .reservationFee(4000)
-                    .status("CONFIRMED")
-                    .build()
-            ))
-            .build();
-        return BaseResponse.ok(data, BaseStatus.OK);
+        MyReservationPageResponse result = reservationService.
+
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 
     @Operation(
