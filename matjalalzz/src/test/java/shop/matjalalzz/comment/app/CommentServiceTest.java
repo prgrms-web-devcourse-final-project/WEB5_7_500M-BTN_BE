@@ -25,9 +25,9 @@ import shop.matjalalzz.comment.dto.CommentResponse;
 import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,10 +37,10 @@ class CommentServiceTest {
     private CommentRepository commentRepository;
 
     @Mock
-    private PartyRepository partyRepository;
+    private PartyService partyService;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @InjectMocks
     private CommentService commentService;
@@ -73,8 +73,8 @@ class CommentServiceTest {
                 .writer(writer)
                 .build();
 
-            when(partyRepository.findById(partyId)).thenReturn(Optional.of(party));
-            when(userRepository.findById(writerId)).thenReturn(Optional.of(writer));
+            when(partyService.findById(partyId)).thenReturn(party);
+            when(userService.getUserById(writerId)).thenReturn(writer);
             when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
             // when
@@ -123,8 +123,8 @@ class CommentServiceTest {
                 .writer(writer)
                 .build();
 
-            when(partyRepository.findById(partyId)).thenReturn(Optional.of(party));
-            when(userRepository.findById(writerId)).thenReturn(Optional.of(writer));
+            when(partyService.findById(partyId)).thenReturn(party);
+            when(userService.getUserById(writerId)).thenReturn(writer);
             when(commentRepository.findById(parentId)).thenReturn(Optional.of(parentComment));
             when(commentRepository.save(any(Comment.class))).thenReturn(childComment);
 
@@ -152,7 +152,8 @@ class CommentServiceTest {
                 .content("테스트 댓글")
                 .build();
 
-            when(partyRepository.findById(partyId)).thenReturn(Optional.empty());
+            when(partyService.findById(partyId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> commentService.createComment(request, partyId, writerId))
@@ -175,8 +176,9 @@ class CommentServiceTest {
 
             Party party = mock(Party.class);
 
-            when(partyRepository.findById(partyId)).thenReturn(Optional.of(party));
-            when(userRepository.findById(writerId)).thenReturn(Optional.empty());
+            when(partyService.findById(partyId)).thenReturn(party);
+            when(userService.getUserById(writerId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> commentService.createComment(request, partyId, writerId))
@@ -203,9 +205,10 @@ class CommentServiceTest {
 
             User writer = mock(User.class);
 
-            when(partyRepository.findById(partyId)).thenReturn(Optional.of(party));
-            when(userRepository.findById(writerId)).thenReturn(Optional.of(writer));
-            when(commentRepository.findById(parentId)).thenReturn(Optional.empty());
+            when(partyService.findById(partyId)).thenReturn(party);
+            when(userService.getUserById(writerId)).thenReturn(writer);
+            when(commentRepository.findById(parentId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> commentService.createComment(request, partyId, writerId))
@@ -259,7 +262,8 @@ class CommentServiceTest {
             // given
             Long commentId = 1L;
 
-            when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+            when(commentRepository.findById(commentId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> commentService.findComment(commentId))
@@ -403,7 +407,8 @@ class CommentServiceTest {
             Long commentId = 1L;
             Long writerId = 1L;
 
-            when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
+            when(commentRepository.findById(commentId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> commentService.deleteComment(commentId, writerId))
