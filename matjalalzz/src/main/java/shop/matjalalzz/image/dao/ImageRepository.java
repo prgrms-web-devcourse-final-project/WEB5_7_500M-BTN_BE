@@ -1,0 +1,19 @@
+package shop.matjalalzz.image.dao;
+
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import shop.matjalalzz.image.entity.Image;
+
+public interface ImageRepository extends JpaRepository<Image, Long> {
+
+    List<Image> findByShopIdOrderByImageIndexAsc(long shopId);
+
+
+    @Query("select i.s3Key from Image i where i.shopId =:shopId")
+    List<String> findByShopImage(@Param("shopId") Long shopId);
+
+    List<Image> findByShopId(Long id);
+}

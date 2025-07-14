@@ -14,6 +14,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RegexRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import shop.matjalalzz.global.security.filter.TokenAuthenticationFilter;
 import shop.matjalalzz.global.security.handler.OAuth2SuccessHandler;
@@ -32,6 +34,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         return http
             .cors(cors -> cors.configurationSource(
                 request -> {
@@ -69,6 +72,13 @@ public class SecurityConfig {
                         "/swagger-ui/**", "/error", "/oauth2/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}", "/parties").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
+
+
+                    .requestMatchers(HttpMethod.GET,"/shops/{shopId}").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/shops").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/shops/search").permitAll()
+                    .requestMatchers("/owner/**").hasAnyRole("OWNER","ADMIN")
+
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
 

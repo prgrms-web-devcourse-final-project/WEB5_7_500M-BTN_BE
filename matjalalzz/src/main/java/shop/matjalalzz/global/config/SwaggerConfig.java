@@ -20,7 +20,7 @@ public class SwaggerConfig {
 
     @Value("${server.port}")
     private String backendPort;
-  
+
     @Bean
     public OpenAPI api() {
         Info info = new Info()

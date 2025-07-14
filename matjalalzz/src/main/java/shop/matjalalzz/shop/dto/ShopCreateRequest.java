@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.Builder;
 import shop.matjalalzz.shop.entity.FoodCategory;
 
@@ -37,7 +38,21 @@ public record ShopCreateRequest(
     @NotBlank
     String businessCode,
 
-    @Schema(description = "음식 카테고리")
+    @Schema(description =
+    """
+    음식 카테고리 (아래 값 중 하나를 입력하세요):
+    - CHICKEN: 치킨
+    - CHINESE: 중식
+    - JAPANESE: 일식
+    - PIZZA: 피자
+    - FASTFOOD: 패스트푸드
+    - STEW_SOUP: 찜/탕
+    - JOK_BO: 족발/보쌈
+    - KOREAN: 한식
+    - SNACK: 분식
+    - WESTERN: 양식
+    - DESSERT: 카페/디저트
+    """)
     @NotNull
     FoodCategory category,
 
@@ -53,9 +68,13 @@ public record ShopCreateRequest(
 
     @Schema(description = "상점 설명")
     @NotBlank
-    String description
+    String description,
 
-    //TODO: Image 추가
+    @Schema(description = "전화번호")
+    @NotNull
+    String tel,
+
+    int imageCount
 
 ) {
 
