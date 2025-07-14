@@ -1,20 +1,12 @@
 package shop.matjalalzz.global.s3.app;
 
 
-import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.global.s3.dto.PreSignedCompledItem;
-import shop.matjalalzz.global.s3.dto.PreSignedCompledRequest;
 import shop.matjalalzz.global.s3.dto.PreSignedItem;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
-import shop.matjalalzz.image.dao.ImageRepository;
-import shop.matjalalzz.image.entity.Image;
-import shop.matjalalzz.shop.dao.ShopRepository;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
@@ -35,8 +27,7 @@ public class PreSignedProvider  {
 
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
-    private final ImageRepository imageRepository;
-    private final ShopRepository shopRepository;
+
 
     @Value("${aws.s3.bucket}")
     private String bucketName;

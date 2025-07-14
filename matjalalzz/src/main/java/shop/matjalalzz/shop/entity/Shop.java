@@ -64,7 +64,7 @@ public class Shop extends BaseEntity {
     private String tel; //전화번호
 
     @Column(length = 10, nullable = false)
-    private long businessCode; //사업자 번호
+    private String businessCode; //사업자 번호
 
     @Column(nullable = false)
     private int reservationFee; //사장이 설정한 예약금
@@ -87,7 +87,7 @@ public class Shop extends BaseEntity {
     @Builder
     public Shop( String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
-        long businessCode, LocalTime openTime, LocalTime closeTime, User user, Integer imageCount, String detailAddress) {
+        String businessCode, LocalTime openTime, LocalTime closeTime, User user, Integer imageCount, String detailAddress) {
         this.shopName = shopName;
         this.roadAddress = roadAddress;
         this.sido = sido;

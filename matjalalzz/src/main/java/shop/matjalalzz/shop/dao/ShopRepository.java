@@ -12,12 +12,12 @@ import shop.matjalalzz.user.entity.User;
 
 public interface ShopRepository extends JpaRepository<Shop, Long> {
 
-    Optional<Shop> findByBusinessCodeOrRoadAddress(long businessCode, String roadAddress);
+    Optional<Shop> findByBusinessCodeOrRoadAddressAndDetailAddress(String businessCode, String roadAddress, String detailAddress);
     
     List<Shop> findByUser(User user);
 
 
-
+//
 //
 //    @Query("""
 //SELECT s FROM Shop s

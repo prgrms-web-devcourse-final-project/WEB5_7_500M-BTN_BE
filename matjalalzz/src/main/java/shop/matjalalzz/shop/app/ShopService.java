@@ -45,8 +45,9 @@ public class ShopService {
         Shop newShop = ShopMapper.createToShop(shopCreateRequest,user);
 
         // 점주가 한명이며 한명이 식당 여러개 등록이 가능해도 식당 주소는 다 달라야 하며 or 사업자 등록번호가 이미 있으면 에러
-        shopRepository.findByBusinessCodeOrRoadAddress(newShop.getBusinessCode(), newShop.getRoadAddress())
+        shopRepository.findByBusinessCodeOrRoadAddressAndDetailAddress(newShop.getBusinessCode(), newShop.getRoadAddress(), newShop.getDetailAddress())
             .ifPresent(shop ->  {throw new BusinessException(ErrorCode.DUPLICATE_SHOP); });
+
 
         shopRepository.save(newShop);
 
@@ -84,8 +85,7 @@ public class ShopService {
     public ShopOwnerDetailResponse getShopOwner(Long shopId, Long userId) {
 
         // 해당 상점이 없으면 에러
-        Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
+        Shop shop = shopFind(shopId);
 
         //유저의 경우 로그인 한 사람, 안한 사람, 사장 3명이 존재하니 상점 주인인 경우 boolean값을 true로 반환하여 수정 버튼이 생기도록 반환
         boolean canEdit = shop.getUser().getId().equals(userId);
@@ -105,7 +105,6 @@ public class ShopService {
     }
 
 
-
     // shop 수정
     @Transactional
     public PreSignedUrlResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
@@ -115,8 +114,7 @@ public class ShopService {
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 해당 유저가 가진 shop들 리스트를 가져오고
-        Shop shop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
+        Shop shop = shopFind(shopId);
 
         // 수정을 원하는 shop을 가진 상점 주인이 맞는지 판단 후
         if(!shop.getUser().getId().equals(userId)) {
@@ -145,6 +143,9 @@ public class ShopService {
 
     }
 
+    public Shop shopFind(Long shopId) {
+        return shopRepository.findById(shopId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
+    }
 
 
     @Transactional(readOnly = true)

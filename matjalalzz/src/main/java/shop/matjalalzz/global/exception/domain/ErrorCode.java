@@ -90,8 +90,8 @@ public enum ErrorCode {
      * shop
      */
     DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다 수정으로 정보를 넣어주세요."),
-    NOT_FIND_SHOP(HttpStatus.NO_CONTENT,"음식점 정보가 존재하지 않습니다."),
-    NOT_SHOP_OWNER(HttpStatus.NOT_FOUND, "상점 주인이 아닙니다"),
+    NOT_FIND_SHOP(HttpStatus.NOT_FOUND,"음식점 정보가 존재하지 않습니다."),
+    NOT_SHOP_OWNER(HttpStatus.BAD_REQUEST, "상점 주인이 아닙니다"),
 
     /**
      * image

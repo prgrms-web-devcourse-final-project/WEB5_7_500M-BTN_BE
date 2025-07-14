@@ -21,7 +21,7 @@ public record ShopOwnerDetailResponse(
     int reviewCount,
     List<String> images,
     boolean canEdit,
-    long businessCode
+    String businessCode
 ) {
 
 }

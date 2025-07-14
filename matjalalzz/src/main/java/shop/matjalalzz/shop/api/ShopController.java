@@ -76,7 +76,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShops(ShopLocationSearchParam param,
         @RequestParam(defaultValue = "distance") String sort, //정렬 기준(근처순, 예약많은순, 평점순) (근처순이 기본(distance))
-        @RequestParam(defaultValue = "0") Long cursor,
+        @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size) {
 
         shopService.getShops(param,sort,cursor,size);
@@ -88,7 +88,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShopsBySearch(@RequestParam String query,
         @RequestParam String sort,
-        @RequestParam(defaultValue = "0") Long cursor,
+        @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size) {
         return BaseResponse.ok(ShopPageResponse.builder().build(), BaseStatus.OK);
     }

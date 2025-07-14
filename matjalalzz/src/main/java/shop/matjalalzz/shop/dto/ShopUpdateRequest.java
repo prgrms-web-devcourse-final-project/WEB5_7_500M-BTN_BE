@@ -26,7 +26,7 @@ public record ShopUpdateRequest(
     Double longitude,
 
     @Schema(description = "사업자 등록번호")
-    long businessCode,
+    String businessCode,
 
     @Schema(description = "음식 카테고리")
     FoodCategory category,

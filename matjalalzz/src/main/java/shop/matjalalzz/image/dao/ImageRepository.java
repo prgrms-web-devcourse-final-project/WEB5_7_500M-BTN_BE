@@ -9,7 +9,6 @@ import shop.matjalalzz.image.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
-
     List<Image> findByShopIdOrderByImageIndexAsc(long shopId);
 
 

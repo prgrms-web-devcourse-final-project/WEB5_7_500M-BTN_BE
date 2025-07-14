@@ -36,9 +36,23 @@ public record ShopCreateRequest(
 
     @Schema(description = "사업자 등록번호")
     @NotBlank
-    long businessCode,
+    String businessCode,
 
-    @Schema(description = "음식 카테고리")
+    @Schema(description =
+    """
+    음식 카테고리 (아래 값 중 하나를 입력하세요):
+    - CHICKEN: 치킨
+    - CHINESE: 중식
+    - JAPANESE: 일식
+    - PIZZA: 피자
+    - FASTFOOD: 패스트푸드
+    - STEW_SOUP: 찜/탕
+    - JOK_BO: 족발/보쌈
+    - KOREAN: 한식
+    - SNACK: 분식
+    - WESTERN: 양식
+    - DESSERT: 카페/디저트
+    """)
     @NotNull
     FoodCategory category,
 

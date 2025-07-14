@@ -1,6 +1,6 @@
 package shop.matjalalzz.global.s3.dto;
 
-public record PreSignedCompledItem (
+public record PreSignedCompliedItem(
     String key,
     boolean completion
 ) {}
