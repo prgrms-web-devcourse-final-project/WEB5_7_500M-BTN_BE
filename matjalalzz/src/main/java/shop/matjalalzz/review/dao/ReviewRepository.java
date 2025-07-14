@@ -10,6 +10,6 @@ import shop.matjalalzz.review.entity.Review;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT r FROM Review r WHERE r.shop.id = :shopId AND (r.id < :cursor OR :cursor = 0) ORDER BY r.id DESC")
-    Page<Review> findByShopIdAndCursor(@Param("shopId") Long shopId, @Param("cursor") Long cursor,
+    Slice<Review> findByShopIdAndCursor(@Param("shopId") Long shopId, @Param("cursor") Long cursor,
         Pageable pageable);
 }

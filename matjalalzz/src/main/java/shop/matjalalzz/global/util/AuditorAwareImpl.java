@@ -20,4 +20,5 @@ public class AuditorAwareImpl implements AuditorAware<String> {
 
         return Optional.of(authentication.getName()); // 또는 userId
     }
+
 }

@@ -33,7 +33,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 정보 조회",
-        description = "로그인한 사용자의 마이페이지 정보를 조회합니다.",
+        description = "로그인한 사용자의 마이페이지 정보를 조회합니다.(Inprogress)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
         }
@@ -60,7 +60,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 정보 수정",
-        description = "로그인한 사용자의 마이페이지 정보를 수정합니다.",
+        description = "로그인한 사용자의 마이페이지 정보를 수정합니다.(Inprogress)",
         responses = {
             @ApiResponse(responseCode = "200", description = "수정 성공")
         }
@@ -76,7 +76,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 예약 정보 조회",
-        description = "로그인한 사용자의 예약 목록을 커서 기반 페이징 방식으로 조회합니다.",
+        description = "로그인한 사용자의 예약 목록을 커서 기반 페이징 방식으로 조회합니다.(Inprogress)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
@@ -107,7 +107,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 파티 정보 조회",
-        description = "로그인한 사용자의 파티 목록을 커서 기반 페이징 방식으로 조회합니다.",
+        description = "로그인한 사용자의 파티 목록을 커서 기반 페이징 방식으로 조회합니다.(Inprogress)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
@@ -144,7 +144,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 리뷰 정보 조회",
-        description = "로그인한 사용자가 작성한 리뷰 목록을 커서 기반 페이징 방식으로 조회합니다.",
+        description = "로그인한 사용자가 작성한 리뷰 목록을 커서 기반 페이징 방식으로 조회합니다.(Inprogress)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }

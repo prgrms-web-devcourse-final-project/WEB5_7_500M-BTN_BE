@@ -3,6 +3,7 @@ package shop.matjalalzz.review.app;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -52,7 +53,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
-        Page<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
+        Slice<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
             PageRequest.of(0, size));
         Long nextCursor = null;
         if (comments.hasNext()) {
