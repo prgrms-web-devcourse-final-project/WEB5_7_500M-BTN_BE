@@ -194,4 +194,63 @@ class ReservationRepositoryTest {
         }
 
     }
+
+    @Nested
+    @DisplayName("예약 저장 테스트")
+    class ReservationSaveTest {
+
+        @Test
+        @DisplayName("예약 저장 성공")
+        void 예약_저장_성공() {
+            // given
+            User user = TestUtil.createUser();
+            em.persist(user);
+
+            Shop shop = TestUtil.createShop(user);
+            em.persist(shop);
+
+            Party party = TestUtil.createParty(shop);
+            em.persist(party);
+
+            LocalDateTime reservedAt = LocalDateTime.now().plusHours(1);
+            Reservation reservation = TestUtil.createReservation(shop, user, party, reservedAt);
+
+            // when
+            em.persist(reservation);
+            em.flush();
+            em.clear();
+
+            // then
+            Reservation found = em.find(Reservation.class, reservation.getId());
+            assertThat(found).isNotNull();
+            assertThat(found.getShop().getId()).isEqualTo(shop.getId());
+            assertThat(found.getReservedAt()).isEqualTo(reservedAt);
+        }
+
+        @Test
+        @DisplayName("중복 예약 여부 확인")
+        void 중복_예약_존재_확인() {
+            // given
+            User user = TestUtil.createUser();
+            em.persist(user);
+
+            Shop shop = TestUtil.createShop(user);
+            em.persist(shop);
+
+            Party party = TestUtil.createParty(shop);
+            em.persist(party);
+
+            LocalDateTime reservedAt = LocalDateTime.now().plusHours(1);
+            Reservation reservation = TestUtil.createReservation(shop, user, party, reservedAt);
+            em.persist(reservation);
+            em.flush();
+            em.clear();
+
+            // when
+            boolean exists = reservationRepository.existsByShopIdAndReservationAt(shop.getId(), reservedAt);
+
+            // then
+            assertThat(exists).isTrue();
+        }
+    }
 }
