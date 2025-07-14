@@ -16,7 +16,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("""
         SELECT new shop.matjalalzz.review.dto.MyReviewResponse(
-            r.id, s.name, r.rating, r.content, r.createdAt, null
+            r.id, s.shopName, r.rating, r.content, r.createdAt, null
         )
         FROM Review r
         JOIN r.shop s
@@ -27,4 +27,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Slice<MyReviewResponse> findByUserIdAndCursor(@Param("userId") Long userId,
         @Param("cursor") Long cursor,
         Pageable pageable);
+
+
+    @Query("select count(r) from Review r where r.shop.id =:shopId")
+    int findReviewCount(@Param("shopId") Long shopId);
 }

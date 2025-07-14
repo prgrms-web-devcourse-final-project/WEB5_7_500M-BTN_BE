@@ -30,6 +30,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
+        if (token == null || token.isBlank()) {
+            // 인증 정보가 없으면 필터 통과
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (token != null) {
             if (tokenProvider.validate(token)) {
                 TokenBodyDto tokenBodyDto = tokenProvider.parseJwt(token);
