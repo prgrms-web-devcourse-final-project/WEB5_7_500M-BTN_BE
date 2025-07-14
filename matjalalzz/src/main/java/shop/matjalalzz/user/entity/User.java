@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.user.entity.enums.Gender;
 import shop.matjalalzz.user.entity.enums.Role;
@@ -20,6 +21,7 @@ import shop.matjalalzz.user.entity.enums.Role;
 @Entity
 @Getter
 @Table(name = "`user`")
+@SQLRestriction("deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
