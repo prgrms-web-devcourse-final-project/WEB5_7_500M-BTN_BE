@@ -66,7 +66,12 @@ public class Reservation extends BaseEntity {
     private Shop shop;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "party_id", nullable = false)
+    @JoinColumn(name = "party_id")
     private Party party;
+
+    public ReservationStatus changeStatus(ReservationStatus status){
+        this.status = status;
+        return this.status;
+    }
 
 }
