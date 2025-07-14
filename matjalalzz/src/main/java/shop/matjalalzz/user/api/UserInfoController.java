@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,20 +17,30 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.security.PrincipalUser;
+import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.review.app.ReviewService;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.MyPartiesResponse;
 import shop.matjalalzz.user.dto.MyReservationsResponse;
-import shop.matjalalzz.user.dto.MyReviewsResponse;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.user.dto.PartyResponse;
 import shop.matjalalzz.user.dto.ReservationResponse;
-import shop.matjalalzz.user.dto.ReviewResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
 
 @Tag(name = "User MyPage", description = "마이페이지 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/my-page")
 public class UserInfoController {
+
+    private final UserService userService;
+    private final ReservationService reservationService;
+    private final PartyService partyService;
+    private final ReviewService reviewService;
 
     @Operation(
         summary = "내 정보 조회",
@@ -40,22 +51,10 @@ public class UserInfoController {
     )
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyInfoResponse> getMyInfo() {
-        // todo: 이후 구현
-        MyInfoResponse data = MyInfoResponse.builder()
-            .email("minji97@gmail.com")
-            .nickname("맛잘알민지")
-            .role("USER")
-            .name("김민지")
-            .age(28)
-            .gender("W")
-            .point(1800)
-            .phoneNumber("010-1234-5678")
-            .bucketId("UUID_a.png")
-            .profile("https://s3.amazonaws.com/bucket/uploads/reviews/UUID_a.png")
-            .build();
+    public BaseResponse<MyInfoResponse> getMyInfo(@AuthenticationPrincipal PrincipalUser userInfo) {
+        MyInfoResponse result = userService.getMyInfo(userInfo.getId());
 
-        return BaseResponse.ok(data, BaseStatus.OK);
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 
     @Operation(
@@ -68,9 +67,11 @@ public class UserInfoController {
     @PatchMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateMyInfo(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @Valid @RequestBody MyInfoUpdateRequest request
     ) {
-        // todo: 이후 구현
+        userService.updateMyInfo(userInfo.getId(), request);
+
         return BaseResponse.ok(BaseStatus.OK);
     }
 
@@ -151,27 +152,14 @@ public class UserInfoController {
     )
     @GetMapping("/reviews")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyReviewsResponse> getMyReviews(
+    public BaseResponse<MyReviewPageResponse> getMyReviews(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyReviewsResponse data = MyReviewsResponse.builder()
-            .nextCursor(20L)
-            .content(List.of(
-                ReviewResponse.builder()
-                    .reviewId(19L)
-                    .shopName("엽기떡볶이 잠실점")
-                    .rating(4.5)
-                    .content("맵찔이도 먹기 좋았어요!")
-                    .createdAt("2025-07-01T15:32:00")
-                    .images(List.of(
-                        "https://s3.amazonaws.com/bucket/uploads/reviews/UUID_a.png",
-                        "https://s3.amazonaws.com/bucket/uploads/reviews/UUID_b.jpg"
-                    ))
-                    .build()
-            ))
-            .build();
+        MyReviewPageResponse result = reviewService.findMyReviewPage(
+            userInfo.getId(), cursor, size);
 
-        return BaseResponse.ok(data, BaseStatus.OK);
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 }

@@ -7,20 +7,22 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.global.security.jwt.app.TokenService;
+import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.dto.LoginRequest;
+import shop.matjalalzz.user.dto.MyInfoResponse;
+import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
@@ -33,7 +35,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TokenService tokenService;
+    private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${custom.jwt.token-validity-time.refresh}")
@@ -49,19 +51,19 @@ public class UserService {
             throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);  //404
         }
 
-        String accessToken = tokenService.issueAccessToken(
+        String accessToken = tokenProvider.issueAccessToken(
             found.getId(), found.getRole(), found.getEmail()
         );
 
         RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
             .orElseGet(() -> refreshTokenRepository.save(
                 TokenMapper.toRefreshToken(
-                    tokenService.issueRefreshToken(found.getId()), found
+                    tokenProvider.issueRefreshToken(found.getId()), found
                 )
             ));
 
-        if (!tokenService.validate(refreshToken.getRefreshToken())) {
-            String reissueRefreshToken = tokenService.issueRefreshToken(found.getId());
+        if (!tokenProvider.validate(refreshToken.getRefreshToken())) {
+            String reissueRefreshToken = tokenProvider.issueRefreshToken(found.getId());
             refreshToken.updateRefreshToken(reissueRefreshToken);
         }
 
@@ -131,5 +133,21 @@ public class UserService {
         cookie.setMaxAge(0); // 즉시 만료
         //cookie.setDomain("your-domain.com"); // 필요 시 설정
         response.addCookie(cookie);
+    }
+
+    @Transactional(readOnly = true)
+    public MyInfoResponse getMyInfo(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+
+        return UserMapper.toMyInfoResponse(user);
+    }
+
+    @Transactional
+    public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+
+        UserMapper.update(user, request);
     }
 }
