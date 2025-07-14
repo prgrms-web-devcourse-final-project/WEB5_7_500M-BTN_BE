@@ -137,7 +137,6 @@ public class PartyService {
         }
     }
 
-    //TODO: party의 최소 인원이 다 채워지지 않아도 임의로 모집완료 변경이 가능하게 할건지?
     @Transactional
     public void completePartyRecruit(Long partyId, long userId) {
         Party party = findById(partyId);
