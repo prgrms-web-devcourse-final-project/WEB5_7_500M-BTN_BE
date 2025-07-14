@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -79,15 +80,12 @@ public class PartyService {
     public PartyScrollResponse searchParties(PartySearchCondition condition, int size) {
         Specification<Party> spec = PartySpecification.createSpecification(condition);
 
-        Pageable pageable = PageRequest.of(0, size + 1, Sort.by(Direction.DESC, "id"));
-        List<Party> partyList = partyRepository.findAll(spec, pageable).getContent();
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
+        Page<Party> partyList = partyRepository.findAll(spec, pageable);
 
-        boolean hasNext = partyList.size() > size;
         Long nextCursor = null;
-
-        if (hasNext) {
-            nextCursor = partyList.get(size - 1).getId();
-            partyList = partyList.subList(0, size);
+        if (partyList.hasNext()) {
+            nextCursor = partyList.getContent().getLast().getId();
         }
 
         List<PartyListResponse> content = partyList.stream()
