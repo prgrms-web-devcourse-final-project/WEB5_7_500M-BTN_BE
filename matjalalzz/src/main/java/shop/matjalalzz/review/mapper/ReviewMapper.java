@@ -2,7 +2,10 @@ package shop.matjalalzz.review.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Slice;
 import shop.matjalalzz.reservation.entity.Reservation;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
@@ -20,6 +23,15 @@ public class ReviewMapper {
             .content(review.getContent())
             .createdAt(review.getCreatedAt())
             .images(null)
+            .build();
+    }
+
+    public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
+        Slice<MyReviewResponse> reviews) {
+
+        return MyReviewPageResponse.builder()
+            .nextCursor(nextCursor)
+            .content(reviews.getContent())
             .build();
     }
 
