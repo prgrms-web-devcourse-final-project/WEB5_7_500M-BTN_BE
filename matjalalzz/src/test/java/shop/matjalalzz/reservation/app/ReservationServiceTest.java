@@ -119,7 +119,7 @@ class ReservationServiceTest {
 
         @Test
         @DisplayName("cursor 기준으로 ID < cursor인 예약들만 조회")
-        void cursor_만_주어진_경우() {
+        void 커서만_주어진_경우() {
             // given
             User user = TestUtil.createUser();
             Shop shop = TestUtil.createShop(user);
