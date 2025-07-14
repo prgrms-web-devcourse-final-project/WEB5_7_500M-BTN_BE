@@ -46,8 +46,8 @@ public class ReviewService {
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
-        reviewRepository.save(review);
-        return ReviewMapper.toReviewResponse(review);
+        Review result = reviewRepository.save(review);
+        return ReviewMapper.toReviewResponse(result);
     }
 
     @Transactional(readOnly = true)
@@ -65,7 +65,8 @@ public class ReviewService {
 
     }
 
-    private Review getReview(Long reviewId) {
+    @Transactional(readOnly = true)
+    public Review getReview(Long reviewId) {
         return reviewRepository.findById(reviewId).orElseThrow(
             () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
