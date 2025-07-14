@@ -74,7 +74,15 @@ public enum ErrorCode {
     NOT_JOIN_PARTY(HttpStatus.BAD_REQUEST, "파티에 참여 중이 아닙니다."),
     HOST_CANNOT_QUIT_PARTY(HttpStatus.BAD_REQUEST, "호스트는 파티에 탈퇴할 수 없습니다."),
     CANNOT_DELETE_PARTY(HttpStatus.BAD_REQUEST, "호스트만 파티를 삭제할 수 있습니다."),
-    CANNOT_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "호스트만 파티 상태 변경이 가능합니다.");
+    CANNOT_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "호스트만 파티 상태 변경이 가능합니다."),
+    INVALID_AGE_CONDITION(HttpStatus.BAD_REQUEST, "최대 나이는 최소 나이보다 많아야 합니다."),
+    INVALID_COUNT_CONDITION(HttpStatus.BAD_REQUEST, "최대 인원은 최소 인원보다 많아야 합니다."),
+    NOT_RECRUITING_PARTY(HttpStatus.BAD_REQUEST, "현재 모집 중인 파티가 아닙니다."),
+    FULL_COUNT_PARTY(HttpStatus.BAD_REQUEST, "파티 정원이 이미 가득 찼습니다."),
+    DEADLINE_GONE(HttpStatus.BAD_REQUEST, "파티 모집 마감 시간이 지났습니다."),
+    NOT_MATCH_GENDER(HttpStatus.BAD_REQUEST, "요청자의 성별이 파티 조건과 맞지 않습니다."),
+    NOT_MATCH_AGE(HttpStatus.BAD_REQUEST, "요청자의 나이가 파티 조건에 맞지 않습니다."),
+    ALREADY_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "이미 모집 완료되었거나 종료된 파티입니다.");
 
 
     private final HttpStatus status;

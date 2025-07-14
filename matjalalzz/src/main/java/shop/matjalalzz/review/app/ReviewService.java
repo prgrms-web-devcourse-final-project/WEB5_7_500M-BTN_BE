@@ -3,6 +3,7 @@ package shop.matjalalzz.review.app;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -46,13 +47,13 @@ public class ReviewService {
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
-        reviewRepository.save(review);
-        return ReviewMapper.toReviewResponse(review);
+        Review result = reviewRepository.save(review);
+        return ReviewMapper.toReviewResponse(result);
     }
 
     @Transactional(readOnly = true)
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
-        Page<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
+        Slice<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
             PageRequest.of(0, size));
         Long nextCursor = null;
         if (comments.hasNext()) {
@@ -65,7 +66,8 @@ public class ReviewService {
 
     }
 
-    private Review getReview(Long reviewId) {
+    @Transactional(readOnly = true)
+    public Review getReview(Long reviewId) {
         return reviewRepository.findById(reviewId).orElseThrow(
             () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
 

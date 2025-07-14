@@ -1,6 +1,7 @@
 package shop.matjalalzz.reservation.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
 
@@ -27,7 +28,7 @@ public record ReservationListResponse(
         String shopName,
 
         @Schema(description = "예약 일시 (yyyy-MM-dd HH:mm)", example = "2025-08-10 18:30")
-        String reservedAt,
+        LocalDateTime reservedAt,
 
         @Schema(description = "예약 인원 수", example = "3")
         int headCount,

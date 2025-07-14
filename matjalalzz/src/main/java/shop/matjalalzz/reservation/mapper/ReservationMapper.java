@@ -15,7 +15,7 @@ import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationMapper {
 
     public static Reservation toEntity(CreateReservationRequest request, LocalDateTime reservedAt,
@@ -45,9 +45,9 @@ public class ReservationMapper {
         return CreateReservationResponse.builder()
             .reservationId(reservation.getId())
             .shopName(reservation.getShop().getName())
-            .dateTime(reservation.getReservedAt().toString())
+            .dateTime(reservation.getReservedAt())
             .headCount(reservation.getHeadCount())
-            .status(reservation.getStatus().name())
+            .status(reservation.getStatus())
             .build();
     }
 
@@ -57,11 +57,11 @@ public class ReservationMapper {
                 .reservationId(res.getId())
                 .shopName(
                     res.getShop().getName())                      // ← N+1 가능성 있음, fetch join 필요
-                .reservedAt(res.getReservedAt().toString())
-                .headCount(res.getHeadCount())
+                    .reservedAt(res.getReservedAt())
+                    .headCount(res.getHeadCount())
                 .phoneNumber(
                     res.getUser().getPhoneNumber())           // ← N+1 가능성 있음, fetch join 필요
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 }
