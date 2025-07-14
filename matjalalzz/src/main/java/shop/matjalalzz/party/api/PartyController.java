@@ -4,10 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +25,7 @@ import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
-import shop.matjalalzz.party.entity.enums.GenderCondition;
-import shop.matjalalzz.party.entity.enums.PartyStatus;
+import shop.matjalalzz.party.dto.PartySearchCondition;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,16 +56,10 @@ public class PartyController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyScrollResponse> getParties(
-        @RequestParam(required = false, defaultValue = "RECRUITING") PartyStatus status,
-        @RequestParam(required = false) GenderCondition gender,
-        @RequestParam(required = false) String location,
-        @RequestParam(required = false) String category,
-        @RequestParam(required = false) String query,
-        @RequestParam(required = false, defaultValue = "0") Long cursor,
+        @ParameterObject @ModelAttribute PartySearchCondition condition,
         @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        PartyScrollResponse response = partyService.searchParties(status, gender,
-            location, category, query, cursor, size);
+        PartyScrollResponse response = partyService.searchParties(condition, size);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
