@@ -2,6 +2,9 @@ package shop.matjalalzz.party.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Slice;
+import shop.matjalalzz.party.dto.MyPartyPageResponse;
+import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
@@ -63,4 +66,11 @@ public class PartyMapper {
             .build();
     }
 
+    public static MyPartyPageResponse toMyPartyPageResponse(Long nextCursor,
+        Slice<MyPartyResponse> parties) {
+        return MyPartyPageResponse.builder()
+            .nextCursor(nextCursor)
+            .content(parties.getContent())
+            .build();
+    }
 }

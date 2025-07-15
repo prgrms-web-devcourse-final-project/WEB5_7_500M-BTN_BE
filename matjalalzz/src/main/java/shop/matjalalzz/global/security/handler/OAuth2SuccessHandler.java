@@ -43,13 +43,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         cookie.setPath("/");
         cookie.setMaxAge(refreshTokenValidityTime); // 7일
         response.addCookie(cookie);
-
-//        // 프론트엔드로 리다이렉트 (토큰 포함)
-//        String targetUrl = UriComponentsBuilder.fromUriString(redirectSuccess)
-//                .build()
-//                .encode()
-//                .toUriString();
-//
-//        response.sendRedirect(targetUrl);
+        response.sendRedirect(redirectSuccess);
     }
 }

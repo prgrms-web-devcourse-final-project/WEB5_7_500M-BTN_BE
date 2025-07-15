@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
-import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.dao.ReviewRepository;
@@ -40,7 +40,7 @@ public class ShopService {
     private String BASE_URL;
 
     @Transactional
-    public PreSignedUrlResponse newShop(long userId, ShopCreateRequest shopCreateRequest) {
+    public PreSignedUrlListResponse newShop(long userId, ShopCreateRequest shopCreateRequest) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -56,8 +56,8 @@ public class ShopService {
         shopRepository.save(newShop);
 
         // 프리사이드 url 링크 반환
-        return preSignedProvider.generateShopPresignedUrl(newShop.getShopName(),
-            shopCreateRequest.imageCount(), newShop.getId());
+        return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(),
+            newShop.getId());
 
     }
 
@@ -84,7 +84,6 @@ public class ShopService {
 
     }
 
-
     @Transactional(readOnly = true)
     // 사장이 자신의 shop을 조회 한 경우 수정 허용되게
     public ShopOwnerDetailResponse getShopOwner(Long shopId, Long userId) {
@@ -109,10 +108,9 @@ public class ShopService {
 
     }
 
-
     // shop 수정
     @Transactional
-    public PreSignedUrlResponse editShop(Long shopId, long userId,
+    public PreSignedUrlListResponse editShop(Long shopId, long userId,
         ShopUpdateRequest updateRequest) {
 
         // 해당 유저 정보를 가져오고
@@ -137,23 +135,20 @@ public class ShopService {
         // 기존 이미지들 가져와서 다 지우고 다시 받게 프리사이드 URL 발급
         List<String> imageKeys = imageRepository.findByShopImage(getShop.getId());
         if (!imageKeys.isEmpty()) {
-            preSignedProvider.deleteImg(imageKeys);
+            preSignedProvider.deleteObjects(imageKeys);
             //db에 내용도 다 날리게
             List<Image> imagesDB = imageRepository.findByShopId(getShop.getId());
             imageRepository.deleteAll(imagesDB);
         }
 
         //새롭게 프리사이드 URL 발급
-        return preSignedProvider.generateShopPresignedUrl(getShop.getShopName(),
-            updateRequest.imageCount(), getShop.getId());
-
+        return preSignedProvider.createShopUploadUrls(updateRequest.imageCount(), getShop.getId());
     }
 
     public Shop shopFind(Long shopId) {
         return shopRepository.findById(shopId)
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
     }
-
 
     @Transactional(readOnly = true)
     //TODO 조건에 맞춰서 shop들 검색 (void 아님 귀찬항서)
@@ -166,11 +161,5 @@ public class ShopService {
 
         //shopRepository.(latitude,longitude,radius,foodCategories,sort,cursor,size+1);
 
-    }
-
-    @Transactional(readOnly = true)
-    public Shop getShopById(Long shopId) {
-        return shopRepository.findById(shopId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
     }
 }

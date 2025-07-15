@@ -23,6 +23,8 @@ import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
+import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.entity.Reservation;
@@ -63,6 +65,19 @@ public class ReservationService {
             ReservationMapper.toReservationContent(reservations);
 
         return ReservationMapper.toReservationListResponse(content, nextCursor);
+    }
+
+    @Transactional(readOnly = true)
+    public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
+        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(userId, cursor,
+            PageRequest.of(0, size));
+
+        Long nextCursor = null;
+        if (reservations.hasNext()) {
+            nextCursor = reservations.getContent().getLast().reservationId();
+        }
+
+        return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
     }
 
     @Transactional

@@ -15,12 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.global.security.jwt.app.TokenService;
+import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.dto.LoginRequest;
+import shop.matjalalzz.user.dto.MyInfoResponse;
+import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
@@ -33,11 +35,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TokenService tokenService;
+    private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${custom.jwt.token-validity-time.refresh}")
     private int refreshTokenValiditySeconds;
+
+    @Value("${aws.credentials.AWS_BASE_URL}")
+    private String baseUrl;
 
     @Transactional
     public void login(LoginRequest dto, HttpServletResponse response) {
@@ -49,19 +54,19 @@ public class UserService {
             throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);  //404
         }
 
-        String accessToken = tokenService.issueAccessToken(
+        String accessToken = tokenProvider.issueAccessToken(
             found.getId(), found.getRole(), found.getEmail()
         );
 
         RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
             .orElseGet(() -> refreshTokenRepository.save(
                 TokenMapper.toRefreshToken(
-                    tokenService.issueRefreshToken(found.getId()), found
+                    tokenProvider.issueRefreshToken(found.getId()), found
                 )
             ));
 
-        if (!tokenService.validate(refreshToken.getRefreshToken())) {
-            String reissueRefreshToken = tokenService.issueRefreshToken(found.getId());
+        if (!tokenProvider.validate(refreshToken.getRefreshToken())) {
+            String reissueRefreshToken = tokenProvider.issueRefreshToken(found.getId());
             refreshToken.updateRefreshToken(reissueRefreshToken);
         }
 
@@ -134,8 +139,18 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
+    public MyInfoResponse getMyInfo(Long userId) {
+        User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+
+        return UserMapper.toMyInfoResponse(user, baseUrl);
+    }
+
+    @Transactional
+    public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+
+        UserMapper.update(user, request);
     }
 }
