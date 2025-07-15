@@ -163,8 +163,8 @@ class ReservationCreateReservationTest {
 
                 // then
                 assertThat(reservationRepository.findAll()).hasSize(1);
-//                assertThat(successCount.get()).isEqualTo(1);
-//                assertThat(failCount.get()).isEqualTo(1);
+                assertThat(successCount.get()).isEqualTo(1);
+                assertThat(failCount.get()).isEqualTo(1);
             }
         }
     }
