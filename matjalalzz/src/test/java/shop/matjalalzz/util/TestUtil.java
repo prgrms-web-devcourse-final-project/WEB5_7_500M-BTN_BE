@@ -31,22 +31,21 @@ public class TestUtil {
             .build();
     }
 
-    public static Shop createShop(User owner) {
+    public static Shop createShop(User user) {
         return Shop.builder()
-            .name("테스트 식당")
-            .address("서울특별시 강남구")
+            .shopName("테스트 식당")
+            .roadAddress("서울 강남대로 123")
+            .detailAddress("서울특별시 강남구 101호")
             .sido("서울")
             .latitude(37.5665)
             .longitude(126.9780)
-            .description("테스트 설명")
+            .description("테스트 설명입니다.")
             .category(FoodCategory.KOREAN)
             .tel("02-1234-5678")
             .businessCode("1234567890")
-            .reservationFee(1000)
-            .rating(4.5)
             .openTime(LocalTime.of(10, 0))
             .closeTime(LocalTime.of(22, 0))
-            .owner(owner)
+            .user(user)
             .build();
     }
 
