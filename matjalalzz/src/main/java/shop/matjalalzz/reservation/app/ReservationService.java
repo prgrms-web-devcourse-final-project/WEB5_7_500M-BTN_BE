@@ -2,6 +2,7 @@ package shop.matjalalzz.reservation.app;
 
 import static shop.matjalalzz.global.exception.domain.ErrorCode.ALREADY_PROCESSED;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REQUEST_DATA;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.PARTY_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.RESERVATION_NOT_FOUND;
@@ -45,7 +46,7 @@ public class ReservationService {
     private final PartyRepository partyRepository;
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(Long shopId, String filter, Long cursor,
+    public ReservationListResponse getReservations(Long shopId, Long ownerId, String filter, Long cursor,
         int size) {
         ReservationStatus status = parseFilter(filter);
 
@@ -59,7 +60,6 @@ public class ReservationService {
 
         Long nextCursor =
             slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
-
         List<ReservationContent> content =
             ReservationMapper.toReservationContent(reservations);
 
@@ -99,40 +99,36 @@ public class ReservationService {
 
     @Transactional
     public void confirmReservation(Long shopId, Long reservationId, Long ownerId) {
-        Reservation reservation = getValidPendingReservation(shopId, reservationId, ownerId);
+        Reservation reservation = validateOwnerPermissionAndPending(reservationId, shopId, ownerId);
         reservation.changeStatus(ReservationStatus.CONFIRMED);
     }
 
     @Transactional
     public void cancelReservation(Long shopId, Long reservationId, Long ownerId) {
-        Reservation reservation = getValidPendingReservation(shopId, reservationId, ownerId);
+        Reservation reservation = validateOwnerPermissionAndPending(reservationId,shopId, ownerId);
         reservation.changeStatus(ReservationStatus.CANCELLED);
     }
 
-    private Reservation getValidPendingReservation(Long shopId, Long reservationId, Long ownerId) {
+
+    private Reservation validateOwnerPermissionAndPending(Long reservationId, Long shopId, Long ownerId) {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new BusinessException(RESERVATION_NOT_FOUND));
-
-        if (!reservation.getShop().getId().equals(shopId)) {
-            throw new BusinessException(SHOP_NOT_FOUND);
-        }
-
-        validateOwnerPermission(reservation, ownerId);
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new BusinessException(ALREADY_PROCESSED);
         }
 
+        if (!reservation.getShop().getId().equals(shopId)) {
+            throw new BusinessException(INVALID_REQUEST_DATA);
+        }
+
+        if (!reservation.getShop().getUser().getId().equals(ownerId)) {
+            throw new BusinessException(FORBIDDEN_ACCESS);
+        }
+
         return reservation;
     }
 
-    private void validateOwnerPermission(Reservation reservation, Long ownerId) {
-        Long shopOwnerId = reservation.getShop().getUser().getId();
-
-        if (!shopOwnerId.equals(ownerId)) {
-            throw new BusinessException(FORBIDDEN_ACCESS);
-        }
-    }
 
 
     private ReservationStatus parseFilter(String filter) {
