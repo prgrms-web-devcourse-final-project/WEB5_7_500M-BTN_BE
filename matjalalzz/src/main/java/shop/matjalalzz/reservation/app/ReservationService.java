@@ -1,5 +1,6 @@
 package shop.matjalalzz.reservation.app;
 
+import static shop.matjalalzz.global.exception.domain.ErrorCode.DUPLICATE_DATA;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.PARTY_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
@@ -7,6 +8,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
@@ -67,6 +69,7 @@ public class ReservationService {
     @Transactional
     public CreateReservationResponse createReservation(Long userId, Long shopId, Long partyId,
         CreateReservationRequest request) {
+
         LocalDateTime reservedAt = LocalDateTime.parse(request.date() + "T" + request.time());
 
         User reservationUser = userRepository.findById(userId)
@@ -81,9 +84,12 @@ public class ReservationService {
                 .orElseThrow(() -> new BusinessException(PARTY_NOT_FOUND));
         }
 
-        // 중복 예약 검사
-        if (reservationRepository.existsByShopIdAndReservationAt(shopId, reservedAt)) {
-            throw new BusinessException(INVALID_RESERVATION_STATUS);
+        Optional<Reservation> existing = reservationRepository.findWithLockByShopIdAndReservedAt(
+            shopId, reservedAt
+        );
+
+        if (existing.isPresent()) {
+            throw new BusinessException(DUPLICATE_DATA);
         }
 
         Reservation reservation = ReservationMapper.toEntity(
@@ -94,14 +100,10 @@ public class ReservationService {
             reservationParty
         );
 
-        try {
-            Reservation savedReservation = reservationRepository.save(reservation);
-            return ReservationMapper.toCreateReservationResponse(savedReservation);
-        } catch (DataIntegrityViolationException e) {
-            throw new BusinessException(INVALID_RESERVATION_STATUS);
-        }
-
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationMapper.toCreateReservationResponse(savedReservation);
     }
+
 
     private ReservationStatus parseFilter(String filter) {
         if (filter == null || filter.equalsIgnoreCase("TOTAL")) {
