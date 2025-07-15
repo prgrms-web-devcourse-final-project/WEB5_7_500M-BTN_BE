@@ -7,12 +7,12 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
@@ -131,5 +131,11 @@ public class UserService {
         cookie.setMaxAge(0); // 즉시 만료
         //cookie.setDomain("your-domain.com"); // 필요 시 설정
         response.addCookie(cookie);
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 }
