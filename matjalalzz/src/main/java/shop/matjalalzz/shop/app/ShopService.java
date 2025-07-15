@@ -9,30 +9,30 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
-import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
-import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
+import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.shop.mapper.ShopMapper;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
 public class ShopService {
+
     private final ShopRepository shopRepository;
-    private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final ReviewRepository reviewRepository;
-
+    private final UserService userService;
     private final PreSignedProvider preSignedProvider;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
@@ -114,8 +114,7 @@ public class ShopService {
         ShopUpdateRequest updateRequest) {
 
         // 해당 유저 정보를 가져오고
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.getUserById(userId);
 
         // 해당 유저가 가진 shop들 리스트를 가져오고
         Shop shop = shopFind(shopId);

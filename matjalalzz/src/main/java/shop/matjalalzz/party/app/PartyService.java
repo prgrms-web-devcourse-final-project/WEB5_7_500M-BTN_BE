@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -29,31 +30,28 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
-import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
-import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PartyService {
 
-    private final ShopRepository shopRepository;
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
     private final PartyUserRepository partyUserRepository;
+    private final PartySchedulerService partySchedulerService;
+    private final ShopService shopService;
 
     @Transactional
     public void createParty(PartyCreateRequest request, long userId) {
 
         validateCreateParty(request);
 
-        //todo: 추후 shopService로 이동
-        Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
-            new BusinessException(ErrorCode.DATA_NOT_FOUND));
+        Shop shop = shopService.shopFind(request.shopId());
 
         Party party = PartyMapper.toEntity(request, shop);
 
@@ -61,6 +59,7 @@ public class PartyService {
         party.getPartyUsers().add(host);
 
         partyRepository.save(party);
+        partySchedulerService.scheduleDeadlineJob(party);
     }
 
     @Transactional(readOnly = true)
