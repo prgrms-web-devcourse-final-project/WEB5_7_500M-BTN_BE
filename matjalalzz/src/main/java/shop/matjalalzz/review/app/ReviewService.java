@@ -16,6 +16,7 @@ import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
@@ -57,6 +58,10 @@ public class ReviewService {
 
         User writer = userService.getUserById(writerId);
         Reservation reservation = reservationService.getReservationById(request.reservationId());
+
+        if (reservation.getStatus() != ReservationStatus.TERMINATED) {
+            throw new BusinessException(ErrorCode.INVALID_RESERVATION_STATUS);
+        }
 
         validateReservationPermission(reservation, writerId);
 
