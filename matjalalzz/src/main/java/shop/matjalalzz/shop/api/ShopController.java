@@ -25,6 +25,7 @@ import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
+import shop.matjalalzz.shop.dto.ShopsResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -74,13 +75,14 @@ public class ShopController {
     @Operation(summary = "식당 목록 조회", description = "위치 기반으로 식당 목록을 조회합니다.")
     @GetMapping("/shops")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<ShopPageResponse> getShops(ShopLocationSearchParam param,
-        @RequestParam(defaultValue = "distance") String sort, //정렬 기준(근처순, 예약많은순, 평점순) (근처순이 기본(distance))
+    public BaseResponse<ShopsResponse> getShops(
+        ShopLocationSearchParam param,
+        @RequestParam(defaultValue = "distance") String sort, //정렬 기준(근처순, 평점순) (근처순이 기본(distance))
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size) {
 
-        shopService.getShops(param,sort,cursor,size);
-        return BaseResponse.ok(ShopPageResponse.builder().build(), BaseStatus.OK);
+        ShopsResponse shops = shopService.getShops(param, sort, cursor, size);
+        return BaseResponse.ok(shops, BaseStatus.OK);
     }
 
     @Operation(summary = "식당 검색", description = "키워드로 식당을 검색합니다.")

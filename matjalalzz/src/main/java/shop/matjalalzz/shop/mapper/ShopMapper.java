@@ -3,9 +3,11 @@ package shop.matjalalzz.shop.mapper;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
+import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 
@@ -72,6 +74,18 @@ public class ShopMapper {
             .canEdit(canEdit)
             .detailAddress(shop.getDetailAddress())
             .businessCode(shop.getBusinessCode())
+            .build();
+    }
+
+    public static ShopsItem sliceShopToShopsList(Shop shop, String thumbnailUrl){
+        return ShopsItem.builder()
+            .shopId(shop.getId())
+            .shopName(shop.getShopName())
+            .category(shop.getCategory())
+            .roadAddress(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
+            .rating(shop.getRating())
+            .thumbnailUrl(thumbnailUrl)
             .build();
     }
 

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -19,6 +21,8 @@ import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
+import shop.matjalalzz.shop.dto.ShopsItem;
+import shop.matjalalzz.shop.dto.ShopsResponse;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.shop.mapper.ShopMapper;
@@ -91,7 +95,7 @@ public class ShopService {
         boolean canEdit = shop.getUser().getId().equals(userId);
 
 
-        //사진 리스트로 가져왔을 때 없어도 에러는 반환 X    이거 mapper로 이동해야 함
+        //사진 리스트로 가져왔을 때 없어도 에러는 반환 X
         List<String> imageUrllList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
@@ -149,17 +153,98 @@ public class ShopService {
     }
 
 
+
     @Transactional(readOnly = true)
-    //TODO 조건에 맞춰서 shop들 검색 (void 아님 귀찬항서)
-    public void getShops(ShopLocationSearchParam param, String sort, Long cursor, int size) {
-
-        double latitude = param.latitude();
-        double longitude = param.longitude();
-        double radius = param.radius();
-        List<FoodCategory> foodCategories = param.category();
-
-        //shopRepository.(latitude,longitude,radius,foodCategories,sort,cursor,size+1);
+    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Long cursor, int size) {
+        double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 종로
+        double longitude = param.longitude() != null ? param.longitude() : 126.9794;
+        double radius = param.radius() != null ? param.radius() : 3000.0;  // 3km
+        List<FoodCategory> foodCategories = (param.category() != null && !param.category().isEmpty()) ? param.category()
+            : List.of(FoodCategory.values());
 
 
+        switch (sort) {
+            case "rating" -> {
+                Double ratingCursor = cursor != null ? cursor.doubleValue() : 5.0; //별점이 높은 순으로 가져오니 max
+                Slice<Shop> shopSlice = shopRepository.findByRatingCursor(
+                    latitude, longitude, radius, foodCategories, ratingCursor, PageRequest.of(0, size)
+                );
+
+
+                Long nextCursor = null;
+                if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
+                    nextCursor = shopSlice.getContent().getLast().getRating().longValue();
+                }
+
+                return ShopsResponse.builder()
+                    .nextCursor(nextCursor)
+                    .shops(toShopsItems(shopSlice))
+                    .build();
+            }
+
+            case "distance" -> {
+                Slice<Shop> shopSlice = shopRepository.findByDistance(
+                    latitude, longitude, radius, foodCategories, cursor, PageRequest.of(0, size)
+                );
+
+                Long nextCursor = null;
+                if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
+                    Shop last = shopSlice.getContent().getLast();
+                    double lastDistance = calculateDistanceInMeters(latitude, longitude, last.getLatitude(), last.getLongitude());
+                    if (lastDistance < radius) {
+                        nextCursor = (long) lastDistance;
+                    }
+                }
+
+                return ShopsResponse.builder()
+                    .nextCursor(nextCursor)
+                    .shops(toShopsItems(shopSlice))
+                    .build();
+            }
+
+            default -> throw new IllegalArgumentException("지원하지 않는 정렬 기준입니다: " + sort);
+        }
     }
+    private List<ShopsItem> toShopsItems(Slice<Shop> shopSlice) {
+        return shopSlice.getContent().stream()
+            .map(shop -> {
+                String thumbnailUrl = imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId())
+                    .stream()
+                    .findFirst()
+                    .map(image -> BASE_URL + image.getS3Key())
+                    .orElse(null);
+
+                return ShopsItem.builder()
+                    .shopId(shop.getId())
+                    .shopName(shop.getShopName())
+                    .category(shop.getCategory())
+                    .roadAddress(shop.getRoadAddress())
+                    .detailAddress(shop.getDetailAddress())
+                    .rating(shop.getRating())
+                    .thumbnailUrl(thumbnailUrl)
+                    .build();
+            })
+            .toList();
+    }
+
+
+
+    // 응답에 포함할 다음 커서 거리 값을 계산하기 위해 마지막 Shop의 좌표를 기준으로 사용자의 거리값을 계산해 커서로 넘겨야 함
+    public static double calculateDistanceInMeters(
+        double lat1, double lon1,
+        double lat2, double lon2
+    ) {
+        final int EARTH_RADIUS = 6371000; // meters
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+            * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return EARTH_RADIUS * c;
+    }
+
 }
