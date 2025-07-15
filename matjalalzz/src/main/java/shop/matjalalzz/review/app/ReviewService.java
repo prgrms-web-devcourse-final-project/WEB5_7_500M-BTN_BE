@@ -11,6 +11,7 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
@@ -44,7 +45,7 @@ public class ReviewService {
         Review review = getReview(reviewId);
         validatePermission(review, userId);
         review.delete();
-        List<String> imageKeys = review.getImages().stream().map(i -> i.getS3Key()).toList();
+        List<String> imageKeys = review.getImages().stream().map(Image::getS3Key).toList();
         preSignedProvider.deleteObjects(imageKeys);
     }
 
@@ -75,10 +76,7 @@ public class ReviewService {
         if (comments.hasNext()) {
             nextCursor = comments.getContent().getLast().getId();
         }
-        return ReviewPageResponse.builder()
-            .nextCursor(nextCursor)
-            .reviews(comments.stream().map(ReviewMapper::toReviewResponse).toList())
-            .build();
+        return ReviewMapper.toReviewPageResponse(nextCursor, comments.getContent());
     }
 
     @Transactional(readOnly = true)
