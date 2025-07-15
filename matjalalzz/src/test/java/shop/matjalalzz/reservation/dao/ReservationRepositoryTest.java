@@ -110,8 +110,8 @@ class ReservationRepositoryTest {
                 pageable
             );
 
-            assertThat(result).hasSize(2);
-            assertThat(result).extracting("id").containsExactly(r2.getId(), r1.getId());
+            assertThat(result).hasSize(3);
+            assertThat(result).extracting("id").containsExactly(r3.getId(), r2.getId(), r1.getId());
         }
 
         @Test
