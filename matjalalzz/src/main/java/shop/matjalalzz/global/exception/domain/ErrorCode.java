@@ -83,7 +83,20 @@ public enum ErrorCode {
     NOT_MATCH_GENDER(HttpStatus.BAD_REQUEST, "요청자의 성별이 파티 조건과 맞지 않습니다."),
     NOT_MATCH_AGE(HttpStatus.BAD_REQUEST, "요청자의 나이가 파티 조건에 맞지 않습니다."),
     ALREADY_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "이미 모집 완료되었거나 종료된 파티입니다."),
-    CANNOT_DELETE_PARTY_STATUS(HttpStatus.BAD_REQUEST, "모집 완료되거나 종료된 파티는 삭제할 수 없습니다.");
+    CANNOT_DELETE_PARTY_STATUS(HttpStatus.BAD_REQUEST, "모집 완료되거나 종료된 파티는 삭제할 수 없습니다."),
+
+    /**
+     * shop
+     */
+    DUPLICATE_SHOP(HttpStatus.CONFLICT, "이미 존재하는 음식점 정보입니다 수정으로 정보를 넣어주세요."),
+    NOT_FIND_SHOP(HttpStatus.NOT_FOUND,"음식점 정보가 존재하지 않습니다."),
+    NOT_SHOP_OWNER(HttpStatus.BAD_REQUEST, "상점 주인이 아닙니다"),
+
+    /**
+     * image
+     */
+    // 여러 이미지 저장 시 하나의 이미지라도 저장에 실패하면 안됨
+    IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, "이미지 저장에 실패하였습니다.");
 
     private final HttpStatus status;
     private final String message;

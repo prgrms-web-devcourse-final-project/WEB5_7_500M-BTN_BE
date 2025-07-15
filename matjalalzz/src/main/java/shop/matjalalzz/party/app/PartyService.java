@@ -1,6 +1,6 @@
 package shop.matjalalzz.party.app;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -50,9 +50,6 @@ public class PartyService {
         Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
             new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
-//        Shop shop = shopRepository.findById(1L).orElseThrow(() ->
-//            new BusinessException(ErrorCode.DATA_NOT_FOUND)); //테스트용
-
         Party party = PartyMapper.toEntity(request, shop);
 
         PartyUser host = PartyUser.createHost(party, getUserById(userId));
@@ -60,7 +57,6 @@ public class PartyService {
 
         partyRepository.save(party);
     }
-
 
     @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
@@ -170,7 +166,7 @@ public class PartyService {
         }
 
         // 3. 모집 마감 시간 확인
-        if (LocalDate.now().isAfter(party.getDeadline())) {
+        if (LocalDateTime.now().isAfter(party.getDeadline())) {
             throw new BusinessException(ErrorCode.DEADLINE_GONE);
         }
 
@@ -189,7 +185,7 @@ public class PartyService {
     }
 
     private void validateCreateParty(PartyCreateRequest request) {
-        if (request.deadline().isAfter(request.metAt().toLocalDate())) {
+        if (request.deadline().isAfter(request.metAt())) {
             throw new BusinessException(ErrorCode.INVALID_DEADLINE);
         }
         if (request.minAge() > request.maxAge()) {

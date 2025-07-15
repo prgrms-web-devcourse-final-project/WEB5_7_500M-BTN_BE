@@ -1,6 +1,5 @@
 package shop.matjalalzz.party.dto;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
@@ -19,7 +18,7 @@ public record PartyDetailResponse(
     int minAge,
     int maxAge,
     LocalDateTime metAt,
-    LocalDate deadline,
+    LocalDateTime deadline,
     LocalDateTime createdAt,
     Long hostId,
     Long shopId,
