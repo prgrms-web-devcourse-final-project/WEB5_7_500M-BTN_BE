@@ -1,16 +1,16 @@
 package shop.matjalalzz.reservation.app;
 
-import static shop.matjalalzz.global.exception.domain.ErrorCode.DUPLICATE_DATA;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.ALREADY_PROCESSED;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.PARTY_NOT_FOUND;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.RESERVATION_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -19,7 +19,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.global.util.AuditorAwareImpl;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
@@ -58,7 +57,8 @@ public class ReservationService {
 
         List<Reservation> reservations = slice.getContent();
 
-        Long nextCursor = slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
+        Long nextCursor =
+            slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
 
         List<ReservationContent> content =
             ReservationMapper.toReservationContent(reservations);
@@ -95,6 +95,43 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationMapper.toCreateReservationResponse(savedReservation);
+    }
+
+    @Transactional
+    public void confirmReservation(Long shopId, Long reservationId, Long ownerId) {
+        Reservation reservation = getValidPendingReservation(shopId, reservationId, ownerId);
+        reservation.changeStatus(ReservationStatus.CONFIRMED);
+    }
+
+    @Transactional
+    public void cancelReservation(Long shopId, Long reservationId, Long ownerId) {
+        Reservation reservation = getValidPendingReservation(shopId, reservationId, ownerId);
+        reservation.changeStatus(ReservationStatus.CANCELLED);
+    }
+
+    private Reservation getValidPendingReservation(Long shopId, Long reservationId, Long ownerId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new BusinessException(RESERVATION_NOT_FOUND));
+
+        if (!reservation.getShop().getId().equals(shopId)) {
+            throw new BusinessException(SHOP_NOT_FOUND);
+        }
+
+        validateOwnerPermission(reservation, ownerId);
+
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new BusinessException(ALREADY_PROCESSED);
+        }
+
+        return reservation;
+    }
+
+    private void validateOwnerPermission(Reservation reservation, Long ownerId) {
+        Long shopOwnerId = reservation.getShop().getUser().getId();
+
+        if (!shopOwnerId.equals(ownerId)) {
+            throw new BusinessException(FORBIDDEN_ACCESS);
+        }
     }
 
 

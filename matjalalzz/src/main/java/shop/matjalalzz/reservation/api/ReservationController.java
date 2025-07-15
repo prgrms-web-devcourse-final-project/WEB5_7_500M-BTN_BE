@@ -98,14 +98,32 @@ public class ReservationController {
         summary = "예약 수락",
         description = "reservationId에 해당하는 예약을 CONFIRMED 상태로 변경한다. (Inprogress)",
         responses = {
-            @ApiResponse(responseCode = "204", description = "예약 수락 성공"),
+            @ApiResponse(responseCode = "200", description = "예약 수락 성공"),
         }
     )
-    @PatchMapping("/{reservationId}/accept")
+    @PatchMapping("/{reservationId}/confirm")
     @ResponseStatus(HttpStatus.OK)
-    public void acceptReservation(@PathVariable Long reservationId,
+    public void acceptReservation(
+        @PathVariable Long shopId,
+        @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.acceptReservation(reservationId, principal.getId());
+        reservationService.confirmReservation(shopId, reservationId, principal.getId());
+    }
+
+    @Operation(
+        summary = "예약 거절",
+        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Inprogress)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "예약 거절 성공"),
+        }
+    )
+    @PatchMapping("/{reservationId}/cancel")
+    @ResponseStatus(HttpStatus.OK)
+    public void cancelReservation(
+        @PathVariable Long shopId,
+        @PathVariable Long reservationId,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        reservationService.cancelReservation(shopId, reservationId, principal.getId());
     }
 
     // 1차 MVP 목표에서 제외
