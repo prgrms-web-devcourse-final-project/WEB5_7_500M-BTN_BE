@@ -129,11 +129,13 @@ public class PartyService {
         getUserById(userId); //검증용
         PartyUser partyUser = findPartyUser(userId, party);
 
-        // 호스트인 경우만 파티 삭제 가능
-        if (partyUser.isHost()) {
+        if (partyUser.isHost()) { // 호스트인 경우만 파티 삭제 가능
+            if (!party.getStatus().equals(PartyStatus.RECRUITING)) { // 모집 중인 파티만 삭제 가능
+                throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_STATUS);
+            }
             party.deleteParty(); //파티 유저까지 cascade 삭제
         } else {
-            throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY);
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS_DELETE_PARTY);
         }
     }
 

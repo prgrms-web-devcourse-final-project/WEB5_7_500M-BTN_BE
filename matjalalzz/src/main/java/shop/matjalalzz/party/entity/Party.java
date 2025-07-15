@@ -22,6 +22,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
@@ -74,6 +75,9 @@ public class Party extends BaseEntity {
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyUser> partyUsers;
 
+    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
     @Builder
     public Party(String title, String description, int minCount, int maxCount, int minAge,
         int maxAge,
@@ -91,21 +95,17 @@ public class Party extends BaseEntity {
         status = PartyStatus.RECRUITING;
         currentCount = 1;
         partyUsers = new ArrayList<>();
-
     }
 
     public void complete() {
         status = PartyStatus.COMPLETED;
     }
 
-    public void cancel() {
-        status = PartyStatus.CANCELED;
-    }
-
-    // 연관된 PartyUser까지 cascade soft delete하는 메서드
+    // 연관된 PartyUser와 comments까지 cascade soft delete하는 메서드
     public void deleteParty() {
         super.delete();
-        this.partyUsers.forEach(pu -> pu.delete());
+        this.partyUsers.forEach(BaseEntity::delete);
+        this.comments.forEach(BaseEntity::delete);
     }
 
     public void increaseCurrentCount() {

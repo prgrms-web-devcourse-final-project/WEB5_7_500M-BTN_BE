@@ -1,5 +1,5 @@
 package shop.matjalalzz.party.entity.enums;
 
 public enum PartyStatus {
-    RECRUITING, COMPLETED, CANCELED, TERMINATED
+    RECRUITING, COMPLETED, TERMINATED
 }

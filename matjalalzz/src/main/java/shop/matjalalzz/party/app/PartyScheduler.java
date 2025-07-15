@@ -25,9 +25,8 @@ public class PartyScheduler {
             if (party.getCurrentCount() >= party.getMinCount()) {
                 party.complete();
             } else {
-                party.cancel(); //TODO: 예약금 환불 로직 필요
+                party.deleteParty(); //TODO: 예약금 환불 로직 필요
             }
         }
     }
-
 }
