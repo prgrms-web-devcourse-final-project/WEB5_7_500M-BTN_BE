@@ -6,7 +6,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 import lombok.Builder;
 
 @Builder
@@ -31,16 +30,7 @@ public record ReviewCreateRequest(
     Double rating,
 
     @Schema(description = "리뷰 이미지 목록")
-    List<ReviewImage> images
+    int imageCount
 ) {
 
-    public record ReviewImage(
-        @Schema(description = "이미지 URL")
-        String imageUrl,
-
-        @Schema(description = "버킷 ID")
-        String bucketId
-    ) {
-
-    }
 }

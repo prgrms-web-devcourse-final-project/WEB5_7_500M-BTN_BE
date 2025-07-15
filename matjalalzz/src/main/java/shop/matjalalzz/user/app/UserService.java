@@ -153,4 +153,10 @@ public class UserService {
 
         UserMapper.update(user, request);
     }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(
+            () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+
+    }
 }

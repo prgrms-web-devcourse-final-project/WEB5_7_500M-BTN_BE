@@ -8,8 +8,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.image.entity.enums.ImageType;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
@@ -41,6 +41,16 @@ public class PreSignedProvider {
         }
 
         return new PreSignedUrlListResponse(items, shopId);
+    }
+
+    public PreSignedUrlListResponse createReviewUploadUrls(int count, long shopId, long reviewId) {
+        List<PreSignedUrlResponse> items = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            items.add(buildItem(ImageType.SHOP_IMG, shopId, "img_review_" + reviewId + "_" + i));
+        }
+
+        return new PreSignedUrlListResponse(items, reviewId);
     }
 
     public PreSignedUrlResponse createProfileUploadUrls(long userId) {

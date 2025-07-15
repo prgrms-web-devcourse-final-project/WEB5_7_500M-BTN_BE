@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.global.s3.app.PreSignedProvider;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
@@ -17,7 +19,6 @@ import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
-import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.app.ShopService;
@@ -34,6 +35,7 @@ public class ReviewService {
     private final ReservationService reservationService;
     private final PartyService partyService;
     private final ShopService shopService;
+    private final PreSignedProvider preSignedProvider;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
@@ -43,7 +45,7 @@ public class ReviewService {
     }
 
     @Transactional
-    public ReviewResponse createReview(ReviewCreateRequest request, Long writerId) {
+    public PreSignedUrlListResponse createReview(ReviewCreateRequest request, Long writerId) {
         if (reviewRepository.existsByReservationIdAndWriterId(request.reservationId(), writerId)) {
             throw new BusinessException(ErrorCode.DUPLICATE_DATA);
         }
@@ -53,11 +55,12 @@ public class ReviewService {
 
         validateReservationPermission(reservation, writerId);
 
-        Shop shop = shopService.getShopById(request.shopId());
+        Shop shop = shopService.shopFind(request.shopId());
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
         Review result = reviewRepository.save(review);
-        return ReviewMapper.toReviewResponse(result);
+        return preSignedProvider.createReviewUploadUrls(request.imageCount(), shop.getId(),
+            result.getId());
     }
 
     @Transactional(readOnly = true)
