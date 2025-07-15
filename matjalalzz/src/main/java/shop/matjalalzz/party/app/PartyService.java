@@ -17,6 +17,8 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.dao.PartySpecification;
 import shop.matjalalzz.party.dao.PartyUserRepository;
+import shop.matjalalzz.party.dto.MyPartyPageResponse;
+import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
@@ -27,6 +29,9 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
+import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.mapper.ReservationMapper;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
@@ -93,6 +98,19 @@ public class PartyService {
             .toList();
 
         return new PartyScrollResponse(content, nextCursor);
+    }
+
+    @Transactional(readOnly = true)
+    public MyPartyPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
+        Slice<MyPartyResponse> parties = partyRepository.findByUserIdAndCursor(userId, cursor,
+            PageRequest.of(0, size));
+
+        Long nextCursor = null;
+        if (parties.hasNext()) {
+            nextCursor = parties.getContent().getLast().partyId();
+        }
+
+        return PartyMapper.toMyPartyPageResponse(nextCursor, parties);
     }
 
     //TODO: 예약금 지불에 대한 로직 필요 (totalReservationFee 올려줘야함)
@@ -223,9 +241,15 @@ public class PartyService {
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_JOIN_PARTY));
     }
 
-    private Party findById(Long partyId) {
+    @Transactional(readOnly = true)
+    public Party findById(Long partyId) {
         return partyRepository.findById(partyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartyUser> getPartyUsers(Long partyId) {
+        return partyUserRepository.findAllByPartyId(partyId);
     }
 
     private User getUserById(Long userId) {

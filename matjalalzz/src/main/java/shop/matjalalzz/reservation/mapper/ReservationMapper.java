@@ -2,12 +2,14 @@ package shop.matjalalzz.reservation.mapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Slice;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
+import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.entity.Reservation;
@@ -63,5 +65,13 @@ public class ReservationMapper {
                     res.getUser().getPhoneNumber())           // ← N+1 가능성 있음, fetch join 필요
                 .build())
             .toList();
+    }
+
+    public static MyReservationPageResponse toMyReservationPageResponse(Long nextCursor,
+        Slice<MyReservationResponse> reservations) {
+        return MyReservationPageResponse.builder()
+            .nextCursor(nextCursor)
+            .content(reservations.getContent())
+            .build();
     }
 }

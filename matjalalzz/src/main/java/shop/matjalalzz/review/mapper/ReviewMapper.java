@@ -1,9 +1,15 @@
 package shop.matjalalzz.review.mapper;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Slice;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.reservation.entity.Reservation;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
+import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.shop.entity.Shop;
@@ -19,7 +25,24 @@ public class ReviewMapper {
             .rating(review.getRating())
             .content(review.getContent())
             .createdAt(review.getCreatedAt())
-            .images(null)
+            .images(review.getImages().stream().map(Image::getS3Key).toList())
+            .build();
+    }
+
+    public static ReviewPageResponse toReviewPageResponse(Long nextCursor, List<Review> reviews) {
+        return ReviewPageResponse.builder()
+            .nextCursor(nextCursor)
+            .reviews(reviews.stream().map(ReviewMapper::toReviewResponse).toList())
+            .build();
+    }
+
+
+    public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
+        Slice<MyReviewResponse> reviews) {
+
+        return MyReviewPageResponse.builder()
+            .nextCursor(nextCursor)
+            .content(reviews.getContent())
             .build();
     }
 

@@ -29,7 +29,6 @@ public class ShopMapper {
             .openTime(request.openTime())
             .closeTime(request.closeTime())
             .user(user)
-            .imageCount(request.imageCount())
             .build();
     }
 

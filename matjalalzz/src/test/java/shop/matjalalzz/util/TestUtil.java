@@ -28,15 +28,14 @@ public class TestUtil {
             .age(25)
             .gender(Gender.M)
             .oauthId(UUID.randomUUID().toString())
-            .bucketId(null)
-            .profileImageUrl(null)
+            .profileKey(UUID.randomUUID().toString())
             .build();
     }
 
     public static Shop createShop(User owner) {
         return Shop.builder()
-            .name("테스트 식당")
-            .address("서울특별시 강남구")
+            .shopName("테스트 식당")
+            .roadAddress("서울특별시 강남구")
             .sido("서울")
             .latitude(37.5665)
             .longitude(126.9780)
@@ -45,10 +44,9 @@ public class TestUtil {
             .tel("02-1234-5678")
             .businessCode("1234567890")
             .reservationFee(1000)
-            .rating(4.5)
             .openTime(LocalTime.of(10, 0))
             .closeTime(LocalTime.of(22, 0))
-            .owner(owner)
+            .user(owner)
             .build();
     }
 
@@ -56,8 +54,6 @@ public class TestUtil {
         return Party.builder()
             .title("맛집 원정대")
             .description("같이 먹어요!")
-            .status(PartyStatus.RECRUITING)
-            .currentCount(1)
             .minCount(2)
             .maxCount(4)
             .minAge(20)
@@ -65,7 +61,6 @@ public class TestUtil {
             .genderCondition(GenderCondition.A)
             .metAt(LocalDateTime.now().plusDays(1))
             .deadline(LocalDateTime.now().plusHours(3))
-            .totalReservationFee(4000)
             .shop(shop)
             .build();
     }
