@@ -45,6 +45,9 @@ class ReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
+    @Mock
+    private ShopRepository shopRepository;
+
     private final Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
     private final Long SHOP_ID = 1L;
     private final Long CURSOR = 3L;
@@ -80,7 +83,7 @@ class ReservationServiceTest {
 
             // when
             ReservationListResponse result = reservationService.getReservations(
-                SHOP_ID, "PENDING", CURSOR, 10
+                SHOP_ID, user.getId(),"PENDING", CURSOR, 10
             );
 
             // then
@@ -112,7 +115,7 @@ class ReservationServiceTest {
 
             // when
             ReservationListResponse result = reservationService.getReservations(
-                SHOP_ID, "PENDING", null, 10
+                SHOP_ID, user.getId(),"PENDING", null, 10
             );
 
             // then
@@ -141,6 +144,7 @@ class ReservationServiceTest {
             // when
             ReservationListResponse response = reservationService.getReservations(
                 shop.getId(),
+                user.getId(),
                 null,
                 r3.getId(),
                 2
@@ -176,6 +180,7 @@ class ReservationServiceTest {
             // when
             ReservationListResponse response = reservationService.getReservations(
                 shop.getId(),
+                user.getId(),
                 null,
                 null,
                 2
@@ -261,14 +266,17 @@ class ReservationServiceTest {
         void 예약_거절_실패_이미처리됨() {
             // given
             User user = TestUtil.createUser();
-            Shop shop = TestUtil.createShop(user);
-            Reservation reservation = TestUtil.createReservation(shop, user, null, LocalDateTime.now());
             ReflectionTestUtils.setField(user,"id", 1L);
+
+            Shop shop = TestUtil.createShop(user);
             ReflectionTestUtils.setField(shop,"id", 1L);
+
+            Reservation reservation = TestUtil.createReservation(shop, user, null, LocalDateTime.now());
             ReflectionTestUtils.setField(reservation, "id", 4L);
             reservation.changeStatus(ReservationStatus.CANCELLED); // 이미 거절됨
 
             given(reservationRepository.findById(4L)).willReturn(Optional.of(reservation));
+
 
             // when & then
             assertThrows(BusinessException.class, () ->
