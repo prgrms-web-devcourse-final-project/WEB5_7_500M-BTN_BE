@@ -30,12 +30,6 @@ import shop.matjalalzz.user.entity.User;
 @AllArgsConstructor
 @Builder
 @SQLRestriction("deleted = false")
-@Table(
-    name = "reservation",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"shop_id", "reserved_at"})
-    }
-)
 public class Reservation extends BaseEntity {
 
     @Id

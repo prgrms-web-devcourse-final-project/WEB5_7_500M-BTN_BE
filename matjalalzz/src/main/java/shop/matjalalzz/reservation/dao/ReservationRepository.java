@@ -39,10 +39,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("reservedAt") LocalDateTime reservedAt
     );
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT r FROM Reservation r WHERE r.shop.id = :shopId AND r.reservedAt = :reservedAt")
-    Optional<Reservation> findWithLockByShopIdAndReservedAt(@Param("shopId") Long shopId,
-        @Param("reservedAt") LocalDateTime reservedAt);
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @Query("SELECT r FROM Reservation r WHERE r.shop.id = :shopId AND r.reservedAt = :reservedAt")
+//    Optional<Reservation> findWithLockByShopIdAndReservedAt(@Param("shopId") Long shopId,
+//        @Param("reservedAt") LocalDateTime reservedAt);
 
 
 

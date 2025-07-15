@@ -44,6 +44,7 @@ public class ReservationService {
     private final ShopRepository shopRepository;
     private final UserRepository userRepository;
     private final PartyRepository partyRepository;
+
     @Transactional(readOnly = true)
     public ReservationListResponse getReservations(Long shopId, String filter, Long cursor,
         int size) {
@@ -82,14 +83,6 @@ public class ReservationService {
         if (partyId != null) {
             reservationParty = partyRepository.findById(partyId)
                 .orElseThrow(() -> new BusinessException(PARTY_NOT_FOUND));
-        }
-
-        Optional<Reservation> existing = reservationRepository.findWithLockByShopIdAndReservedAt(
-            shopId, reservedAt
-        );
-
-        if (existing.isPresent()) {
-            throw new BusinessException(DUPLICATE_DATA);
         }
 
         Reservation reservation = ReservationMapper.toEntity(
