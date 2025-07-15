@@ -8,16 +8,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.global.s3.app.PreSignedProvider;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.image.dao.ImageRepository;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
-import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.app.ShopService;
@@ -34,16 +38,20 @@ public class ReviewService {
     private final ReservationService reservationService;
     private final PartyService partyService;
     private final ShopService shopService;
+    private final PreSignedProvider preSignedProvider;
+    private final ImageRepository imageRepository;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
         Review review = getReview(reviewId);
         validatePermission(review, userId);
         review.delete();
+        List<String> imageKeys = review.getImages().stream().map(Image::getS3Key).toList();
+        preSignedProvider.deleteObjects(imageKeys);
     }
 
     @Transactional
-    public ReviewResponse createReview(ReviewCreateRequest request, Long writerId) {
+    public PreSignedUrlListResponse createReview(ReviewCreateRequest request, Long writerId) {
         if (reviewRepository.existsByReservationIdAndWriterId(request.reservationId(), writerId)) {
             throw new BusinessException(ErrorCode.DUPLICATE_DATA);
         }
@@ -51,13 +59,18 @@ public class ReviewService {
         User writer = userService.getUserById(writerId);
         Reservation reservation = reservationService.getReservationById(request.reservationId());
 
+        if (reservation.getStatus() != ReservationStatus.TERMINATED) {
+            throw new BusinessException(ErrorCode.INVALID_RESERVATION_STATUS);
+        }
+
         validateReservationPermission(reservation, writerId);
 
         Shop shop = shopService.shopFind(request.shopId());
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
         Review result = reviewRepository.save(review);
-        return ReviewMapper.toReviewResponse(result);
+        return preSignedProvider.createReviewUploadUrls(request.imageCount(), shop.getId(),
+            result.getId());
     }
 
     @Transactional(readOnly = true)
@@ -68,10 +81,7 @@ public class ReviewService {
         if (comments.hasNext()) {
             nextCursor = comments.getContent().getLast().getId();
         }
-        return ReviewPageResponse.builder()
-            .nextCursor(nextCursor)
-            .reviews(comments.stream().map(ReviewMapper::toReviewResponse).toList())
-            .build();
+        return ReviewMapper.toReviewPageResponse(nextCursor, comments.getContent());
     }
 
     @Transactional(readOnly = true)

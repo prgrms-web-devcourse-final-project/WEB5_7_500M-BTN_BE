@@ -57,4 +57,31 @@ public class UserMapper {
 			consumer.accept(value);
 		}
 	}
+
+	public static MyInfoResponse toMyInfoResponse(User user, String baseUrl) {
+		return MyInfoResponse.builder()
+			.email(user.getEmail())
+			.nickname(user.getNickname())
+			.role(user.getRole())
+			.name(user.getName())
+			.age(user.getAge())
+			.gender(user.getGender())
+			.point(user.getPoint())
+			.phoneNumber(user.getPhoneNumber())
+			.profile(baseUrl + user.getProfileKey())
+			.build();
+	}
+
+	public static void update(User user, MyInfoUpdateRequest dto) {
+		applyIfNotNull(dto.nickname(), user::updateNickname);
+		applyIfNotNull(dto.age(), user::updateAge);
+		applyIfNotNull(dto.phoneNumber(), user::updatePhoneNumber);
+		applyIfNotNull(dto.profileKey(), user::updateProfileKey);
+	}
+
+	private static <T> void applyIfNotNull(T value, Consumer<T> consumer) {
+		if (value != null) {
+			consumer.accept(value);
+		}
+	}
 }

@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -22,12 +21,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
-import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
@@ -71,7 +70,6 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             User writer = mock(User.class);
@@ -98,14 +96,11 @@ class ReviewServiceTest {
             when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
             // when
-            ReviewResponse response = reviewService.createReview(request, writerId);
+            PreSignedUrlListResponse response = reviewService.createReview(request, writerId);
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.reviewId()).isEqualTo(reviewId);
-            assertThat(response.content()).isEqualTo(request.content());
-            assertThat(response.rating()).isEqualTo(rating);
-            assertThat(response.userNickname()).isEqualTo("테스터");
+            assertThat(response.refId()).isEqualTo(reviewId);
 
             verify(reviewRepository).save(any(Review.class));
         }
@@ -124,7 +119,6 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             when(userService.getUserById(writerId)).thenThrow(
@@ -150,7 +144,6 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             User writer = mock(User.class);
@@ -179,7 +172,6 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             User writer = mock(User.class);
@@ -214,7 +206,6 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             User writer = mock(User.class);
@@ -250,7 +241,6 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             // 이미 동일한 예약과 작성자로 리뷰가 존재한다고 설정
