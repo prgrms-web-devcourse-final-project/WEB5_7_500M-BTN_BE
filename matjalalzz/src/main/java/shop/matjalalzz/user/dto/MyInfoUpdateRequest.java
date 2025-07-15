@@ -22,11 +22,8 @@ public record MyInfoUpdateRequest(
     @Min(0)
     Integer age,
 
-    @Schema(example = "UUID_b.png")
-    String bucketId,
-
-    @Schema(example = "https://s3.amazonaws.com/bucket/uploads/reviews/UUID_b.png")
-    String profile
+    @Schema(example = "/profile/1/img_1")
+    String profileKey
 ) {
 
 }

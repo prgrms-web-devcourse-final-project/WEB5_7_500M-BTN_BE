@@ -33,7 +33,7 @@ public class UserMapper {
 				.build();
 	}
 
-	public static MyInfoResponse toMyInfoResponse(User user) {
+	public static MyInfoResponse toMyInfoResponse(User user, String baseUrl) {
 		return MyInfoResponse.builder()
 			.email(user.getEmail())
 			.nickname(user.getNickname())
@@ -43,8 +43,7 @@ public class UserMapper {
 			.gender(user.getGender())
 			.point(user.getPoint())
 			.phoneNumber(user.getPhoneNumber())
-			.bucketId(user.getBucketId())
-			.profile(user.getProfileImageUrl())
+			.profile(baseUrl + user.getProfileKey())
 			.build();
 	}
 
@@ -52,10 +51,7 @@ public class UserMapper {
 		applyIfNotNull(dto.nickname(), user::updateNickname);
 		applyIfNotNull(dto.age(), user::updateAge);
 		applyIfNotNull(dto.phoneNumber(), user::updatePhoneNumber);
-
-		if (dto.bucketId() != null && dto.profile() != null) {
-			user.updateProfileImage(dto.bucketId(), dto.profile());
-		}
+		applyIfNotNull(dto.profileKey(), user::updateProfileKey);
 	}
 
 	private static <T> void applyIfNotNull(T value, Consumer<T> consumer) {

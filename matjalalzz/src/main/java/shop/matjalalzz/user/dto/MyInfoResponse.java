@@ -31,9 +31,6 @@ public record MyInfoResponse(
     @Schema(example = "010-1234-5678")
     String phoneNumber,
 
-    @Schema(example = "UUID_a.png")
-    String bucketId,
-
     @Schema(example = "https://s3.amazonaws.com/bucket/uploads/reviews/UUID_a.png")
     String profile
 ) {
