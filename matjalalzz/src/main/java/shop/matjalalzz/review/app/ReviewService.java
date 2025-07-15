@@ -10,6 +10,7 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
@@ -36,12 +37,15 @@ public class ReviewService {
     private final PartyService partyService;
     private final ShopService shopService;
     private final PreSignedProvider preSignedProvider;
+    private final ImageRepository imageRepository;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
         Review review = getReview(reviewId);
         validatePermission(review, userId);
         review.delete();
+        List<String> imageKeys = review.getImages().stream().map(i -> i.getS3Key()).toList();
+        preSignedProvider.deleteObjects(imageKeys);
     }
 
     @Transactional
