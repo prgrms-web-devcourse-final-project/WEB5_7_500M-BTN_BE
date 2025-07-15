@@ -1,5 +1,6 @@
 package shop.matjalalzz.tosspay.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 @RequiredArgsConstructor
 @RequestMapping("/api/payments")
 @Validated
+@Tag(name = "TOSS Payment API", description = "TOSS Payment 관련 API")
 // Toss 결제 성공 후 백엔드에서 결제를 최종 승인하고 포인트 충전
 public class PaymentController {
 

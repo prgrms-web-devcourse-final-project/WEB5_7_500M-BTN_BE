@@ -25,7 +25,7 @@ import shop.matjalalzz.user.dto.PartyResponse;
 import shop.matjalalzz.user.dto.ReservationResponse;
 import shop.matjalalzz.user.dto.ReviewResponse;
 
-@Tag(name = "User MyPage", description = "마이페이지 관련 API")
+@Tag(name = "마이페이지 API", description = "마이페이지 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/my-page")

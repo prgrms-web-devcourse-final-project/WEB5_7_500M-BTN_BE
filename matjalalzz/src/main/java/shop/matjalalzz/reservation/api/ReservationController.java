@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import shop.matjalalzz.reservation.dto.ReservationListResponse;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping("/shops/{shopId}/reservations")
+@Tag(name = "예약 API", description = "예약 관련 API")
 public class ReservationController {
 
     private final ReservationService reservationService;

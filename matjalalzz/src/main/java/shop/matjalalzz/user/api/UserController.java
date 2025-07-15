@@ -24,7 +24,7 @@ import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 
-@Tag(name = "User", description = "사용자 관련 API")
+@Tag(name = "사용자 API", description = "사용자 관련 API")
 @RestController
 @RequiredArgsConstructor
 @Validated
