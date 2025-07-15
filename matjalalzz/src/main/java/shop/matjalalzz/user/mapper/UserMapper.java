@@ -43,7 +43,7 @@ public class UserMapper {
 			.gender(user.getGender())
 			.point(user.getPoint())
 			.phoneNumber(user.getPhoneNumber())
-			.profile(baseUrl + user.getProfileKey())
+			.profile(user.getProfileKey() == null ? null : baseUrl + user.getProfileKey())
 			.build();
 	}
 
