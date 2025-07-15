@@ -17,8 +17,8 @@ import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
-import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
+import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsItem;
@@ -156,7 +156,7 @@ public class ShopService {
 
     @Transactional(readOnly = true)
     public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Long cursor, int size) {
-        double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 종로
+        double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 좌표값은 종로
         double longitude = param.longitude() != null ? param.longitude() : 126.9794;
         double radius = param.radius() != null ? param.radius() : 3000.0;  // 3km
         List<FoodCategory> foodCategories = (param.category() != null && !param.category().isEmpty()) ? param.category()
@@ -169,7 +169,6 @@ public class ShopService {
                 Slice<Shop> shopSlice = shopRepository.findByRatingCursor(
                     latitude, longitude, radius, foodCategories, ratingCursor, PageRequest.of(0, size)
                 );
-
 
                 Long nextCursor = null;
                 if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
@@ -213,16 +212,8 @@ public class ShopService {
                     .findFirst()
                     .map(image -> BASE_URL + image.getS3Key())
                     .orElse(null);
+                return ShopMapper.sliceShopToShopsItem(shop, thumbnailUrl);
 
-                return ShopsItem.builder()
-                    .shopId(shop.getId())
-                    .shopName(shop.getShopName())
-                    .category(shop.getCategory())
-                    .roadAddress(shop.getRoadAddress())
-                    .detailAddress(shop.getDetailAddress())
-                    .rating(shop.getRating())
-                    .thumbnailUrl(thumbnailUrl)
-                    .build();
             })
             .toList();
     }

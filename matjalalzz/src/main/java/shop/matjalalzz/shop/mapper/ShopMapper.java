@@ -77,7 +77,7 @@ public class ShopMapper {
             .build();
     }
 
-    public static ShopsItem sliceShopToShopsList(Shop shop, String thumbnailUrl){
+    public static ShopsItem sliceShopToShopsItem(Shop shop, String thumbnailUrl){
         return ShopsItem.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
@@ -88,5 +88,7 @@ public class ShopMapper {
             .thumbnailUrl(thumbnailUrl)
             .build();
     }
+
+
 
 }
