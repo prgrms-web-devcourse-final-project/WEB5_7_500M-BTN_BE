@@ -11,6 +11,7 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import java.util.Date;
 import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,14 @@ public class TokenProvider {
     @Value("${custom.jwt.token-validity-time.refresh}")
     private int refreshTokenValiditySeconds;
     @Value("${custom.jwt.secret}")
-    private String secretKey;
+    private String secret;
+    private SecretKey secretKey;
+
+    @PostConstruct
+    void init() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     //access 토큰 생성
     public String issueAccessToken(Long id, Role role, String email) {
@@ -59,7 +67,7 @@ public class TokenProvider {
         return jwtBuilder
             .issuedAt(now)
             .expiration(expirationDate)
-            .signWith(getSecretKey(), Jwts.SIG.HS256) //문자열을 바이트로 바꿈,  서명으로 어떻게 암호화 할지
+            .signWith(secretKey, Jwts.SIG.HS256) //문자열을 바이트로 바꿈,  서명으로 어떻게 암호화 할지
             .compact();
     }
 
@@ -69,7 +77,7 @@ public class TokenProvider {
             //검증용 생성
             JwtParser jwtParser = Jwts.parser()
                 //내가 만든 키가 맞는지 테스트를 위해 내 비밀키로 설정함
-                .verifyWith(getSecretKey())
+                .verifyWith(secretKey)
                 .build();
 
             //이전에 설정한 시크릿 키를 가져와서 access토큰을 만든 후 만들어진 jwtparser과 token값을 비교해 토큰값이 제대로 맞는지 확인
@@ -95,7 +103,7 @@ public class TokenProvider {
 
     public TokenBodyDto parseJwt(String token) {
         Jws<Claims> parsed = Jwts.parser()
-            .verifyWith(getSecretKey())
+            .verifyWith(secretKey)
             .build()
             .parseSignedClaims(token);
 
@@ -104,11 +112,6 @@ public class TokenProvider {
         String email = parsed.getPayload().get("email").toString();
 
         return TokenMapper.toTokenBodyDto(Long.parseLong(userId), email, Role.valueOf(role));
-    }
-
-    private SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     //log에서 마스킹 후 출력용

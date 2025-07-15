@@ -1,15 +1,9 @@
 package shop.matjalalzz.review.mapper;
 
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Slice;
-import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.reservation.entity.Reservation;
-import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
-import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.shop.entity.Shop;
