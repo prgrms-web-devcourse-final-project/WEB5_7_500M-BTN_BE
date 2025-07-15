@@ -41,6 +41,9 @@ public class UserService {
     @Value("${custom.jwt.token-validity-time.refresh}")
     private int refreshTokenValiditySeconds;
 
+    @Value("${aws.credentials.AWS_BASE_URL}")
+    private String baseUrl;
+
     @Transactional
     public void login(LoginRequest dto, HttpServletResponse response) {
         //가입된 email과 password가 같은지 확인
@@ -140,7 +143,7 @@ public class UserService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
 
-        return UserMapper.toMyInfoResponse(user);
+        return UserMapper.toMyInfoResponse(user, baseUrl);
     }
 
     @Transactional

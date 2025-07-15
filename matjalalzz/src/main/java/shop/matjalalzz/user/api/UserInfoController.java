@@ -7,8 +7,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,12 +18,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.s3.app.PreSignedProvider;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.review.app.ReviewService;
 import shop.matjalalzz.user.app.UserService;
+import shop.matjalalzz.user.dto.DeleteProfileRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
@@ -37,6 +42,7 @@ public class UserInfoController {
     private final ReservationService reservationService;
     private final PartyService partyService;
     private final ReviewService reviewService;
+    private final PreSignedProvider preSignedProvider;
 
     @Operation(
         summary = "내 정보 조회",
@@ -69,6 +75,38 @@ public class UserInfoController {
         userService.updateMyInfo(userInfo.getId(), request);
 
         return BaseResponse.ok(BaseStatus.OK);
+    }
+
+    @Operation(
+        summary = "프로필 이미지 업로드를 위한 pre-signed url 생성",
+        description = "내 정보 수정 항목 중 프로필 이미지를 업로드하기 위한 pre-signed url을 생성합니다.(Inprogress)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "생성 성공")
+        }
+    )
+    @PostMapping("/presigned-urls")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<PreSignedUrlResponse> getProfilePresignedUrl(
+        @AuthenticationPrincipal PrincipalUser userInfo
+    ) {
+        PreSignedUrlResponse result = preSignedProvider.createProfileUploadUrls(userInfo.getId());
+
+        return BaseResponse.ok(result, BaseStatus.OK);
+    }
+
+    @Operation(
+        summary = "프로필 이미지 삭제",
+        description = "프로필 수정 작업 중 예외 발생으로 업로드된 이미지를 삭제합니다.(Inprogress)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "삭제 성공")
+        }
+    )
+    @DeleteMapping("/profile-img")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteProfile(
+        @Valid @RequestBody DeleteProfileRequest request
+    ) {
+        preSignedProvider.deleteObject(request.profileKey());
     }
 
     @Operation(
