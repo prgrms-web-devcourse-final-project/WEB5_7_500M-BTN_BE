@@ -1,7 +1,11 @@
 package shop.matjalalzz.global.s3.dto;
 
-import java.util.List;
+import lombok.Builder;
 
+@Builder
+public record PreSignedUrlResponse(
+    String key,
+    String url
+){
 
-public record PreSignedUrlResponse (List<PreSignedItem> preSignedResponse, long shopId)
-{}
+}
