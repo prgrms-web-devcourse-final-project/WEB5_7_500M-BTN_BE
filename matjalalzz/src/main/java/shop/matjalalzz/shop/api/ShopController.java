@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
-import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
@@ -35,10 +35,10 @@ public class ShopController {
     @Operation(summary = "식당 생성", description = "새로운 식당을 생성합니다.")
     @PostMapping("/shops/presigned-urls")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<PreSignedUrlResponse> createShop(@RequestBody ShopCreateRequest request,
+    public BaseResponse<PreSignedUrlListResponse> createShop(@RequestBody ShopCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
-        PreSignedUrlResponse preSignedUrlResponse = shopService.newShop(principal.getId(), request);
-        return BaseResponse.ok(preSignedUrlResponse,BaseStatus.CREATED);
+        PreSignedUrlListResponse preSignedUrlListResponse = shopService.newShop(principal.getId(), request);
+        return BaseResponse.ok(preSignedUrlListResponse,BaseStatus.CREATED);
     }
 
 
@@ -63,10 +63,10 @@ public class ShopController {
     @Operation(summary = "사장 식당 정보 수정", description = "식당 정보를 수정합니다.")
     @PatchMapping("/owner/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<PreSignedUrlResponse> updateShop(@PathVariable Long shopId,
+    public BaseResponse<PreSignedUrlListResponse> updateShop(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal,
         @RequestBody @Valid ShopUpdateRequest shopUpdateRequest) {
-        PreSignedUrlResponse urlResponse = shopService.editShop(shopId, principal.getId(), shopUpdateRequest);
+        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(), shopUpdateRequest);
         return BaseResponse.ok(urlResponse, BaseStatus.OK);
     }
 

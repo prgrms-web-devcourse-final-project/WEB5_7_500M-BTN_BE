@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.user.entity.enums.Gender;
 import shop.matjalalzz.user.entity.enums.Role;
@@ -20,6 +21,7 @@ import shop.matjalalzz.user.entity.enums.Role;
 @Entity
 @Getter
 @Table(name = "`user`")
+@SQLRestriction("deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
@@ -59,16 +61,11 @@ public class User extends BaseEntity {
     private int point = 0;
 
     @Size(max = 255)
-    @Column(name = "bucket_id")
-    private String bucketId;
-
-    @Size(max = 255)
-    @Column(name = "profile_image_url")
-    private String profileImageUrl;
+    private String profileKey;
 
     @Builder
     public User(String email, String oauthId, String password, String nickname, String phoneNumber,
-        String name, int age, Gender gender, String bucketId, String profileImageUrl) {
+        String name, int age, Gender gender, String profileKey) {
         this.email = email;
         this.oauthId = oauthId;
         this.password = password;
@@ -77,8 +74,7 @@ public class User extends BaseEntity {
         this.name = name;
         this.age = age;
         this.gender = gender;
-        this.bucketId = bucketId;
-        this.profileImageUrl = profileImageUrl;
+        this.profileKey = profileKey;
     }
 
     // 닉네임 변경 메서드
@@ -107,13 +103,20 @@ public class User extends BaseEntity {
     }
 
     //사진 변경 메서드
-    public void updateProfileImage(String bucketId, String profileImageUrl) {
-        this.bucketId = bucketId;
-        this.profileImageUrl = profileImageUrl;
+    public void updateProfileKey(String profileKey) {
+        this.profileKey = profileKey;
     }
 
     // 권한 변경 메서드
     public void updateRole(Role role) {
         this.role = role;
+    }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateGender(Gender gender) {
+        this.gender = gender;
     }
 }

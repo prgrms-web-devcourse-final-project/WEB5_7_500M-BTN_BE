@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.PrincipalUser;
+import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
 import shop.matjalalzz.global.security.oauth2.mapper.OAuth2Mapper;
@@ -21,7 +22,7 @@ import shop.matjalalzz.global.security.oauth2.mapper.OAuth2Mapper;
 @RequiredArgsConstructor
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
-    private final TokenService tokenService;
+    private final TokenProvider tokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response
@@ -36,8 +37,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (token != null) {
-            if (tokenService.validate(token)) {
-                TokenBodyDto tokenBodyDto = tokenService.parseJwt(token);
+            if (tokenProvider.validate(token)) {
+                TokenBodyDto tokenBodyDto = tokenProvider.parseJwt(token);
                 PrincipalUser principalUser = OAuth2Mapper.toPrincipalUser(tokenBodyDto);
 
                 Authentication authentication = new UsernamePasswordAuthenticationToken(

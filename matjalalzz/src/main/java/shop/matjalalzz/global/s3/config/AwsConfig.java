@@ -39,9 +39,9 @@ public class AwsConfig {
     public S3Client s3Client() {
         return S3Client.builder()
             .region(Region.of(region))
-            //.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+            .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
 
-            .credentialsProvider(DefaultCredentialsProvider.builder().build()) //- 이게 인증정보를 알아서 찾는거 같긴한데 테스트를 못하는 상황이라 흐음 create는 depreated..
+//            .credentialsProvider(DefaultCredentialsProvider.builder().build()) //- 이게 인증정보를 알아서 찾는거 같긴한데 테스트를 못하는 상황이라 흐음 create는 depreated..
             // https://team05-500m-btn.s3.ap-northeast-2.amazonaws.com/shops/cat/cat_img_0
 
             //DefaultCredentialsProvider 클래스가 인증정보 찾는 순서가 아래와 같습니다. https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/auth/credentials/DefaultCredentialsProvider.html

@@ -89,7 +89,7 @@ aws:
   s3:
     bucket: ${AWS_S3_BUCKET}
     path: ${AWS_S3_PATH}
-
+    exp-min: ${AWS_S3_PRESIGN_EXP}
 
 toss:
   secret-key: ${TOSS_SECRET_KEY}
