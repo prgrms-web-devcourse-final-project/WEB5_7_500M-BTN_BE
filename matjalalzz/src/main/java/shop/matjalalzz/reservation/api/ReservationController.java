@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -91,6 +92,20 @@ public class ReservationController {
 
         return BaseResponse.ok(response, BaseStatus.CREATED);
 
+    }
+
+    @Operation(
+        summary = "예약 수락",
+        description = "reservationId에 해당하는 예약을 CONFIRMED 상태로 변경한다. (Inprogress)",
+        responses = {
+            @ApiResponse(responseCode = "204", description = "예약 수락 성공"),
+        }
+    )
+    @PatchMapping("/{reservationId}/accept")
+    @ResponseStatus(HttpStatus.OK)
+    public void acceptReservation(@PathVariable Long reservationId,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        reservationService.acceptReservation(reservationId, principal.getId());
     }
 
     // 1차 MVP 목표에서 제외
