@@ -44,7 +44,7 @@ public class ReservationMapper {
     public static CreateReservationResponse toCreateReservationResponse(Reservation reservation) {
         return CreateReservationResponse.builder()
             .reservationId(reservation.getId())
-            .shopName(reservation.getShop().getName())
+            .shopName(reservation.getShop().getShopName())
             .dateTime(reservation.getReservedAt())
             .headCount(reservation.getHeadCount())
             .status(reservation.getStatus())
@@ -56,9 +56,9 @@ public class ReservationMapper {
             .map(res -> ReservationContent.builder()
                 .reservationId(res.getId())
                 .shopName(
-                    res.getShop().getName())                      // ← N+1 가능성 있음, fetch join 필요
-                .reservedAt(res.getReservedAt())
-                .headCount(res.getHeadCount())
+                    res.getShop().getShopName())                      // ← N+1 가능성 있음, fetch join 필요
+                    .reservedAt(res.getReservedAt())
+                    .headCount(res.getHeadCount())
                 .phoneNumber(
                     res.getUser().getPhoneNumber())           // ← N+1 가능성 있음, fetch join 필요
                 .build())
