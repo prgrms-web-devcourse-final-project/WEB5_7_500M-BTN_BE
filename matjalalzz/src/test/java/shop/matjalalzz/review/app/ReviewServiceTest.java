@@ -93,7 +93,7 @@ class ReviewServiceTest {
                 .build();
 
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(shopService.getShopById(shopId)).thenReturn(shop);
+            when(shopService.shopFind(shopId)).thenReturn(shop);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
             when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
@@ -190,7 +190,7 @@ class ReviewServiceTest {
 
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
-            when(shopService.getShopById(shopId)).thenThrow(
+            when(shopService.shopFind(shopId)).thenThrow(
                 new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then

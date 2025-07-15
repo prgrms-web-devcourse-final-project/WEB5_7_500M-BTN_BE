@@ -15,12 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.global.security.jwt.app.TokenService;
+import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.dto.LoginRequest;
+import shop.matjalalzz.user.dto.MyInfoResponse;
+import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
@@ -33,11 +35,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final TokenService tokenService;
+    private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${custom.jwt.token-validity-time.refresh}")
     private int refreshTokenValiditySeconds;
+
+    @Value("${aws.credentials.AWS_BASE_URL}")
+    private String baseUrl;
 
     @Transactional
     public void login(LoginRequest dto, HttpServletResponse response) {
@@ -49,19 +54,19 @@ public class UserService {
             throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);  //404
         }
 
-        String accessToken = tokenService.issueAccessToken(
+        String accessToken = tokenProvider.issueAccessToken(
             found.getId(), found.getRole(), found.getEmail()
         );
 
         RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
             .orElseGet(() -> refreshTokenRepository.save(
                 TokenMapper.toRefreshToken(
-                    tokenService.issueRefreshToken(found.getId()), found
+                    tokenProvider.issueRefreshToken(found.getId()), found
                 )
             ));
 
-        if (!tokenService.validate(refreshToken.getRefreshToken())) {
-            String reissueRefreshToken = tokenService.issueRefreshToken(found.getId());
+        if (!tokenProvider.validate(refreshToken.getRefreshToken())) {
+            String reissueRefreshToken = tokenProvider.issueRefreshToken(found.getId());
             refreshToken.updateRefreshToken(reissueRefreshToken);
         }
 
@@ -76,8 +81,6 @@ public class UserService {
         response.addCookie(cookie);
     }
 
-    //암호화 후 db에 회원가입 정보 저장
-    //BaseResponse로 지정한 내용에 http 상태 코드를 수정 후 다시 ResponseEntity로 감싸서 보냄
     @Transactional
     public void signup(SignUpRequest dto) {
         if (userRepository.findByEmail(dto.email()).isPresent()) {
@@ -85,30 +88,21 @@ public class UserService {
         }
 
         User user = UserMapper.toUser(dto, passwordEncoder);
-//        user.setCreatedBy(user.getName());
-//        user.setUpdatedBy(user.getName()); 이거를 써도 회원가입 형태는 anonymous가 뜨는 문제 발생
-        userRepository.save(user);
 
+        userRepository.save(user);
     }
 
     @Transactional
-    public void oauthSignup(String email, OAuthSignUpRequest dto) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new BusinessException(EMAIL_ALREADY_EXISTS);  //409
-        }
+    public void oauthSignup(long userId, OAuthSignUpRequest request) {
+        User user = findUserByIdOrThrow(userId);
 
-        User user = UserMapper.toOAuthUser(dto);
-//        user.setCreatedBy(user.getName());
-//        user.setUpdatedBy(user.getName()); 이거를 써도 회원가입 형태는 anonymous가 뜨는 문제 발생
-        userRepository.save(user);
-
+        UserMapper.update(user, request);
     }
 
     @Transactional
     public void deleteUser(Long userId, String refreshToken,
         HttpServletResponse response) {
-        User tokenUser = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        User tokenUser = findUserByIdOrThrow(userId);
 
         //refresh token 비교
         RefreshToken foundRefreshToken = refreshTokenRepository.findByUser(tokenUser)
@@ -134,8 +128,26 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public MyInfoResponse getMyInfo(Long userId) {
+        User user = findUserByIdOrThrow(userId);
+
+        return UserMapper.toMyInfoResponse(user, baseUrl);
+    }
+
+    @Transactional
+    public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
+        User user = findUserByIdOrThrow(userId);
+
+        UserMapper.update(user, request);
+    }
+
+    @Transactional(readOnly = true)
     public User getUserById(Long userId) {
-        return userRepository.findById(userId)
+        return findUserByIdOrThrow(userId);
+    }
+
+    private User findUserByIdOrThrow(Long id) {
+        return userRepository.findById(id)
             .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 }

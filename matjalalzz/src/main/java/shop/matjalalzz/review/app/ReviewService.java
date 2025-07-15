@@ -13,6 +13,8 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dao.ReviewRepository;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
@@ -51,7 +53,7 @@ public class ReviewService {
 
         validateReservationPermission(reservation, writerId);
 
-        Shop shop = shopService.getShopById(request.shopId());
+        Shop shop = shopService.shopFind(request.shopId());
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
         Review result = reviewRepository.save(review);
@@ -70,7 +72,19 @@ public class ReviewService {
             .nextCursor(nextCursor)
             .reviews(comments.stream().map(ReviewMapper::toReviewResponse).toList())
             .build();
+    }
 
+    @Transactional(readOnly = true)
+    public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
+        Slice<MyReviewResponse> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
+            PageRequest.of(0, size));
+
+        Long nextCursor = null;
+        if (comments.hasNext()) {
+            nextCursor = comments.getContent().getLast().reviewId();
+        }
+
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, comments);
     }
 
     @Transactional(readOnly = true)

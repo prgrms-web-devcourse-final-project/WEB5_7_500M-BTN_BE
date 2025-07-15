@@ -19,9 +19,10 @@ public class S3Controller {
     private final PreSignedService preSignedService;
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/presigned-urls")
+    @PostMapping("/upload-result")
     public void presignedCompleted(@RequestBody PreSignedCompliedRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
         preSignedService.imageCompletion(request);
     }
+
 }
