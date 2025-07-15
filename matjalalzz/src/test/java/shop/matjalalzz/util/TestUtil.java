@@ -16,8 +16,9 @@ import shop.matjalalzz.user.entity.enums.Gender;
 public class TestUtil {
 
     public static User createUser() {
+        String randomEmail = "testEmail" + UUID.randomUUID() + "@naver.com";
         return User.builder()
-            .email("testEmail@naver.com")
+            .email(randomEmail)
             .password("test-password")
             .nickname("nickname")
             .name("홍길동")
