@@ -56,7 +56,7 @@ public class ReservationController {
         @RequestParam(defaultValue = "10") int size,
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
-        ReservationListResponse response = reservationService.getReservations(shopId, filter,
+        ReservationListResponse response = reservationService.getReservations(shopId, userInfo.getId(), filter,
             cursor, size);
 
         return BaseResponse.ok(response, BaseStatus.OK);
@@ -103,7 +103,7 @@ public class ReservationController {
     )
     @PatchMapping("/{reservationId}/confirm")
     @ResponseStatus(HttpStatus.OK)
-    public void acceptReservation(
+    public void confirmReservation(
         @PathVariable Long shopId,
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
