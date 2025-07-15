@@ -22,7 +22,7 @@ import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.shop.mapper.ShopMapper;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -30,19 +30,18 @@ import shop.matjalalzz.user.entity.User;
 public class ShopService {
 
     private final ShopRepository shopRepository;
-    private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final ReviewRepository reviewRepository;
 
     private final PreSignedProvider preSignedProvider;
+    private final UserService userService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
 
     @Transactional
     public PreSignedUrlResponse newShop(long userId, ShopCreateRequest shopCreateRequest) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.getUserById(userId);
 
         Shop newShop = ShopMapper.createToShop(shopCreateRequest, user);
 
@@ -96,7 +95,7 @@ public class ShopService {
         boolean canEdit = shop.getUser().getId().equals(userId);
 
         //사진 리스트로 가져왔을 때 없어도 에러는 반환 X    이거 mapper로 이동해야 함
-        List<String> imageUrllList = Optional.ofNullable(
+        List<String> imageUrlList = Optional.ofNullable(
                 imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
@@ -105,7 +104,7 @@ public class ShopService {
         //리뷰 갯수가 몇개인지 보내줘야 함
         int reviewCount = reviewRepository.findReviewCount(shop.getId());
 
-        return ShopMapper.shopOwnerDetailResponse(shop, imageUrllList, canEdit, reviewCount);
+        return ShopMapper.shopOwnerDetailResponse(shop, imageUrlList, canEdit, reviewCount);
 
     }
 
@@ -166,11 +165,5 @@ public class ShopService {
 
         //shopRepository.(latitude,longitude,radius,foodCategories,sort,cursor,size+1);
 
-    }
-
-    @Transactional(readOnly = true)
-    public Shop getShopById(Long shopId) {
-        return shopRepository.findById(shopId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
     }
 }
