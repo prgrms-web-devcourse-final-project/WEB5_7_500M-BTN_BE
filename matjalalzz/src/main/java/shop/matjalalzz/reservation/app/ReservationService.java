@@ -1,5 +1,6 @@
 package shop.matjalalzz.reservation.app;
 
+import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.PARTY_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
@@ -57,11 +58,12 @@ public class ReservationService {
 
         List<Reservation> reservations = slice.getContent();
 
-        Long nextCursor = slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
+        Long nextCursor =
+            slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
 
         List<ReservationContent> content =
             ReservationMapper.toReservationContent(reservations);
-        
+
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
 
@@ -127,6 +129,12 @@ public class ReservationService {
         } catch (IllegalArgumentException e) {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Reservation getReservationById(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new BusinessException(DATA_NOT_FOUND));
     }
 }
 

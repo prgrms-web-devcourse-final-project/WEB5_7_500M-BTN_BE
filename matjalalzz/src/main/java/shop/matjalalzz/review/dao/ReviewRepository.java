@@ -10,7 +10,7 @@ import shop.matjalalzz.review.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-    @Query("SELECT r FROM Review r WHERE r.shop.id = :shopId AND (r.id < :cursor OR :cursor = 0) ORDER BY r.id DESC")
+    @Query("SELECT r FROM Review r WHERE r.shop.id = :shopId AND (r.id < :cursor OR :cursor IS NULL ) ORDER BY r.id DESC")
     Slice<Review> findByShopIdAndCursor(@Param("shopId") Long shopId, @Param("cursor") Long cursor,
         Pageable pageable);
 
@@ -31,4 +31,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("select count(r) from Review r where r.shop.id =:shopId")
     int findReviewCount(@Param("shopId") Long shopId);
+
+    Boolean existsByReservationIdAndWriterId(Long reservationId, Long writerId);
 }
