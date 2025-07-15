@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
+import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.enums.ImageType;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
@@ -26,6 +27,7 @@ public class PreSignedProvider {
 
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
+    private final ImageRepository imageRepository;
 
     @Value("${aws.s3.bucket}")
     private String bucketName;
@@ -76,8 +78,8 @@ public class PreSignedProvider {
                     .build()
             )
             .build();
-
         s3Client.deleteObjects(request);
+        keys.forEach(imageRepository::deleteByS3Key);
     }
 
     private PreSignedUrlResponse buildItem(ImageType type, long id, String subPath) {
