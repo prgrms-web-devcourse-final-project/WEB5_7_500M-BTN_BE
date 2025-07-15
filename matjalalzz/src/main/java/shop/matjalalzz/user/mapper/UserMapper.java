@@ -23,16 +23,6 @@ public class UserMapper {
 			.build();
 	}
 
-	public static User toOAuthUser(OAuthSignUpRequest signUpRequest) {
-		return User.builder()
-				.nickname(signUpRequest.nickname())
-				.phoneNumber(signUpRequest.phoneNumber())
-				.age(signUpRequest.age())
-				.name(signUpRequest.name())
-				.gender(signUpRequest.gender())
-				.build();
-	}
-
 	public static MyInfoResponse toMyInfoResponse(User user, String baseUrl) {
 		return MyInfoResponse.builder()
 			.email(user.getEmail())
@@ -45,6 +35,14 @@ public class UserMapper {
 			.phoneNumber(user.getPhoneNumber())
 			.profile(user.getProfileKey() == null ? null : baseUrl + user.getProfileKey())
 			.build();
+	}
+
+	public static void update(User user, OAuthSignUpRequest request) {
+		user.updateNickname(request.nickname());
+		user.updatePhoneNumber(request.phoneNumber());
+		user.updateName(request.name());
+		user.updateAge(request.age());
+		user.updateGender(request.gender());
 	}
 
 	public static void update(User user, MyInfoUpdateRequest dto) {

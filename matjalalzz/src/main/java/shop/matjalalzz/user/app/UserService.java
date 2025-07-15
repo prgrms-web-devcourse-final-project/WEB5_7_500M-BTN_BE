@@ -81,8 +81,6 @@ public class UserService {
         response.addCookie(cookie);
     }
 
-    //암호화 후 db에 회원가입 정보 저장
-    //BaseResponse로 지정한 내용에 http 상태 코드를 수정 후 다시 ResponseEntity로 감싸서 보냄
     @Transactional
     public void signup(SignUpRequest dto) {
         if (userRepository.findByEmail(dto.email()).isPresent()) {
@@ -90,30 +88,21 @@ public class UserService {
         }
 
         User user = UserMapper.toUser(dto, passwordEncoder);
-//        user.setCreatedBy(user.getName());
-//        user.setUpdatedBy(user.getName()); 이거를 써도 회원가입 형태는 anonymous가 뜨는 문제 발생
-        userRepository.save(user);
 
+        userRepository.save(user);
     }
 
     @Transactional
-    public void oauthSignup(String email, OAuthSignUpRequest dto) {
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new BusinessException(EMAIL_ALREADY_EXISTS);  //409
-        }
+    public void oauthSignup(long userId, OAuthSignUpRequest request) {
+        User user = findUserByIdOrThrow(userId);
 
-        User user = UserMapper.toOAuthUser(dto);
-//        user.setCreatedBy(user.getName());
-//        user.setUpdatedBy(user.getName()); 이거를 써도 회원가입 형태는 anonymous가 뜨는 문제 발생
-        userRepository.save(user);
-
+        UserMapper.update(user, request);
     }
 
     @Transactional
     public void deleteUser(Long userId, String refreshToken,
         HttpServletResponse response) {
-        User tokenUser = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        User tokenUser = findUserByIdOrThrow(userId);
 
         //refresh token 비교
         RefreshToken foundRefreshToken = refreshTokenRepository.findByUser(tokenUser)
@@ -140,23 +129,25 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public MyInfoResponse getMyInfo(Long userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        User user = findUserByIdOrThrow(userId);
 
         return UserMapper.toMyInfoResponse(user, baseUrl);
     }
 
     @Transactional
     public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        User user = findUserByIdOrThrow(userId);
 
         UserMapper.update(user, request);
     }
 
     @Transactional(readOnly = true)
     public User getUserById(Long userId) {
-        return userRepository.findById(userId)
+        return findUserByIdOrThrow(userId);
+    }
+
+    private User findUserByIdOrThrow(Long id) {
+        return userRepository.findById(id)
             .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
     }
 }
