@@ -2,13 +2,10 @@ package shop.matjalalzz.party.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.shop.entity.Shop;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -52,7 +52,7 @@ public class PartyController {
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
-    @Operation(summary = "파티 목록 조회", description = "파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다.(Inprogress)")
+    @Operation(summary = "파티 목록 조회", description = "파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다.(Completed)")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyScrollResponse> getParties(
