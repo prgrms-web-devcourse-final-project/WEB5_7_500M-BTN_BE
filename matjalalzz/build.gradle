@@ -58,6 +58,11 @@ dependencies {
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+
+    implementation platform("software.amazon.awssdk:bom:2.25.4") // 버전 통일
+    implementation "software.amazon.awssdk:s3"                    // S3 클라이언트
+
 }
 
 tasks.named('test') {
