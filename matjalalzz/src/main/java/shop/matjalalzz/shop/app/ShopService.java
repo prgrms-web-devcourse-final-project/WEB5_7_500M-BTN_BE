@@ -230,6 +230,7 @@ public class ShopService {
     private ShopPageResponse getShopListByRating(String query, String cursor, int size) {
         Double ratingCursor = null;
         if (cursor != null) {
+            //파싱 불가능 검증
             try {
                 ratingCursor = Double.parseDouble(cursor);
             } catch (NumberFormatException e) {
@@ -258,6 +259,7 @@ public class ShopService {
     private ShopPageResponse getShopListByCreatedAt(String query, String cursor, int size) {
         LocalDateTime timeCursor = null;
         if (cursor != null) {
+            // 파싱 불가능 검증
             try {
                 timeCursor = LocalDateTime.parse(cursor);
             } catch (DateTimeParseException e) {

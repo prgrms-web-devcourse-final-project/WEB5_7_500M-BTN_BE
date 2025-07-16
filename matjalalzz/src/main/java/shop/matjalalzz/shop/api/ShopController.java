@@ -88,7 +88,8 @@ public class ShopController {
         return BaseResponse.ok(shops, BaseStatus.OK);
     }
 
-    @Operation(summary = "식당 검색", description = "키워드로 식당을 검색합니다.")
+    @Operation(summary = "식당 검색", description = "키워드로 식당을 검색합니다."
+        + "정렬기준: name, createdAt, rating  (Completed)")
     @GetMapping("/shops/search")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShopsBySearch(
