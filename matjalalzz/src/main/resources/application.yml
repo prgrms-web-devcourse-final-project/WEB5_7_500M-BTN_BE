@@ -19,13 +19,18 @@ spring:
       hibernate:
         format_sql: true
     generate-ddl: true
+    defer-datasource-initialization: true
 
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
-      timeout: ${REDIS_TIMEOUT}
+  sql:
+    init:
+      mode: always
+
+    data:
+      redis:
+        host: ${REDIS_HOST}
+        port: ${REDIS_PORT}
+        password: ${REDIS_PASSWORD}
+        timeout: ${REDIS_TIMEOUT}
   security:
     oauth2:
       client:
