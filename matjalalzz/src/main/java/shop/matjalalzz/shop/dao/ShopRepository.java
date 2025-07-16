@@ -68,11 +68,11 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 
     @Query("""
         SELECT s FROM Shop s 
-        WHERE (s.shopName < :cursor OR :cursor IS NULL ) 
+        WHERE (s.shopName > :cursor OR :cursor IS NULL ) 
         AND (:query IS NULL 
             OR s.shopName LIKE %:query%
             OR s.description LIKE %:query%)
-        ORDER BY s.shopName DESC
+        ORDER BY s.shopName ASC 
         """)
     Slice<Shop> findCursorListByName(@Param("cursor") String cursor, @Param("query") String query,
         Pageable pageable);
