@@ -127,9 +127,6 @@ public class ReviewService {
 
     private void addShopRating(Shop shop, Double rating) {
         Double currentRating = shop.getRating();
-        if (currentRating == null) {
-            currentRating = 0.0;
-        }
         int currentCount = reviewRepository.countReviewByShop(shop);
         double newRating = currentRating * currentCount + rating;
         newRating /= (currentCount + 1);
@@ -138,9 +135,6 @@ public class ReviewService {
 
     private void removeShopRating(Shop shop, Double rating) {
         Double currentRating = shop.getRating();
-        if (currentRating == null) {
-            currentRating = 0.0;
-        }
         int currentCount = reviewRepository.countReviewByShop(shop);
         double newRating = currentRating * currentCount - rating;
         newRating /= (currentCount - 1);
