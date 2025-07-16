@@ -122,8 +122,7 @@ public class ReservationService {
 
     private Reservation validateOwnerPermissionAndPending(Long reservationId, Long shopId,
         Long ownerId) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new BusinessException(RESERVATION_NOT_FOUND));
+        Reservation reservation = getReservationById(reservationId);
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new BusinessException(ALREADY_PROCESSED);
