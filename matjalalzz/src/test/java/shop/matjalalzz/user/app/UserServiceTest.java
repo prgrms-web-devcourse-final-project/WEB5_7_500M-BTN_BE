@@ -22,7 +22,8 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    @Mock private UserRepository userRepository;
+    @Mock
+    private UserRepository userRepository;
 
     @Test
     @DisplayName("내 정보 조회 테스트")
@@ -55,6 +56,7 @@ public class UserServiceTest {
             .nickname("old")
             .age(20)
             .phoneNumber("010-1111-1111")
+            .profileKey("/profile/1/1234_img.png")
             .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -62,6 +64,8 @@ public class UserServiceTest {
         MyInfoUpdateRequest dto = MyInfoUpdateRequest.builder()
             .nickname("newNick")
             .age(25)
+            .phoneNumber("010-2222-2222")
+            .profileKey("/profile/1/5678_img.png")
             .build();
 
         // when
@@ -70,7 +74,7 @@ public class UserServiceTest {
         // then
         assertThat(user.getNickname()).isEqualTo("newNick");
         assertThat(user.getAge()).isEqualTo(25);
-        assertThat(user.getPhoneNumber())
-            .isEqualTo("010-1111-1111");
+        assertThat(user.getPhoneNumber()).isEqualTo("010-2222-2222");
+        assertThat(user.getProfileKey()).isEqualTo("/profile/1/5678_img.png");
     }
 }

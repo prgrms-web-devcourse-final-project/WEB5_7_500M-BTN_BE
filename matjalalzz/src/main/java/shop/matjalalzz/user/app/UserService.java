@@ -98,7 +98,7 @@ public class UserService {
     public void oauthSignup(long userId, OAuthSignUpRequest request) {
         User user = findUserByIdOrThrow(userId);
 
-        UserMapper.update(user, request);
+        user.oauthSignup(request);
     }
 
     @Transactional
@@ -140,11 +140,11 @@ public class UserService {
     public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
         User user = findUserByIdOrThrow(userId);
 
-        if(request.profileKey() != null) {
+        if(!request.profileKey().equals(user.getProfileKey())) {
             preSignedProvider.deleteObject(user.getProfileKey());
         }
 
-        UserMapper.update(user, request);
+        user.update(request);
     }
 
     @Transactional(readOnly = true)

@@ -36,25 +36,4 @@ public class UserMapper {
             .profile(user.getProfileKey() == null ? null : baseUrl + user.getProfileKey())
             .build();
     }
-
-    public static void update(User user, OAuthSignUpRequest dto) {
-        user.updateNickname(dto.nickname());
-        user.updatePhoneNumber(dto.phoneNumber());
-        user.updateName(dto.name());
-        user.updateAge(dto.age());
-        user.updateGender(dto.gender());
-    }
-
-    public static void update(User user, MyInfoUpdateRequest dto) {
-        applyIfNotNull(dto.nickname(), user::updateNickname);
-        applyIfNotNull(dto.age(), user::updateAge);
-        applyIfNotNull(dto.phoneNumber(), user::updatePhoneNumber);
-        applyIfNotNull(dto.profileKey(), user::updateProfileKey);
-    }
-
-    private static <T> void applyIfNotNull(T value, Consumer<T> consumer) {
-        if (value != null) {
-            consumer.accept(value);
-        }
-    }
 }
