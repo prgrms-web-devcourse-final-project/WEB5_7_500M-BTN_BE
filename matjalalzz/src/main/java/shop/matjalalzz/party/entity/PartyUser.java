@@ -19,7 +19,7 @@ import shop.matjalalzz.user.entity.User;
 
 @Entity
 @Getter
-@Table(name = "party_users")
+@Table(name = "party_user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("deleted = false")
 public class PartyUser extends BaseEntity {
