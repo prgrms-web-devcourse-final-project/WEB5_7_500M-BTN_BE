@@ -85,7 +85,7 @@ public class UserInfoController {
         }
     )
     @PostMapping("/presigned-urls")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<PreSignedUrlResponse> getProfilePresignedUrl(
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
@@ -102,7 +102,7 @@ public class UserInfoController {
         }
     )
     @DeleteMapping("/profile-img")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProfile(
         @Valid @RequestBody DeleteProfileRequest request
     ) {

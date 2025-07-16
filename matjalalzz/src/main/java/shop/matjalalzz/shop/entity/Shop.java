@@ -80,12 +80,10 @@ public class Shop extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-
-
     @Builder
     public Shop( String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
-        String businessCode, LocalTime openTime, LocalTime closeTime, User user, Integer imageCount, String detailAddress) {
+        String businessCode, LocalTime openTime, LocalTime closeTime, User user, String detailAddress, int reservationFee) {
         this.shopName = shopName;
         this.roadAddress = roadAddress;
         this.sido = sido;
@@ -95,7 +93,7 @@ public class Shop extends BaseEntity {
         this.category = category;
         this.tel = tel;
         this.businessCode = businessCode;
-        this.reservationFee = 0;
+        this.reservationFee = reservationFee;
         this.rating = 0.0;
         this.openTime = openTime;
         this.closeTime = closeTime;

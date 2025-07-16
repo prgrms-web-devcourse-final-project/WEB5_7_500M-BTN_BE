@@ -34,7 +34,7 @@ public class TokenProvider {
     private SecretKey secretKey;
 
     @PostConstruct
-    void init() {
+    private void init() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }

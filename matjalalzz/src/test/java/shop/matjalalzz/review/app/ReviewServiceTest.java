@@ -7,7 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -22,16 +21,16 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.reservation.dao.ReservationRepository;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
-import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
-import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,13 +40,13 @@ class ReviewServiceTest {
     private ReviewRepository reviewRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private ReservationService reservationService;
 
     @Mock
-    private ShopRepository shopRepository;
+    private ShopService shopService;
 
     @InjectMocks
     private ReviewService reviewService;
@@ -71,15 +70,16 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
             when(writer.getNickname()).thenReturn("테스터");
 
             Shop shop = mock(Shop.class);
 
             Reservation reservation = mock(Reservation.class);
+            when(reservation.getUser()).thenReturn(writer);
 
             Review review = Review.builder()
                 .id(reviewId)
@@ -90,21 +90,17 @@ class ReviewServiceTest {
                 .reservation(reservation)
                 .build();
 
-            when(userRepository.findById(writerId)).thenReturn(Optional.of(writer));
-            when(shopRepository.findById(shopId)).thenReturn(Optional.of(shop));
-            when(reservationRepository.findById(reservationId)).thenReturn(
-                Optional.of(reservation));
+            when(userService.getUserById(writerId)).thenReturn(writer);
+            when(shopService.shopFind(shopId)).thenReturn(shop);
+            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
             when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
             // when
-            ReviewResponse response = reviewService.createReview(request, writerId);
+            PreSignedUrlListResponse response = reviewService.createReview(request, writerId);
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.reviewId()).isEqualTo(reviewId);
-            assertThat(response.content()).isEqualTo(request.content());
-            assertThat(response.rating()).isEqualTo(rating);
-            assertThat(response.userNickname()).isEqualTo("테스터");
+            assertThat(response.refId()).isEqualTo(reviewId);
 
             verify(reviewRepository).save(any(Review.class));
         }
@@ -123,10 +119,10 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
-            when(userRepository.findById(writerId)).thenReturn(Optional.empty());
+            when(userService.getUserById(writerId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> reviewService.createReview(request, writerId))
@@ -148,13 +144,13 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             User writer = mock(User.class);
 
-            when(userRepository.findById(writerId)).thenReturn(Optional.of(writer));
-            when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
+            when(userService.getUserById(writerId)).thenReturn(writer);
+            when(reservationService.getReservationById(reservationId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> reviewService.createReview(request, writerId))
@@ -176,22 +172,85 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
-                .images(new ArrayList<>())
                 .build();
 
             User writer = mock(User.class);
+            when(writer.getId()).thenReturn(writerId);
 
             Reservation reservation = mock(Reservation.class);
+            when(reservation.getUser()).thenReturn(writer);
 
-            when(userRepository.findById(writerId)).thenReturn(Optional.of(writer));
-            when(reservationRepository.findById(reservationId)).thenReturn(
-                Optional.of(reservation));
-            when(shopRepository.findById(shopId)).thenReturn(Optional.empty());
+            when(userService.getUserById(writerId)).thenReturn(writer);
+            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
+            when(shopService.shopFind(shopId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> reviewService.createReview(request, writerId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("예약 주인이 아닌 사용자가 리뷰 생성 실패")
+        void createReview_notReservationOwner_fail() {
+            // given
+            Long writerId = 1L;
+            Long reservationUserId = 2L; // 실제 예약자 ID
+            Long shopId = 1L;
+            Long reservationId = 1L;
+            Double rating = 4.5;
+
+            ReviewCreateRequest request = ReviewCreateRequest.builder()
+                .shopId(shopId)
+                .reservationId(reservationId)
+                .content("맛있어요!")
+                .rating(rating)
+                .build();
+
+            User writer = mock(User.class);
+
+            User reservationUser = mock(User.class);
+            when(reservationUser.getId()).thenReturn(reservationUserId);
+
+            Reservation reservation = mock(Reservation.class);
+            when(reservation.getUser()).thenReturn(reservationUser);
+            when(reservation.getParty()).thenReturn(null); // 파티 예약이 아닌 경우
+
+            when(userService.getUserById(writerId)).thenReturn(writer);
+            when(reservationService.getReservationById(reservationId)).thenReturn(
+                reservation);
+
+            // when & then
+            assertThatThrownBy(() -> reviewService.createReview(request, writerId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        @Test
+        @DisplayName("중복 리뷰 생성 실패")
+        void createReview_duplicateReview_fail() {
+            // given
+            Long writerId = 1L;
+            Long shopId = 1L;
+            Long reservationId = 1L;
+            Double rating = 4.5;
+
+            ReviewCreateRequest request = ReviewCreateRequest.builder()
+                .shopId(shopId)
+                .reservationId(reservationId)
+                .content("맛있어요!")
+                .rating(rating)
+                .build();
+
+            // 이미 동일한 예약과 작성자로 리뷰가 존재한다고 설정
+            when(reviewRepository.existsByReservationIdAndWriterId(reservationId, writerId))
+                .thenReturn(true);
+
+            // when & then
+            assertThatThrownBy(() -> reviewService.createReview(request, writerId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DUPLICATE_DATA);
         }
     }
 
@@ -233,7 +292,8 @@ class ReviewServiceTest {
             Long reviewId = 1L;
             Long writerId = 1L;
 
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+            when(reviewRepository.findById(reviewId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> reviewService.deleteReview(reviewId, writerId))
@@ -426,7 +486,8 @@ class ReviewServiceTest {
             // given
             Long reviewId = 1L;
 
-            when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+            when(reviewRepository.findById(reviewId)).thenThrow(
+                new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> reviewService.getReview(reviewId))
