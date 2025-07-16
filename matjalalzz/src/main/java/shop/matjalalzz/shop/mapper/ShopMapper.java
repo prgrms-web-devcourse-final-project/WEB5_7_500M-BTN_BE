@@ -1,12 +1,14 @@
 package shop.matjalalzz.shop.mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
+import shop.matjalalzz.shop.dto.ShopPageResponse;
+import shop.matjalalzz.shop.dto.ShopPageResponse.ShopElementResponse;
 import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
@@ -33,7 +35,8 @@ public class ShopMapper {
     }
 
 
-    public static ShopDetailResponse shopDetailResponse (Shop shop, List<String> imageListUrl, boolean canEdit, int reviewCount) {
+    public static ShopDetailResponse shopDetailResponse(Shop shop, List<String> imageListUrl,
+        boolean canEdit, int reviewCount) {
         return ShopDetailResponse.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
@@ -53,10 +56,8 @@ public class ShopMapper {
     }
 
 
-
-
-
-    public static ShopOwnerDetailResponse shopOwnerDetailResponse (Shop shop, List<String> imageListUrl, boolean canEdit, int reviewCount) {
+    public static ShopOwnerDetailResponse shopOwnerDetailResponse(Shop shop,
+        List<String> imageListUrl, boolean canEdit, int reviewCount) {
         return ShopOwnerDetailResponse.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
@@ -76,7 +77,7 @@ public class ShopMapper {
             .build();
     }
 
-    public static ShopsItem sliceShopToShopsItem(Shop shop, String thumbnailUrl){
+    public static ShopsItem sliceShopToShopsItem(Shop shop, String thumbnailUrl) {
         return ShopsItem.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
@@ -88,6 +89,28 @@ public class ShopMapper {
             .build();
     }
 
+    public static ShopPageResponse toShopPageResponse(String nextCursor, List<Shop> shops,
+        List<String> thumbnails) {
+        List<ShopElementResponse> shopList = new ArrayList<>();
+        for (int i = 0; i < shops.size(); i++) {
+            shopToShopElementResponse(shops.get(i), thumbnails.get(i));
+        }
+        return ShopPageResponse.builder()
+            .nextCursor(nextCursor)
+            .shops(shopList)
+            .build();
+    }
+
+    public static ShopElementResponse shopToShopElementResponse(Shop shop, String thumbnailUrl) {
+        return ShopElementResponse.builder()
+            .shopId(shop.getId())
+            .name(shop.getShopName())
+            .category(shop.getCategory())
+            .address(shop.getRoadAddress() + shop.getDetailAddress())
+            .rating(shop.getRating())
+            .thumbnailUrl(thumbnailUrl)
+            .build();
+    }
 
 
 }
