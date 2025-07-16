@@ -20,10 +20,10 @@ import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
+import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
-import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsResponse;
 
@@ -31,6 +31,7 @@ import shop.matjalalzz.shop.dto.ShopsResponse;
 @RequiredArgsConstructor
 @Tag(name = "식당 API", description = "식당 관련 API")
 public class ShopController {
+
     private final ShopService shopService;
 
     @Operation(summary = "식당 생성", description = "새로운 식당을 생성합니다.")
@@ -38,8 +39,9 @@ public class ShopController {
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<PreSignedUrlListResponse> createShop(@RequestBody ShopCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
-        PreSignedUrlListResponse preSignedUrlListResponse = shopService.newShop(principal.getId(), request);
-        return BaseResponse.ok(preSignedUrlListResponse,BaseStatus.CREATED);
+        PreSignedUrlListResponse preSignedUrlListResponse = shopService.newShop(principal.getId(),
+            request);
+        return BaseResponse.ok(preSignedUrlListResponse, BaseStatus.CREATED);
     }
 
 
@@ -67,7 +69,8 @@ public class ShopController {
     public BaseResponse<PreSignedUrlListResponse> updateShop(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal,
         @RequestBody @Valid ShopUpdateRequest shopUpdateRequest) {
-        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(), shopUpdateRequest);
+        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(),
+            shopUpdateRequest);
         return BaseResponse.ok(urlResponse, BaseStatus.OK);
     }
 
@@ -90,9 +93,9 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShopsBySearch(@RequestParam String query,
         @RequestParam String sort,
-        @RequestParam(required = false) Long cursor,
+        @RequestParam(defaultValue = "createdAt") String cursor,
         @RequestParam(defaultValue = "10") int size) {
-        return BaseResponse.ok(ShopPageResponse.builder().build(), BaseStatus.OK);
+        return BaseResponse.ok(shopService.getShopList(query, sort, cursor, size), BaseStatus.OK);
     }
 
 
