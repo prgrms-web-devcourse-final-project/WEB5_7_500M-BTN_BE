@@ -117,4 +117,8 @@ public class Party extends BaseEntity {
         this.currentCount -= 1;
         this.status = PartyStatus.RECRUITING;
     }
+
+    public boolean isRecruiting() {
+        return this.status.equals(PartyStatus.RECRUITING);
+    }
 }

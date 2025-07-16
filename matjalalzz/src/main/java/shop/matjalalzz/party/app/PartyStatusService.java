@@ -8,7 +8,6 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.party.entity.enums.PartyStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class PartyStatusService {
         Party party = partyRepository.findById(partyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.PARTY_NOT_FOUND));
 
-        if (!party.getStatus().equals(PartyStatus.RECRUITING)) {
+        if (!party.isRecruiting()) {
             return;
         }
 
