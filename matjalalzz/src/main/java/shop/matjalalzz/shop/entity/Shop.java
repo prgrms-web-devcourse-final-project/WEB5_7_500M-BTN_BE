@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.shop.dto.ShopUpdateCommand;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.user.entity.User;
 import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
@@ -101,19 +102,20 @@ public class Shop extends BaseEntity {
         this.detailAddress = detailAddress;
     }
 
-    public void updateShop(ShopUpdateRequest dto) {
-        this.shopName = dto.shopName();
-        this.roadAddress = dto.roadAddress();
-        this.sido = dto.sido();
-        this.latitude = dto.latitude();
-        this.longitude = dto.longitude();
-        this.description = dto.description();
-        this.category = dto.category();
-        this.tel = dto.tel();
-        this.businessCode = dto.businessCode();
-        this.openTime = dto.openTime();
-        this.closeTime = dto.closeTime();
-        this.detailAddress = dto.detailAddress();
+    public void updateShop(ShopUpdateCommand shopUpdateCommand, User user) {
+        this.shopName = shopUpdateCommand.shopName();
+        this.roadAddress = shopUpdateCommand.roadAddress();
+        this.sido = shopUpdateCommand.sido();
+        this.latitude = shopUpdateCommand.latitude();
+        this.longitude = shopUpdateCommand.longitude();
+        this.description = shopUpdateCommand.description();
+        this.category = shopUpdateCommand.category();
+        this.tel = shopUpdateCommand.tel();
+        this.businessCode = shopUpdateCommand.businessCode();
+        this.openTime = shopUpdateCommand.openTime();
+        this.closeTime = shopUpdateCommand.closeTime();
+        this.detailAddress = shopUpdateCommand.detailAddress();
+        this.user = user;
     }
 
 }
