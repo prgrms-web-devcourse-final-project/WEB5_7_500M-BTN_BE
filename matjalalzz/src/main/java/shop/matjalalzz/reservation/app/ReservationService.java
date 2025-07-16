@@ -4,6 +4,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.ALREADY_PROCESSE
 import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REQUEST_DATA;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.RESERVATION_NOT_FOUND;
 
 import java.time.LocalDateTime;
@@ -45,9 +46,12 @@ public class ReservationService {
     private final PartyService partyService;
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(Long shopId, ReservationStatus status,
+    public ReservationListResponse getReservations(Long shopId, String filter
+        ,
         Long cursor,
         int size) {
+
+        ReservationStatus status = parseFilter(filter);
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
 
@@ -137,6 +141,18 @@ public class ReservationService {
         }
 
         return reservation;
+    }
+
+    private ReservationStatus parseFilter(String filter) {
+        if (filter == null || filter.equalsIgnoreCase("TOTAL")) {
+            return null;
+        }
+
+        try {
+            return ReservationStatus.valueOf(filter.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException(INVALID_RESERVATION_STATUS);
+        }
     }
 
 

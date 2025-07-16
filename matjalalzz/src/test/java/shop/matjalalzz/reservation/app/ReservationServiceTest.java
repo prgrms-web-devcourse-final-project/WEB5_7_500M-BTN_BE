@@ -80,7 +80,7 @@ class ReservationServiceTest {
 
             // when
             ReservationListResponse result = reservationService.getReservations(
-                SHOP_ID, ReservationStatus.PENDING, CURSOR, 10
+                SHOP_ID, "PENDING", CURSOR, 10
             );
 
             // then
@@ -115,7 +115,7 @@ class ReservationServiceTest {
 
             // when
             ReservationListResponse result = reservationService.getReservations(
-                SHOP_ID, ReservationStatus.PENDING, null, 10
+                SHOP_ID, "PENDING", null, 10
             );
 
             // then
