@@ -10,7 +10,6 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
-import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -39,7 +38,6 @@ public class ReviewService {
     private final PartyService partyService;
     private final ShopService shopService;
     private final PreSignedProvider preSignedProvider;
-    private final ImageRepository imageRepository;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
@@ -66,6 +64,8 @@ public class ReviewService {
         validateReservationPermission(reservation, writerId);
 
         Shop shop = shopService.shopFind(request.shopId());
+
+        updateShopRating(shop, request.rating());
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
         Review result = reviewRepository.save(review);
@@ -122,5 +122,16 @@ public class ReviewService {
         } else if (!reservation.getUser().getId().equals(actorId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
+    }
+
+    private void updateShopRating(Shop shop, Double rating) {
+        Double currentRating = shop.getRating();
+        if (currentRating == null) {
+            currentRating = 0.0;
+        }
+        int currentCount = reviewRepository.countReviewByShop(shop);
+        double newRating = currentRating * currentCount + rating;
+        newRating /= (currentCount + 1);
+        shop.updateRating(newRating);
     }
 }
