@@ -63,9 +63,8 @@ public class Reservation extends BaseEntity {
     @JoinColumn(name = "party_id")
     private Party party;
 
-    public ReservationStatus changeStatus(ReservationStatus status){
+    public void changeStatus(ReservationStatus status){
         this.status = status;
-        return this.status;
     }
 
 }
