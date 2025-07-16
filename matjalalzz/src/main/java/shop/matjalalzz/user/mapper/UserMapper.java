@@ -38,11 +38,11 @@ public class UserMapper {
     }
 
     public static void update(User user, OAuthSignUpRequest dto) {
-        user.updateNickname(request.nickname());
-        user.updatePhoneNumber(request.phoneNumber());
-        user.updateName(request.name());
-        user.updateAge(request.age());
-        user.updateGender(request.gender());
+        user.updateNickname(dto.nickname());
+        user.updatePhoneNumber(dto.phoneNumber());
+        user.updateName(dto.name());
+        user.updateAge(dto.age());
+        user.updateGender(dto.gender());
     }
 
     public static void update(User user, MyInfoUpdateRequest dto) {
