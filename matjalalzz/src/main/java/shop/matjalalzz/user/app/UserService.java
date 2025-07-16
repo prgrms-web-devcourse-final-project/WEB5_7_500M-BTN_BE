@@ -133,7 +133,9 @@ public class UserService {
     public MyInfoResponse getMyInfo(Long userId) {
         User user = findUserByIdOrThrow(userId);
 
-        return UserMapper.toMyInfoResponse(user, baseUrl);
+        String profile = user.getProfileKey() == null ? null : baseUrl + user.getProfileKey();
+
+        return UserMapper.toMyInfoResponse(user, profile);
     }
 
     @Transactional

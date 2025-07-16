@@ -23,7 +23,7 @@ public class UserMapper {
             .build();
     }
 
-    public static MyInfoResponse toMyInfoResponse(User user, String baseUrl) {
+    public static MyInfoResponse toMyInfoResponse(User user, String profile) {
         return MyInfoResponse.builder()
             .email(user.getEmail())
             .nickname(user.getNickname())
@@ -33,7 +33,7 @@ public class UserMapper {
             .gender(user.getGender())
             .point(user.getPoint())
             .phoneNumber(user.getPhoneNumber())
-            .profile(user.getProfileKey() == null ? null : baseUrl + user.getProfileKey())
+            .profile(profile)
             .build();
     }
 }
