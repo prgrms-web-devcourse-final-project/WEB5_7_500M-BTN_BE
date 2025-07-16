@@ -1,7 +1,6 @@
 package shop.matjalalzz.reservation.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hibernate.dialect.OracleTypes.CURSOR;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.util.ReflectionTestUtils;
 import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
@@ -32,7 +30,6 @@ import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
-import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.util.TestUtil;
 
@@ -83,13 +80,14 @@ class ReservationServiceTest {
 
             // when
             ReservationListResponse result = reservationService.getReservations(
-                SHOP_ID, user.getId(),"PENDING", CURSOR, 10
+                SHOP_ID, ReservationStatus.PENDING, CURSOR, 10
             );
 
             // then
             assertThat(result.content()).hasSize(2);
             assertThat(result.nextCursor()).isEqualTo(1L);
         }
+
         @Test
         @DisplayName("status만 주어진 경우 - 해당 상태의 예약 목록 전체 반환")
         void 상태만_주어진_경우() {
@@ -98,9 +96,11 @@ class ReservationServiceTest {
             Shop shop = TestUtil.createShop(user);
             Party party = TestUtil.createParty(shop);
 
-            Reservation r1 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(1));
+            Reservation r1 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(1));
             ReflectionTestUtils.setField(r1, "id", 1L);
-            Reservation r2 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(2));
+            Reservation r2 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(2));
             ReflectionTestUtils.setField(r2, "id", 2L);
 
             List<Reservation> reservations = List.of(r2, r1);
@@ -115,7 +115,7 @@ class ReservationServiceTest {
 
             // when
             ReservationListResponse result = reservationService.getReservations(
-                SHOP_ID, user.getId(),"PENDING", null, 10
+                SHOP_ID, ReservationStatus.PENDING, null, 10
             );
 
             // then
@@ -131,20 +131,23 @@ class ReservationServiceTest {
             Shop shop = TestUtil.createShop(user);
             Party party = TestUtil.createParty(shop);
 
-            Reservation r1 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(1));
-            Reservation r2 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(2));
-            Reservation r3 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(3));
+            Reservation r1 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(1));
+            Reservation r2 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(2));
+            Reservation r3 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(3));
             List<Reservation> reservations = List.of(r3, r2, r1);
             Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "id"));
             Slice<Reservation> slice = new SliceImpl<>(List.of(r3, r2), pageable, true);
 
-            given(reservationRepository.findByShopIdWithFilterAndCursor(shop.getId(), null, r3.getId(), pageable))
+            given(reservationRepository.findByShopIdWithFilterAndCursor(shop.getId(), null,
+                r3.getId(), pageable))
                 .willReturn(slice);
 
             // when
             ReservationListResponse response = reservationService.getReservations(
                 shop.getId(),
-                user.getId(),
                 null,
                 r3.getId(),
                 2
@@ -166,21 +169,24 @@ class ReservationServiceTest {
             Shop shop = TestUtil.createShop(user);
             Party party = TestUtil.createParty(shop);
 
-            Reservation r1 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(1)); // ID 1
-            Reservation r2 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(2)); // ID 2
-            Reservation r3 = TestUtil.createReservation(shop, user, party, LocalDateTime.now().plusHours(3)); // ID 3
+            Reservation r1 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(1)); // ID 1
+            Reservation r2 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(2)); // ID 2
+            Reservation r3 = TestUtil.createReservation(shop, user, party,
+                LocalDateTime.now().plusHours(3)); // ID 3
 
             List<Reservation> reservations = List.of(r3, r2, r1); // 최신순
             Pageable pageable = PageRequest.of(0, 2, Sort.by(Direction.DESC, "id"));
             Slice<Reservation> slice = new SliceImpl<>(List.of(r3, r2), pageable, true);
 
-            given(reservationRepository.findByShopIdWithFilterAndCursor(shop.getId(), null, null, pageable))
+            given(reservationRepository.findByShopIdWithFilterAndCursor(shop.getId(), null, null,
+                pageable))
                 .willReturn(slice);
 
             // when
             ReservationListResponse response = reservationService.getReservations(
                 shop.getId(),
-                user.getId(),
                 null,
                 null,
                 2
@@ -205,13 +211,15 @@ class ReservationServiceTest {
             // given
             User user = TestUtil.createUser();
             Shop shop = TestUtil.createShop(user);
-            Reservation reservation = TestUtil.createReservation(shop, user, null, LocalDateTime.now());
-            ReflectionTestUtils.setField(user,"id", 1L);
-            ReflectionTestUtils.setField(shop,"id", 1L);
+            Reservation reservation = TestUtil.createReservation(shop, user, null,
+                LocalDateTime.now());
+            ReflectionTestUtils.setField(user, "id", 1L);
+            ReflectionTestUtils.setField(shop, "id", 1L);
             ReflectionTestUtils.setField(reservation, "id", 1L);
             reservation.changeStatus(ReservationStatus.PENDING);
 
-            given(reservationRepository.findById(1L)).willReturn(java.util.Optional.of(reservation));
+            given(reservationRepository.findById(1L)).willReturn(
+                java.util.Optional.of(reservation));
 
             // when
             reservationService.confirmReservation(shop.getId(), reservation.getId(), user.getId());
@@ -226,13 +234,15 @@ class ReservationServiceTest {
             // given
             User user = TestUtil.createUser();
             Shop shop = TestUtil.createShop(user);
-            Reservation reservation = TestUtil.createReservation(shop, user, null, LocalDateTime.now());
-            ReflectionTestUtils.setField(user,"id", 1L);
-            ReflectionTestUtils.setField(shop,"id", 1L);
+            Reservation reservation = TestUtil.createReservation(shop, user, null,
+                LocalDateTime.now());
+            ReflectionTestUtils.setField(user, "id", 1L);
+            ReflectionTestUtils.setField(shop, "id", 1L);
             ReflectionTestUtils.setField(reservation, "id", 2L);
             reservation.changeStatus(ReservationStatus.PENDING);
 
-            given(reservationRepository.findById(2L)).willReturn(java.util.Optional.of(reservation));
+            given(reservationRepository.findById(2L)).willReturn(
+                java.util.Optional.of(reservation));
 
             // when
             reservationService.cancelReservation(shop.getId(), reservation.getId(), user.getId());
@@ -247,9 +257,10 @@ class ReservationServiceTest {
             // given
             User user = TestUtil.createUser();
             Shop shop = TestUtil.createShop(user);
-            Reservation reservation = TestUtil.createReservation(shop, user, null, LocalDateTime.now());
-            ReflectionTestUtils.setField(user,"id", 1L);
-            ReflectionTestUtils.setField(shop,"id", 1L);
+            Reservation reservation = TestUtil.createReservation(shop, user, null,
+                LocalDateTime.now());
+            ReflectionTestUtils.setField(user, "id", 1L);
+            ReflectionTestUtils.setField(shop, "id", 1L);
             ReflectionTestUtils.setField(reservation, "id", 3L);
             reservation.changeStatus(ReservationStatus.CONFIRMED); // 이미 수락됨
 
@@ -257,7 +268,8 @@ class ReservationServiceTest {
 
             // when & then
             assertThrows(BusinessException.class, () ->
-                reservationService.confirmReservation(shop.getId(), reservation.getId(), user.getId())
+                reservationService.confirmReservation(shop.getId(), reservation.getId(),
+                    user.getId())
             );
         }
 
@@ -266,25 +278,25 @@ class ReservationServiceTest {
         void 예약_거절_실패_이미처리됨() {
             // given
             User user = TestUtil.createUser();
-            ReflectionTestUtils.setField(user,"id", 1L);
+            ReflectionTestUtils.setField(user, "id", 1L);
 
             Shop shop = TestUtil.createShop(user);
-            ReflectionTestUtils.setField(shop,"id", 1L);
+            ReflectionTestUtils.setField(shop, "id", 1L);
 
-            Reservation reservation = TestUtil.createReservation(shop, user, null, LocalDateTime.now());
+            Reservation reservation = TestUtil.createReservation(shop, user, null,
+                LocalDateTime.now());
             ReflectionTestUtils.setField(reservation, "id", 4L);
             reservation.changeStatus(ReservationStatus.CANCELLED); // 이미 거절됨
 
             given(reservationRepository.findById(4L)).willReturn(Optional.of(reservation));
 
-
             // when & then
             assertThrows(BusinessException.class, () ->
-                reservationService.cancelReservation(shop.getId(), reservation.getId(), user.getId())
+                reservationService.cancelReservation(shop.getId(), reservation.getId(),
+                    user.getId())
             );
         }
     }
-
 
 
 }

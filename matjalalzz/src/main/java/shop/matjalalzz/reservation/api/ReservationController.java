@@ -28,6 +28,7 @@ import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,12 +52,12 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReservationListResponse> getReservations(
         @PathVariable Long shopId,
-        @RequestParam(defaultValue = "TOTAL") String filter,
+        @RequestParam(defaultValue = "TOTAL") ReservationStatus filter,
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size,
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
-        ReservationListResponse response = reservationService.getReservations(shopId, userInfo.getId(), filter,
+        ReservationListResponse response = reservationService.getReservations(shopId, filter,
             cursor, size);
 
         return BaseResponse.ok(response, BaseStatus.OK);
