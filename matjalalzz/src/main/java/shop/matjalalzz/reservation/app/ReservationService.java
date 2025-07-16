@@ -5,7 +5,6 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REQUEST_DATA;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
-import static shop.matjalalzz.global.exception.domain.ErrorCode.RESERVATION_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,10 +45,13 @@ public class ReservationService {
     private final PartyService partyService;
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(Long shopId, String filter
-        ,
-        Long cursor,
-        int size) {
+    public ReservationListResponse getReservations(Long shopId, String filter, Long ownerId, Long cursor, int size) {
+
+        Shop shop = shopService.shopFind(shopId);
+
+        if(!shop.getUser().getId().equals(ownerId)){
+            throw new BusinessException(FORBIDDEN_ACCESS);
+        }
 
         ReservationStatus status = parseFilter(filter);
 

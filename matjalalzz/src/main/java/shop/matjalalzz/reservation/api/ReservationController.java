@@ -58,7 +58,7 @@ public class ReservationController {
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
-            cursor, size);
+            cursor, userInfo.getId(),size);
 
         return BaseResponse.ok(response, BaseStatus.OK);
     }
