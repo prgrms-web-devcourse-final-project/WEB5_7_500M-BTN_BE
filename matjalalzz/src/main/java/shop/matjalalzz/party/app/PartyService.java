@@ -27,45 +27,37 @@ import shop.matjalalzz.party.dto.PartySearchCondition;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
-import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
-import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
-import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
 public class PartyService {
 
-    private final ShopRepository shopRepository;
     private final PartyRepository partyRepository;
-    private final UserRepository userRepository;
     private final PartyUserRepository partyUserRepository;
+    private final PartySchedulerService partySchedulerService;
+    private final ShopService shopService;
+    private final UserService userService;
 
     @Transactional
     public void createParty(PartyCreateRequest request, long userId) {
 
         validateCreateParty(request);
 
-        //todo: 추후 shopService로 이동
-        Shop shop = shopRepository.findById(request.shopId()).orElseThrow(() ->
-            new BusinessException(ErrorCode.DATA_NOT_FOUND));
-
-//        Shop shop = shopRepository.findById(1L).orElseThrow(() ->
-//            new BusinessException(ErrorCode.DATA_NOT_FOUND)); //테스트용
+        Shop shop = shopService.shopFind(request.shopId());
 
         Party party = PartyMapper.toEntity(request, shop);
 
-        PartyUser host = PartyUser.createHost(party, getUserById(userId));
+        PartyUser host = PartyUser.createHost(party, userService.getUserById(userId));
         party.getPartyUsers().add(host);
 
         partyRepository.save(party);
+        partySchedulerService.scheduleDeadlineJob(party);
     }
-
 
     @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
@@ -117,25 +109,30 @@ public class PartyService {
     @Transactional
     public void joinParty(Long partyId, long userId) {
         Party party = findById(partyId);
-        User user = getUserById(userId);
+        User user = userService.getUserById(userId);
 
         validateJoinParty(party, user);
 
         HandlePartyUserJoin(party, user);
     }
 
-
     //TODO: 예약금 차감에 대한 로직 필요 (totalReservationFee 내려줘야함)
     @Transactional
     public void quitParty(Long partyId, long userId) {
         Party party = findById(partyId);
-        getUserById(userId); //검증용
+        userService.getUserById(userId); //검증용
         PartyUser partyUser = findPartyUser(userId, party);
 
         // 호스트인 경우 파티 탈퇴 불가능
         if (partyUser.isHost()) {
             throw new BusinessException(ErrorCode.HOST_CANNOT_QUIT_PARTY);
         }
+
+        // 모집 중인 파티만 탈퇴 가능
+        if (!party.isRecruiting()) {
+            throw new BusinessException(ErrorCode.CANNOT_QUIT_PARTY_STATUS);
+        }
+
         partyUser.delete();
         party.decreaseCurrentCount();
     }
@@ -144,26 +141,30 @@ public class PartyService {
     @Transactional
     public void deleteParty(Long partyId, long userId) {
         Party party = findById(partyId);
-        getUserById(userId); //검증용
+        userService.getUserById(userId); //검증용
         PartyUser partyUser = findPartyUser(userId, party);
 
         // 호스트인 경우만 파티 삭제 가능
-        if (partyUser.isHost()) {
-            party.deleteParty(); //파티 유저까지 cascade 삭제
-        } else {
-            throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY);
+        if (!partyUser.isHost()) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS_DELETE_PARTY);
         }
+
+        // 모집 중인 파티만 삭제 가능
+        if (!party.isRecruiting()) {
+            throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_STATUS);
+        }
+        party.deleteParty(); //파티 유저와 댓글까지 cascade 삭제
     }
 
     @Transactional
     public void completePartyRecruit(Long partyId, long userId) {
         Party party = findById(partyId);
 
-        if (!party.getStatus().equals(PartyStatus.RECRUITING)) {
+        if (!party.isRecruiting()) {
             throw new BusinessException(ErrorCode.ALREADY_COMPLETE_PARTY);
         }
 
-        getUserById(userId); //검증용
+        userService.getUserById(userId); //검증용
         PartyUser partyUser = findPartyUser(userId, party);
 
         // 호스트인 경우만 파티 상태 변경 가능
@@ -176,7 +177,7 @@ public class PartyService {
 
     private void validateJoinParty(Party party, User user) {
         // 1. 모집 상태 확인
-        if (!party.getStatus().equals(PartyStatus.RECRUITING)) {
+        if (!party.isRecruiting()) {
             throw new BusinessException(ErrorCode.NOT_RECRUITING_PARTY);
         }
 
@@ -231,6 +232,7 @@ public class PartyService {
             PartyUser partyUser = PartyUser.createUser(party, user);
             party.getPartyUsers().add(partyUser);
         }
+
         party.increaseCurrentCount();
     }
 
@@ -252,8 +254,4 @@ public class PartyService {
         return partyUserRepository.findAllByPartyId(partyId);
     }
 
-    private User getUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() ->
-            new BusinessException(ErrorCode.USER_NOT_FOUND));
-    }
 }

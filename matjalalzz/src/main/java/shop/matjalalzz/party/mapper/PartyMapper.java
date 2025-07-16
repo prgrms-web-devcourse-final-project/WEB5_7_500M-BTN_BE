@@ -48,7 +48,8 @@ public class PartyMapper {
             .hostId(hostId)
             .shopId(party.getId())
             .shopName(party.getShop().getShopName())
-            .shopAddress(party.getShop().getRoadAddress())
+            .shopRoadAddress(party.getShop().getRoadAddress())
+            .shopDetailAddress(party.getShop().getDetailAddress())
             .build();
     }
 
@@ -62,7 +63,8 @@ public class PartyMapper {
             .currentCount(party.getCurrentCount())
             .metAt(party.getMetAt())
             .shopName(party.getShop().getShopName())
-            .shopAddress(party.getShop().getRoadAddress())
+            .shopRoadAddress(party.getShop().getRoadAddress())
+            .shopDetailAddress(party.getShop().getDetailAddress())
             .build();
     }
 
