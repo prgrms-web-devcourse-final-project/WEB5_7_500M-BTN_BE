@@ -9,6 +9,8 @@ import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse.ShopElementResponse;
+import shop.matjalalzz.shop.dto.ShopUpdateCommand;
+import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
@@ -34,9 +36,26 @@ public class ShopMapper {
             .build();
     }
 
+    public static ShopUpdateCommand updateToShop(ShopUpdateRequest request) {
+        return ShopUpdateCommand.builder()
+            .shopName(request.shopName())
+            .roadAddress(request.roadAddress())
+            .detailAddress(request.detailAddress())
+            .sido(request.sido())
+            .latitude(request.latitude())
+            .longitude(request.longitude())
+            .description(request.description())
+            .category(request.category())
+            .tel(request.tel())
+            .businessCode(request.businessCode())
+            .openTime(request.openTime())
+            .closeTime(request.closeTime())
+            .build();
+    }
 
-    public static ShopDetailResponse shopDetailResponse(Shop shop, List<String> imageListUrl,
-        boolean canEdit, int reviewCount) {
+
+
+    public static ShopDetailResponse shopDetailResponse (Shop shop, List<String> imageListUrl, boolean canEdit, int reviewCount) {
         return ShopDetailResponse.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())

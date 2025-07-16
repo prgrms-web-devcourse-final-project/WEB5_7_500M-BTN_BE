@@ -23,6 +23,7 @@ import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
+import shop.matjalalzz.shop.dto.ShopUpdateCommand;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.dto.ShopsResponse;
@@ -120,8 +121,7 @@ public class ShopService {
 
     // shop 수정
     @Transactional
-    public PreSignedUrlListResponse editShop(Long shopId, long userId,
-        ShopUpdateRequest updateRequest) {
+    public PreSignedUrlListResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
 
         // 해당 유저 정보를 가져오고
         User user = userService.getUserById(userId);
@@ -133,13 +133,15 @@ public class ShopService {
         if (!shop.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.NOT_SHOP_OWNER);
         }
-
         // 해당 상점을 가져온다
         List<Shop> shopList = shopRepository.findByUser(user);
         Shop getShop = shopList.stream().filter(s -> s.equals(shop)).findFirst().get();
 
+
+        ShopUpdateCommand shopUpdateCommand = ShopMapper.updateToShop(updateRequest);
+
         //가져온 shop 내용 수정
-        getShop.updateShop(updateRequest);
+        getShop.updateShop(shopUpdateCommand, user);
 
         // 기존 이미지들 가져와서 다 지우고 다시 받게 프리사이드 URL 발급
         List<String> imageKeys = imageRepository.findByShopImage(getShop.getId());
@@ -198,9 +200,8 @@ public class ShopService {
                 Long nextCursor = null;
                 if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
                     Shop last = shopSlice.getContent().getLast();
-                    double lastDistance = calculateDistanceInMeters(latitude, longitude,
-                        last.getLatitude(), last.getLongitude());
-                    if (lastDistance < radius) {
+                    double lastDistance = calculateDistanceInMeters(latitude, longitude, last.getLatitude(), last.getLongitude());
+                    if (lastDistance < radius) {        //계산 돌려본 결과 좌표값이 radius 값보다 크면 null
                         nextCursor = (long) lastDistance;
                     }
                 }
@@ -316,8 +317,9 @@ public class ShopService {
             .toList();
     }
 
-
-    // 응답에 포함할 다음 커서 거리 값을 계산하기 위해 마지막 Shop의 좌표를 기준으로 사용자의 거리값을 계산해 커서로 넘겨야 함
+    /* 레포지토리에서는 거리 계산 결과(숫자)를 반환해주지 않기 때문에 응답에 포함할 다음 커서 거리 값을 계산하기 위해
+       마지막 Shop의 좌표를 기준으로 사용자의 거리값을 계산해 커서로 넘겨야 함,
+       다음 커서(nextCursor) 값을 정확하게 계산해서 프론트에 넘기기 위해, 자바 코드에서 최종적으로 한 번 더 거리 계산을 수행 */
     private static double calculateDistanceInMeters(
         double lat1, double lon1,
         double lat2, double lon2
