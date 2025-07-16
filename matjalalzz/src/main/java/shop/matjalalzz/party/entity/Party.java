@@ -119,6 +119,6 @@ public class Party extends BaseEntity {
     }
 
     public boolean isRecruiting() {
-        return this.status.equals(PartyStatus.RECRUITING);
+        return this.status == PartyStatus.RECRUITING;
     }
 }
