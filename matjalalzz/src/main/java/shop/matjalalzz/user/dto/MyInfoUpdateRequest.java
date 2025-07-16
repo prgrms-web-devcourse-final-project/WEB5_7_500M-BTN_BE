@@ -22,7 +22,7 @@ public record MyInfoUpdateRequest(
     @Min(0)
     Integer age,
 
-    @Schema(example = "/profile/1/img_1")
+    @Schema(example = "profile/1/img_1")
     String profileKey
 ) {
 
