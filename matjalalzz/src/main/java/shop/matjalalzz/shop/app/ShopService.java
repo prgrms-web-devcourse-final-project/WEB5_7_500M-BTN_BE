@@ -244,8 +244,12 @@ public class ShopService {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            String s3key = imageRepository.findByShopIdOrderByImageIndexAsc(
-                s.getId()).getFirst().getS3Key();
+            List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(
+                s.getId());
+            if (images.isEmpty()) {
+                return null;
+            }
+            String s3key = images.getFirst().getS3Key();
             return BASE_URL + s3key;
         }).toList();
         return ShopMapper.toShopPageResponse(nextCursor, result.getContent(), thumbnailList);
@@ -268,8 +272,12 @@ public class ShopService {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            String s3key = imageRepository.findByShopIdOrderByImageIndexAsc(
-                s.getId()).getFirst().getS3Key();
+            List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(
+                s.getId());
+            if (images.isEmpty()) {
+                return null;
+            }
+            String s3key = images.getFirst().getS3Key();
             return BASE_URL + s3key;
         }).toList();
         return ShopMapper.toShopPageResponse(nextCursor, result.getContent(), thumbnailList);
@@ -283,8 +291,12 @@ public class ShopService {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            String s3key = imageRepository.findByShopIdOrderByImageIndexAsc(
-                s.getId()).getFirst().getS3Key();
+            List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(
+                s.getId());
+            if (images.isEmpty()) {
+                return null;
+            }
+            String s3key = images.getFirst().getS3Key();
             return BASE_URL + s3key;
         }).toList();
         return ShopMapper.toShopPageResponse(nextCursor, result.getContent(), thumbnailList);

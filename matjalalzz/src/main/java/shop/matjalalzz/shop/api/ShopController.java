@@ -91,9 +91,10 @@ public class ShopController {
     @Operation(summary = "식당 검색", description = "키워드로 식당을 검색합니다.")
     @GetMapping("/shops/search")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<ShopPageResponse> getShopsBySearch(@RequestParam String query,
-        @RequestParam String sort,
-        @RequestParam(defaultValue = "createdAt") String cursor,
+    public BaseResponse<ShopPageResponse> getShopsBySearch(
+        @RequestParam(required = false) String query,
+        @RequestParam(defaultValue = "createdAt") String sort,
+        @RequestParam(required = false) String cursor,
         @RequestParam(defaultValue = "10") int size) {
         return BaseResponse.ok(shopService.getShopList(query, sort, cursor, size), BaseStatus.OK);
     }
