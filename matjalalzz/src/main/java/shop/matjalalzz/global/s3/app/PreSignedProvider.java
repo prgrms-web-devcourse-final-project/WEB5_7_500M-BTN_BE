@@ -66,6 +66,9 @@ public class PreSignedProvider {
 
     // 여러 개 삭제
     public void deleteObjects(List<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return;
+        }
         DeleteObjectsRequest request = DeleteObjectsRequest.builder()
             .bucket(bucketName)
             .delete(
