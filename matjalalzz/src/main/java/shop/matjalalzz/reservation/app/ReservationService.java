@@ -1,14 +1,11 @@
 package shop.matjalalzz.reservation.app;
 
 import static shop.matjalalzz.global.exception.domain.ErrorCode.ALREADY_PROCESSED;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REQUEST_DATA;
-import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
-import static shop.matjalalzz.global.exception.domain.ErrorCode.PARTY_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.RESERVATION_NOT_FOUND;
-import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
-import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
@@ -33,9 +30,9 @@ import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationConten
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -44,12 +41,13 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
 
-    private final ShopRepository shopRepository;
-    private final UserRepository userRepository;
-    private final PartyRepository partyRepository;
+    private final ShopService shopService;
+    private final UserService userService;
+    private final PartyService partyService;
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(Long shopId, Long ownerId, String filter, Long cursor,
+    public ReservationListResponse getReservations(Long shopId, Long ownerId, String filter,
+        Long cursor,
         int size) {
         ReservationStatus status = parseFilter(filter);
 
@@ -72,7 +70,8 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
-        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(userId, cursor,
+        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(
+            userId, cursor,
             PageRequest.of(0, size));
 
         Long nextCursor = null;
@@ -89,16 +88,13 @@ public class ReservationService {
 
         LocalDateTime reservedAt = LocalDateTime.parse(request.date() + "T" + request.time());
 
-        User reservationUser = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+        User reservationUser = userService.getUserById(userId);
 
-        Shop reservationShop = shopRepository.findById(shopId)
-            .orElseThrow(() -> new BusinessException(SHOP_NOT_FOUND));
+        Shop reservationShop = shopService.shopFind(shopId);
 
         Party reservationParty = null;
         if (partyId != null) {
-            reservationParty = partyRepository.findById(partyId)
-                .orElseThrow(() -> new BusinessException(PARTY_NOT_FOUND));
+            reservationParty = partyService.findById(partyId);
         }
 
         Reservation reservation = ReservationMapper.toEntity(
@@ -121,12 +117,13 @@ public class ReservationService {
 
     @Transactional
     public void cancelReservation(Long shopId, Long reservationId, Long ownerId) {
-        Reservation reservation = validateOwnerPermissionAndPending(reservationId,shopId, ownerId);
+        Reservation reservation = validateOwnerPermissionAndPending(reservationId, shopId, ownerId);
         reservation.changeStatus(ReservationStatus.CANCELLED);
     }
 
 
-    private Reservation validateOwnerPermissionAndPending(Long reservationId, Long shopId, Long ownerId) {
+    private Reservation validateOwnerPermissionAndPending(Long reservationId, Long shopId,
+        Long ownerId) {
         Reservation reservation = reservationRepository.findById(reservationId)
             .orElseThrow(() -> new BusinessException(RESERVATION_NOT_FOUND));
 
@@ -144,7 +141,6 @@ public class ReservationService {
 
         return reservation;
     }
-
 
 
     private ReservationStatus parseFilter(String filter) {
