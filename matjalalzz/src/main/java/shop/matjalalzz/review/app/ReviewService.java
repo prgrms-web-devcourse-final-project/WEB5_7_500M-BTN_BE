@@ -46,6 +46,7 @@ public class ReviewService {
         review.delete();
         List<String> imageKeys = review.getImages().stream().map(Image::getS3Key).toList();
         preSignedProvider.deleteObjects(imageKeys);
+        removeShopRating(review.getShop(), review.getRating());
     }
 
     @Transactional
@@ -65,7 +66,7 @@ public class ReviewService {
 
         Shop shop = shopService.shopFind(request.shopId());
 
-        updateShopRating(shop, request.rating());
+        addShopRating(shop, request.rating());
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
         Review result = reviewRepository.save(review);
@@ -124,7 +125,7 @@ public class ReviewService {
         }
     }
 
-    private void updateShopRating(Shop shop, Double rating) {
+    private void addShopRating(Shop shop, Double rating) {
         Double currentRating = shop.getRating();
         if (currentRating == null) {
             currentRating = 0.0;
@@ -132,6 +133,20 @@ public class ReviewService {
         int currentCount = reviewRepository.countReviewByShop(shop);
         double newRating = currentRating * currentCount + rating;
         newRating /= (currentCount + 1);
+        shop.updateRating(newRating);
+    }
+
+    private void removeShopRating(Shop shop, Double rating) {
+        Double currentRating = shop.getRating();
+        if (currentRating == null) {
+            currentRating = 0.0;
+        }
+        int currentCount = reviewRepository.countReviewByShop(shop);
+        double newRating = currentRating * currentCount - rating;
+        newRating /= (currentCount - 1);
+        if (newRating < 0) {
+            newRating = 0.0;
+        }
         shop.updateRating(newRating);
     }
 }
