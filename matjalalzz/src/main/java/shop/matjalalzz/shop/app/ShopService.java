@@ -269,7 +269,7 @@ public class ShopService {
             timeCursor, query, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
-            nextCursor = String.valueOf(result.getContent().getLast().getRating());
+            nextCursor = String.valueOf(result.getContent().getLast().getCreatedAt());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
             List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(
@@ -288,7 +288,7 @@ public class ShopService {
             cursor, query, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
-            nextCursor = String.valueOf(result.getContent().getLast().getRating());
+            nextCursor = String.valueOf(result.getContent().getLast().getShopName());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
             List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(

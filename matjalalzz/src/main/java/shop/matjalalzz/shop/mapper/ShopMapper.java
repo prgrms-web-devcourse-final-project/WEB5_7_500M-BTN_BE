@@ -93,7 +93,7 @@ public class ShopMapper {
         List<String> thumbnails) {
         List<ShopElementResponse> shopList = new ArrayList<>();
         for (int i = 0; i < shops.size(); i++) {
-            shopToShopElementResponse(shops.get(i), thumbnails.get(i));
+            shopList.add(shopToShopElementResponse(shops.get(i), thumbnails.get(i)));
         }
         return ShopPageResponse.builder()
             .nextCursor(nextCursor)
