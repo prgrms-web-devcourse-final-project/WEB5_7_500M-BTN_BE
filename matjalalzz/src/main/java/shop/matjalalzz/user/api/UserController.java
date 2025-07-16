@@ -47,7 +47,7 @@ public class UserController {
     public BaseResponse<Void> oauthSignup(
         @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestBody @Valid OAuthSignUpRequest oauthSignUpRequestDto) {
-        userService.oauthSignup(userInfo.getEmail(), oauthSignUpRequestDto);
+        userService.oauthSignup(userInfo.getId(), oauthSignUpRequestDto);
         return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 

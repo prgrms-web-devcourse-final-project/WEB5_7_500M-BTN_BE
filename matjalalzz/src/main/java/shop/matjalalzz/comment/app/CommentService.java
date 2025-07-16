@@ -11,9 +11,9 @@ import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.comment.mapper.CommentMapper;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -21,16 +21,14 @@ import shop.matjalalzz.user.entity.User;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PartyRepository partyRepository;
-    private final UserRepository userRepository;
+    private final PartyService partyService;
+    private final UserService userService;
 
     @Transactional
     public CommentResponse createComment(CommentCreateRequest request, Long partyId,
         Long writerId) {
-        Party party = partyRepository.findById(partyId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
-        User writer = userRepository.findById(writerId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
+        Party party = partyService.findById(partyId);
+        User writer = userService.getUserById(writerId);
         Comment parent = null;
         if (request.parentId() != null) {
             parent = getComment(request.parentId());

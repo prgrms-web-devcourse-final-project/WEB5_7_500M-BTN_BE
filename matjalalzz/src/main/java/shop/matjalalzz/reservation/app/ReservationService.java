@@ -3,6 +3,7 @@ package shop.matjalalzz.reservation.app;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.ALREADY_PROCESSED;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REQUEST_DATA;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.PARTY_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.RESERVATION_NOT_FOUND;
@@ -25,6 +26,8 @@ import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
+import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.entity.Reservation;
@@ -60,12 +63,25 @@ public class ReservationService {
 
         Long nextCursor =
             slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
+
         List<ReservationContent> content =
             ReservationMapper.toReservationContent(reservations);
 
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
 
+    @Transactional(readOnly = true)
+    public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
+        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(userId, cursor,
+            PageRequest.of(0, size));
+
+        Long nextCursor = null;
+        if (reservations.hasNext()) {
+            nextCursor = reservations.getContent().getLast().reservationId();
+        }
+
+        return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
+    }
 
     @Transactional
     public CreateReservationResponse createReservation(Long userId, Long shopId, Long partyId,
@@ -141,6 +157,12 @@ public class ReservationService {
         } catch (IllegalArgumentException e) {
             throw new BusinessException(INVALID_RESERVATION_STATUS);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Reservation getReservationById(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new BusinessException(DATA_NOT_FOUND));
     }
 }
 

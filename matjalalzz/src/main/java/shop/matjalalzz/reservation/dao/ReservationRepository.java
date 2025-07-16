@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
@@ -39,11 +40,27 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("reservedAt") LocalDateTime reservedAt
     );
 
-//    @Lock(LockModeType.PESSIMISTIC_WRITE)
-//    @Query("SELECT r FROM Reservation r WHERE r.shop.id = :shopId AND r.reservedAt = :reservedAt")
-//    Optional<Reservation> findWithLockByShopIdAndReservedAt(@Param("shopId") Long shopId,
-//        @Param("reservedAt") LocalDateTime reservedAt);
-
-
-
+    // 회원이 진행한 예약과 회원이 속한 파티가 진행한 예약을 조회
+    @Query("""
+        select new shop.matjalalzz.reservation.dto.MyReservationResponse(
+                r.id, s.shopName, u.name, r.reservedAt, r.headCount, r.reservationFee, r.status
+        )
+        from Reservation r
+            join r.shop  s
+            join r.user  u
+        where (:cursor is null or r.id < :cursor)
+            and (
+                r.user.id = :userId
+                or exists (
+                    select 1 from PartyUser pu
+                    where pu.party = r.party
+                        and pu.user.id = :userId
+                )
+            )
+        order by r.id desc
+        """)
+    Slice<MyReservationResponse> findByUserIdAndCursor(
+        @Param("userId") Long userId,
+        @Param("cursor") Long cursor,
+        Pageable pageable);
 }

@@ -26,8 +26,7 @@ public class TestUtil {
             .age(25)
             .gender(Gender.M)
             .oauthId(UUID.randomUUID().toString())
-            .bucketId(null)
-            .profileImageUrl(null)
+            .profileKey(UUID.randomUUID().toString())
             .build();
     }
 
@@ -36,6 +35,7 @@ public class TestUtil {
             .shopName("테스트 식당")
             .roadAddress("서울 강남대로 123")
             .detailAddress("서울특별시 강남구 101호")
+            .roadAddress("서울특별시 강남구")
             .sido("서울")
             .latitude(37.5665)
             .longitude(126.9780)
@@ -46,6 +46,10 @@ public class TestUtil {
             .openTime(LocalTime.of(10, 0))
             .closeTime(LocalTime.of(22, 0))
             .user(user)
+            .reservationFee(1000)
+            .openTime(LocalTime.of(10, 0))
+            .closeTime(LocalTime.of(22, 0))
+            .user(owner)
             .build();
     }
 
