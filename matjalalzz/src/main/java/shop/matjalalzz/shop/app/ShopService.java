@@ -11,30 +11,30 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
+
 import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
-import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
+import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.shop.mapper.ShopMapper;
 import shop.matjalalzz.user.app.UserService;
-import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
 public class ShopService {
+
     private final ShopRepository shopRepository;
-    private final UserService userService;
     private final ImageRepository imageRepository;
     private final ReviewRepository reviewRepository;
-
+    private final UserService userService;
     private final PreSignedProvider preSignedProvider;
 
     @Value("${aws.credentials.AWS_BASE_URL}")

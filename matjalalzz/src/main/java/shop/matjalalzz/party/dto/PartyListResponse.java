@@ -14,7 +14,8 @@ public record PartyListResponse(
     int currentCount,
     LocalDateTime metAt,
     String shopName,
-    String shopAddress
+    String shopRoadAddress,
+    String shopDetailAddress
 ) {
 
 }
