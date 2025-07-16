@@ -103,11 +103,13 @@ public class ReservationController {
     )
     @PatchMapping("/{reservationId}/confirm")
     @ResponseStatus(HttpStatus.OK)
-    public void confirmReservation(
+    public BaseResponse<Void> confirmReservation(
         @PathVariable Long shopId,
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
         reservationService.confirmReservation(shopId, reservationId, principal.getId());
+
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
     @Operation(
@@ -119,11 +121,13 @@ public class ReservationController {
     )
     @PatchMapping("/{reservationId}/cancel")
     @ResponseStatus(HttpStatus.OK)
-    public void cancelReservation(
+    public BaseResponse<Void> cancelReservation(
         @PathVariable Long shopId,
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
         reservationService.cancelReservation(shopId, reservationId, principal.getId());
+
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
     // 1차 MVP 목표에서 제외
