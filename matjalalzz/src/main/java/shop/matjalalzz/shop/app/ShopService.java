@@ -29,7 +29,7 @@ import shop.matjalalzz.shop.dto.ShopsResponse;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.shop.mapper.ShopMapper;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -39,7 +39,7 @@ public class ShopService {
     private final static int EARTH_RADIUS = 6371000; // meters
 
     private final ShopRepository shopRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ImageRepository imageRepository;
     private final ReviewRepository reviewRepository;
 
@@ -50,8 +50,7 @@ public class ShopService {
 
     @Transactional
     public PreSignedUrlListResponse newShop(long userId, ShopCreateRequest shopCreateRequest) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.getUserById(userId);
 
         Shop newShop = ShopMapper.createToShop(shopCreateRequest, user);
 
@@ -125,8 +124,7 @@ public class ShopService {
         ShopUpdateRequest updateRequest) {
 
         // 해당 유저 정보를 가져오고
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.getUserById(userId);
 
         // 해당 유저가 가진 shop들 리스트를 가져오고
         Shop shop = shopFind(shopId);
@@ -213,7 +211,7 @@ public class ShopService {
                     .build();
             }
 
-            default -> throw new IllegalArgumentException("지원하지 않는 정렬 기준입니다: " + sort);
+            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA);
         }
     }
 
