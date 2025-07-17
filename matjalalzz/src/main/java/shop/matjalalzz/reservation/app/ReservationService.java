@@ -66,7 +66,7 @@ public class ReservationService {
         }
 
         List<Shop> shops = shopService.findByOwnerId(ownerId);
-        if (shops.isEmpty()) {
+        if (shops == null) {
             throw new BusinessException(SHOP_NOT_FOUND);
         }
 
