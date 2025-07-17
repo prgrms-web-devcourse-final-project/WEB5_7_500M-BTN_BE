@@ -49,7 +49,6 @@ public class TestUtil {
             .reservationFee(1000)
             .openTime(LocalTime.of(10, 0))
             .closeTime(LocalTime.of(22, 0))
-            .user(owner)
             .build();
     }
 

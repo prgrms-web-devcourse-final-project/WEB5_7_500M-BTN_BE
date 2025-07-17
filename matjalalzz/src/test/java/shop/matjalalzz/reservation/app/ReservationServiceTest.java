@@ -26,6 +26,7 @@ import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
+import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
@@ -41,7 +42,7 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @Mock
-    private ShopRepository shopRepository;
+    private ShopService shopService;
 
     private final Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
     private final Long SHOP_ID = 1L;
@@ -72,7 +73,7 @@ class ReservationServiceTest {
             Slice<Reservation> slice = new SliceImpl<>(reservations, pageable, true);
 
             // mocking
-            given(shopRepository.findById(SHOP_ID)).willReturn(Optional.of(shop));
+            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
             given(reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, CURSOR, pageable))
                 .willReturn(slice);
@@ -108,7 +109,7 @@ class ReservationServiceTest {
             Slice<Reservation> slice = new SliceImpl<>(reservations, pageable, true);
 
             // mocking
-            given(shopRepository.findById(SHOP_ID)).willReturn(Optional.of(shop));
+            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
             given(reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, null, pageable))
                 .willReturn(slice);
@@ -148,7 +149,7 @@ class ReservationServiceTest {
                 true); // r3는 커서 기준으로 제외됨
 
             // mocking
-            given(shopRepository.findById(SHOP_ID)).willReturn(Optional.of(shop));
+            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
             given(
                 reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID, null, 3L, pageable))
                 .willReturn(slice);
@@ -187,7 +188,7 @@ class ReservationServiceTest {
             Slice<Reservation> slice = new SliceImpl<>(List.of(r3, r2), pageable, true); // 최신순
 
             // mocking
-            given(shopRepository.findById(SHOP_ID)).willReturn(Optional.of(shop));
+            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
             given(reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
                 pageable))
                 .willReturn(slice);
@@ -202,6 +203,42 @@ class ReservationServiceTest {
             assertThat(result.content()).extracting("reservationId")
                 .containsExactly(3L, 2L);
             assertThat(result.nextCursor()).isEqualTo(2L);
+        }
+
+        @Test
+        @DisplayName("shopId 없이 소유한 모든 가게의 예약을 조회")
+        void shopId_없이_모든_예약_조회() {
+            // given
+            User owner = TestUtil.createUser();
+            ReflectionTestUtils.setField(owner, "id", 1L);
+
+            Shop shop1 = TestUtil.createShop(owner);
+            Shop shop2 = TestUtil.createShop(owner);
+            ReflectionTestUtils.setField(shop1, "id", 1L);
+            ReflectionTestUtils.setField(shop2, "id", 2L);
+
+            Reservation r1 = TestUtil.createReservation(shop1, owner, null, LocalDateTime.now().plusHours(1));
+            Reservation r2 = TestUtil.createReservation(shop2, owner, null, LocalDateTime.now().plusHours(2));
+            ReflectionTestUtils.setField(r1, "id", 1L);
+            ReflectionTestUtils.setField(r2, "id", 2L);
+
+            Pageable pageable = PageRequest.of(0, 10, Sort.by(Direction.DESC, "id"));
+            Slice<Reservation> slice = new SliceImpl<>(List.of(r2, r1), pageable, false);
+
+            // mocking
+            given(shopService.findByOwnerId(owner.getId())).willReturn(List.of(shop1, shop2));
+            given(reservationRepository.findByShopIdsWithFilterAndCursor(
+                List.of(1L, 2L), null, null, pageable)).willReturn(slice);
+
+            // when
+            ReservationListResponse result = reservationService.getReservations(
+                null, null, owner.getId(), null, 10
+            );
+
+            // then
+            assertThat(result.content()).hasSize(2);
+            assertThat(result.content()).extracting("reservationId").containsExactly(2L, 1L);
+            assertThat(result.nextCursor()).isNull(); // hasNext=false였기 때문에
         }
 
 
@@ -226,7 +263,7 @@ class ReservationServiceTest {
                     java.util.Optional.of(reservation));
 
                 // when
-                reservationService.confirmReservation(shop.getId(), reservation.getId(),
+                reservationService.confirmReservation(reservation.getId(),
                     user.getId());
 
                 // then
@@ -250,7 +287,7 @@ class ReservationServiceTest {
                     java.util.Optional.of(reservation));
 
                 // when
-                reservationService.cancelReservation(shop.getId(), reservation.getId(),
+                reservationService.cancelReservation(reservation.getId(),
                     user.getId());
 
                 // then
@@ -274,7 +311,7 @@ class ReservationServiceTest {
 
                 // when & then
                 assertThrows(BusinessException.class, () ->
-                    reservationService.confirmReservation(shop.getId(), reservation.getId(),
+                    reservationService.confirmReservation(reservation.getId(),
                         user.getId())
                 );
             }
@@ -298,7 +335,7 @@ class ReservationServiceTest {
 
                 // when & then
                 assertThrows(BusinessException.class, () ->
-                    reservationService.cancelReservation(shop.getId(), reservation.getId(),
+                    reservationService.cancelReservation(reservation.getId(),
                         user.getId())
                 );
             }
