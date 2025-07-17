@@ -9,6 +9,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
@@ -38,6 +39,7 @@ public class PreSignedProvider {
     @Value("${aws.s3.exp-min}")
     private int expMin;
 
+    @Transactional
     public PreSignedUrlListResponse createShopUploadUrls(int count, long shopId) {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
@@ -54,6 +56,7 @@ public class PreSignedProvider {
         return new PreSignedUrlListResponse(items, shopId);
     }
 
+    @Transactional
     public PreSignedUrlListResponse createReviewUploadUrls(int count, long shopId, long reviewId) {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
