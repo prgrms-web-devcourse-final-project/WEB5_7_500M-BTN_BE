@@ -76,14 +76,7 @@ public class PartyService {
             .findFirst()
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
-        Shop shop = shopService.shopFind(party.getShop().getId());
-
-        //TODO: 추후 imageService로 이동
-        String thumbnailImage = imageRepository.findByShopIdAndImageIndex(shop.getId(), 0)
-            .map(image -> BASE_URL + image.getS3Key())
-            .orElse(null);
-
-        return PartyMapper.toDetailResponse(party, hostId, thumbnailImage);
+        return PartyMapper.toDetailResponse(party, hostId, getShopThumbnail(party));
     }
 
     @Transactional(readOnly = true)
@@ -99,15 +92,8 @@ public class PartyService {
         }
 
         List<PartyListResponse> content = partyList.stream()
-            .map(PartyMapper::toListResponse)
+            .map(party -> PartyMapper.toListResponse(party, getShopThumbnail(party)))
             .toList();
-
-//        Shop shop = shopService.shopFind(party.getShop().getId());
-//
-//        //TODO: 추후 imageService로 이동
-//        String thumbnailImage = imageRepository.findByShopIdAndImageIndex(shop.getId(), 0)
-//            .map(image -> BASE_URL + image.getS3Key())
-//            .orElse(null);
 
         return new PartyScrollResponse(content, nextCursor);
     }
@@ -126,6 +112,7 @@ public class PartyService {
     }
 
     //TODO: 예약금 지불에 대한 로직 필요 (totalReservationFee 올려줘야함)
+
     @Transactional
     public void joinParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -135,8 +122,8 @@ public class PartyService {
 
         HandlePartyUserJoin(party, user);
     }
-
     //TODO: 예약금 차감에 대한 로직 필요 (totalReservationFee 내려줘야함)
+
     @Transactional
     public void quitParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -156,8 +143,8 @@ public class PartyService {
         partyUser.delete();
         party.decreaseCurrentCount();
     }
-
     // TODO: 예약금 환불 로직 필요
+
     @Transactional
     public void deleteParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -193,6 +180,13 @@ public class PartyService {
         } else {
             throw new BusinessException(ErrorCode.CANNOT_COMPLETE_PARTY);
         }
+    }
+
+    //TODO: 추후 imageService로 이동
+    private String getShopThumbnail(Party party) {
+        return imageRepository.findByShopIdAndImageIndex(party.getShop().getId(), 0)
+            .map(image -> BASE_URL + image.getS3Key())
+            .orElse(null);
     }
 
     private void validateJoinParty(Party party, User user) {

@@ -25,7 +25,7 @@ public record PartyDetailResponse(
     String shopName,
     String shopRoadAddress,
     String shopDetailAddress,
-    String thumbnailImage
+    String shopImage
 ) {
 
 }
