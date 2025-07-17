@@ -3,13 +3,11 @@ package shop.matjalalzz.shop.app;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -23,8 +21,8 @@ import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
 import shop.matjalalzz.shop.dto.OwnerShopsList;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
-import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
+import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
@@ -33,6 +31,7 @@ import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.dto.ShopsResponse;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.entity.ShopListSort;
 import shop.matjalalzz.shop.mapper.ShopMapper;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.dao.UserRepository;
@@ -57,7 +56,7 @@ public class ShopService {
 
     @Transactional
     public PreSignedUrlListResponse newShop(long userId, ShopCreateRequest shopCreateRequest) {
-        User user = userService.getUserById(userId);
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Shop newShop = ShopMapper.createToShop(shopCreateRequest, user);
 
@@ -100,7 +99,10 @@ public class ShopService {
         List<Shop> shopList = shopRepository.findByUser(userService.getUserById(userId));
 
         List<OwnerShopItem> shops = shopList.stream().map(shop ->
-            ShopMapper.shopToOwnerShopItem(shop, reviewRepository.findReviewCount(shop.getId()))
+            {
+                String image = BASE_URL + imageRepository.findByShopId(shop.getId()).stream().findFirst().get().getS3Key();
+                return ShopMapper.shopToOwnerShopItem(shop, image);
+            }
         ).toList();
 
         return new OwnerShopsList(shops);
@@ -228,12 +230,14 @@ public class ShopService {
         }
     }
 
+
+
     @Transactional(readOnly = true)
-    public ShopPageResponse getShopList(String query, String sort, String cursor, int size) {
+    public ShopPageResponse getShopList(String query, ShopListSort sort, String cursor, int size) {
         return switch (sort) {
-            case "rating" -> getShopListByRating(query, cursor, size);
-            case "createdAt" -> getShopListByCreatedAt(query, cursor, size);
-            case "name" -> getShopListByName(query, cursor, size);
+            case ShopListSort.RATING -> getShopListByRating(query, cursor, size);
+            case ShopListSort.CREATED_AT -> getShopListByCreatedAt(query, cursor, size);
+            case ShopListSort.NAME -> getShopListByName(query, cursor, size);
             default -> throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA);
         };
     }

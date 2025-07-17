@@ -22,12 +22,12 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 
     //거리 순
     @Query("""
-            SELECT s FROM Shop s
-            WHERE function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) <= :radius
-            AND s.category IN :categories
-            AND (:cursor IS NULL OR function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) > :cursor)
-            ORDER BY function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) ASC
-        """)
+    SELECT s FROM Shop s
+    WHERE function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) <= :radius
+    AND s.category IN :categories
+    AND (:cursor IS NULL OR function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) > :cursor)
+    ORDER BY function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) ASC
+""")
     Slice<Shop> findByDistance(
         @Param("lat") double lat,
         @Param("lng") double lng,
@@ -39,12 +39,12 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 
     //평점 순
     @Query("""
-            SELECT s FROM Shop s
-            WHERE function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) <= :radius
-            AND s.category IN :categories
-            AND (:cursor IS NULL OR s.rating < :cursor)
-            ORDER BY s.rating DESC
-        """)
+    SELECT s FROM Shop s
+    WHERE function('ST_Distance_Sphere', point(s.longitude, s.latitude), point(:lng, :lat)) <= :radius
+    AND s.category IN :categories
+    AND (:cursor IS NULL OR s.rating < :cursor)
+    ORDER BY s.rating DESC
+""")
     Slice<Shop> findByRatingCursor(
         @Param("lat") double lat,
         @Param("lng") double lng,

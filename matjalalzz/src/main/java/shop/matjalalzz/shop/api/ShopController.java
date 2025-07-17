@@ -26,8 +26,10 @@ import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
+import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsResponse;
+import shop.matjalalzz.shop.entity.ShopListSort;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class ShopController {
 
     private final ShopService shopService;
 
-    @Operation(summary = "식당 생성", description = "새로운 식당을 생성합니다.")
+    @Operation(summary = "식당 생성", description = "새로운 식당을 생성합니다.(Completed)")
     @PostMapping("/shops/presigned-urls")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<PreSignedUrlListResponse> createShop(@RequestBody ShopCreateRequest request,
@@ -46,7 +48,7 @@ public class ShopController {
     }
 
 
-    @Operation(summary = "식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다.")
+    @Operation(summary = "식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다. (Completed)")
     @GetMapping("/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopDetailResponse> getDetailShop(@PathVariable Long shopId) {
@@ -54,8 +56,8 @@ public class ShopController {
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
-    //사장의 식당 리스트 조회
-    @Operation(summary = "사장이 가진 식당들 조회", description = "사장 한명이 가진 식당들 리스트들을 조회합니다.")
+
+    @Operation(summary = "사장이 가진 식당들 조회", description = "사장 한명이 가진 식당들 리스트들을 조회합니다.(Completed)")
     @GetMapping("/owner/shops")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<OwnerShopsList> getOwnerShops(@AuthenticationPrincipal PrincipalUser principal) {
@@ -64,8 +66,7 @@ public class ShopController {
     }
 
 
-
-    @Operation(summary = "사장의 식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다.")
+    @Operation(summary = "사장의 식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다. (Completed)")
     @GetMapping("/owner/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopOwnerDetailResponse> getDetailShopOwner(@PathVariable Long shopId,
@@ -75,19 +76,18 @@ public class ShopController {
     }
 
 
-    @Operation(summary = "사장 식당 정보 수정", description = "식당 정보를 수정합니다.")
+    @Operation(summary = "사장 식당 정보 수정", description = "식당 정보를 수정합니다. (Completed)")
     @PutMapping("/owner/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PreSignedUrlListResponse> updateShop(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal,
         @RequestBody @Valid ShopUpdateRequest shopUpdateRequest) {
-        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(),
-            shopUpdateRequest);
+        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(), shopUpdateRequest);
         return BaseResponse.ok(urlResponse, BaseStatus.OK);
     }
 
 
-    @Operation(summary = "식당 목록 조회", description = "위치 기반으로 식당 목록을 조회합니다.")
+    @Operation(summary = "식당 목록 조회", description = "위치 기반으로 식당 목록을 조회합니다. (Completed)")
     @GetMapping("/shops")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopsResponse> getShops(
@@ -106,7 +106,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShopsBySearch(
         @RequestParam(required = false) String query,
-        @RequestParam(defaultValue = "createdAt") String sort,
+        @RequestParam(defaultValue = "createdAt") ShopListSort sort,
         @RequestParam(required = false) String cursor,
         @RequestParam(defaultValue = "10") int size) {
         return BaseResponse.ok(shopService.getShopList(query, sort, cursor, size), BaseStatus.OK);

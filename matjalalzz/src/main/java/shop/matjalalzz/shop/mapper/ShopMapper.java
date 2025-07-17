@@ -9,9 +9,9 @@ import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.vo.ShopUpdateVo;
-import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse.ShopElementResponse;
+import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
@@ -134,11 +134,14 @@ public class ShopMapper {
             .build();
     }
 
-    public static OwnerShopItem shopToOwnerShopItem(Shop shop, int reviewCount) {
+    public static OwnerShopItem shopToOwnerShopItem(Shop shop, String thumbnailUrl) {
         return OwnerShopItem.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
-            .reviewCount(reviewCount)
+            .category(shop.getCategory())
+            .roadAddress(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
+            .thumbnailUrl(thumbnailUrl)
             .rating(shop.getRating()).build();
 
     }
