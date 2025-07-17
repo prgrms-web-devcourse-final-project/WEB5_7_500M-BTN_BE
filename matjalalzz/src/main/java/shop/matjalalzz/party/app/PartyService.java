@@ -65,6 +65,7 @@ public class PartyService {
         partySchedulerService.scheduleDeadlineJob(party);
     }
 
+
     @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
         Party party = findById(partyId);
@@ -112,7 +113,6 @@ public class PartyService {
     }
 
     //TODO: 예약금 지불에 대한 로직 필요 (totalReservationFee 올려줘야함)
-
     @Transactional
     public void joinParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -122,8 +122,8 @@ public class PartyService {
 
         HandlePartyUserJoin(party, user);
     }
-    //TODO: 예약금 차감에 대한 로직 필요 (totalReservationFee 내려줘야함)
 
+    //TODO: 예약금 차감에 대한 로직 필요 (totalReservationFee 내려줘야함)
     @Transactional
     public void quitParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -143,8 +143,8 @@ public class PartyService {
         partyUser.delete();
         party.decreaseCurrentCount();
     }
-    // TODO: 예약금 환불 로직 필요
 
+    // TODO: 예약금 환불 로직 필요
     @Transactional
     public void deleteParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -267,5 +267,4 @@ public class PartyService {
     public List<PartyUser> getPartyUsers(Long partyId) {
         return partyUserRepository.findAllByPartyId(partyId);
     }
-
 }

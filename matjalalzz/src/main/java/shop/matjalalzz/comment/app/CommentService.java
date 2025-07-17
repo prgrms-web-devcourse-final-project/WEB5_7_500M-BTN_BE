@@ -35,7 +35,7 @@ public class CommentService {
         }
         Comment comment = CommentMapper.fromCommentCreateRequest(request, parent, party, writer);
         Comment result = commentRepository.save(comment);
-        return CommentMapper.toCommentResponse(result);
+        return validateMap(result);
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +47,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public CommentResponse findComment(Long commentId) {
         Comment comment = getComment(commentId);
-        return CommentMapper.toCommentResponse(comment);
+        return validateMap(comment);
     }
 
     @Transactional
@@ -67,7 +67,12 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponse> findCommentsByParty(Long partyId) {
         List<Comment> comments = commentRepository.findAllByPartyId(partyId);
-        return comments.stream().map(CommentMapper::toCommentResponse).toList();
+        return comments.stream().map(this::validateMap).toList();
+    }
+
+    private CommentResponse validateMap(Comment comment) {
+        Long parentId = comment.getParent() != null ? comment.getParent().getId() : null;
+        return CommentMapper.toCommentResponse(comment, parentId);
     }
 
 }

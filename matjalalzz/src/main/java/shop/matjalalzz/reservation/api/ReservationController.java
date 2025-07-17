@@ -6,12 +6,14 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,11 +28,13 @@ import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 
 @RestController
 @RequiredArgsConstructor
 @Validated
 @RequestMapping("/shops/{shopId}/reservations")
+@Tag(name = "예약 API", description = "예약 관련 API")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -48,13 +52,13 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReservationListResponse> getReservations(
         @PathVariable Long shopId,
-        @RequestParam(defaultValue = "TOTAL") String filter,
+        @RequestParam(required = false) ReservationStatus filter,
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size,
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
-            cursor, size);
+            cursor, userInfo.getId(),size);
 
         return BaseResponse.ok(response, BaseStatus.OK);
     }
@@ -89,6 +93,42 @@ public class ReservationController {
 
         return BaseResponse.ok(response, BaseStatus.CREATED);
 
+    }
+
+    @Operation(
+        summary = "예약 수락",
+        description = "reservationId에 해당하는 예약을 CONFIRMED 상태로 변경한다. (Inprogress)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "예약 수락 성공"),
+        }
+    )
+    @PatchMapping("/{reservationId}/confirm")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<Void> confirmReservation(
+        @PathVariable Long shopId,
+        @PathVariable Long reservationId,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        reservationService.confirmReservation(shopId, reservationId, principal.getId());
+
+        return BaseResponse.ok(BaseStatus.OK);
+    }
+
+    @Operation(
+        summary = "예약 거절",
+        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Inprogress)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "예약 거절 성공"),
+        }
+    )
+    @PatchMapping("/{reservationId}/cancel")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<Void> cancelReservation(
+        @PathVariable Long shopId,
+        @PathVariable Long reservationId,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        reservationService.cancelReservation(shopId, reservationId, principal.getId());
+
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
     // 1차 MVP 목표에서 제외

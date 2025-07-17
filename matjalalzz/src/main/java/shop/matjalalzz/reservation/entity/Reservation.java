@@ -30,12 +30,6 @@ import shop.matjalalzz.user.entity.User;
 @AllArgsConstructor
 @Builder
 @SQLRestriction("deleted = false")
-@Table(
-    name = "reservation",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"shop_id", "reserved_at"})
-    }
-)
 public class Reservation extends BaseEntity {
 
     @Id
@@ -68,5 +62,9 @@ public class Reservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "party_id")
     private Party party;
+
+    public void changeStatus(ReservationStatus status){
+        this.status = status;
+    }
 
 }

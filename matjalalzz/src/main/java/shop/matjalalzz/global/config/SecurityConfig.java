@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import shop.matjalalzz.global.security.filter.TokenAuthenticationFilter;
+import shop.matjalalzz.global.security.handler.CustomAuthenticationEntryPoint;
 import shop.matjalalzz.global.security.handler.OAuth2SuccessHandler;
 import shop.matjalalzz.global.security.oauth2.app.OAuth2UserService;
 
@@ -27,6 +28,8 @@ public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint entryPoint;
+
     @Value("${custom.cors.allowed-origin}")
     private String allowedOrigin;
 
@@ -71,6 +74,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}", "/parties").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
 
+                    .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reservations").hasRole("OWNER")
+                    .requestMatchers(HttpMethod.PATCH,"/shops/{shopId}/reservations/**").hasRole("OWNER")
 
                     .requestMatchers(HttpMethod.GET,"/shops/{shopId}").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops").permitAll()
@@ -81,6 +86,8 @@ public class SecurityConfig {
 
                     .anyRequest().hasAnyRole("USER", "ADMIN") //나머지 요청은 USER 또는 ADMiN 권한을 가져야 접근 가능
             )
+            .exceptionHandling(handler ->
+                handler.authenticationEntryPoint(entryPoint))
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .build();
