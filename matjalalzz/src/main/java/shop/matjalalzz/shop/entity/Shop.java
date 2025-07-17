@@ -46,10 +46,10 @@ public class Shop extends BaseEntity {
     private String sido;
 
     @Column(nullable = false)
-    private Double latitude; //위도
+    private double latitude; //위도
 
     @Column(nullable = false)
-    private Double longitude; //경도
+    private double longitude; //경도
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description; //설명

@@ -6,7 +6,6 @@ import lombok.Builder;
 @Builder
 public record ShopsResponse (
     Long nextCursor,
-    //List<ShopsCursorResponse> content,
     List<ShopsItem> content)
 {}
 

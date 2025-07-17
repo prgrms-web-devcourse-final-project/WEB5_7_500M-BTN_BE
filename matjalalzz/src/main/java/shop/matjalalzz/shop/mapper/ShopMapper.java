@@ -107,6 +107,8 @@ public class ShopMapper {
             .roadAddress(shop.getRoadAddress())
             .detailAddress(shop.getDetailAddress())
             .rating(shop.getRating())
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
             .thumbnailUrl(thumbnailUrl)
             .build();
     }
