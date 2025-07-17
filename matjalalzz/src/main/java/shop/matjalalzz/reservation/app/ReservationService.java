@@ -3,13 +3,12 @@ package shop.matjalalzz.reservation.app;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.ALREADY_PROCESSED;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
-import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REQUEST_DATA;
-import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -35,6 +34,7 @@ import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -46,11 +46,12 @@ public class ReservationService {
     private final PartyService partyService;
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size) {
+    public ReservationListResponse getReservations(Long shopId, ReservationStatus status,
+        Long ownerId, Long cursor, int size) {
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
 
-        if(shopId != null) {
+        if (shopId != null) {
             Shop shop = shopService.shopFind(shopId); // 검증용
 
             if (!shop.getUser().getId().equals(ownerId)) {
@@ -65,13 +66,14 @@ public class ReservationService {
         }
 
         List<Shop> shops = shopService.findByOwnerId(ownerId);
-        if(shops.isEmpty()){
+        if (shops.isEmpty()) {
             throw new BusinessException(SHOP_NOT_FOUND);
         }
 
         List<Long> shopIds = shops.stream()
             .map(Shop::getId)
             .toList();
+
 
         Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursor(
             shopIds, status, cursor, pageable
@@ -135,28 +137,24 @@ public class ReservationService {
     }
 
     @Transactional
-    public void confirmReservation(Long shopId, Long reservationId, Long ownerId) {
-        Reservation reservation = validateOwnerPermissionAndPending(reservationId, shopId, ownerId);
+    public void confirmReservation(Long reservationId, Long ownerId) {
+        Reservation reservation = validateOwnerPermissionAndPending(reservationId, ownerId);
         reservation.changeStatus(ReservationStatus.CONFIRMED);
     }
 
     @Transactional
-    public void cancelReservation(Long shopId, Long reservationId, Long ownerId) {
-        Reservation reservation = validateOwnerPermissionAndPending(reservationId, shopId, ownerId);
+    public void cancelReservation(Long reservationId, Long ownerId) {
+        Reservation reservation = validateOwnerPermissionAndPending(reservationId, ownerId);
         reservation.changeStatus(ReservationStatus.CANCELLED);
     }
 
 
-    private Reservation validateOwnerPermissionAndPending(Long reservationId, Long shopId,
+    private Reservation validateOwnerPermissionAndPending(Long reservationId,
         Long ownerId) {
         Reservation reservation = getReservationById(reservationId);
 
         if (reservation.getStatus() != ReservationStatus.PENDING) {
             throw new BusinessException(ALREADY_PROCESSED);
-        }
-
-        if (!reservation.getShop().getId().equals(shopId)) {
-            throw new BusinessException(INVALID_REQUEST_DATA);
         }
 
         if (!reservation.getShop().getUser().getId().equals(ownerId)) {
@@ -165,7 +163,6 @@ public class ReservationService {
 
         return reservation;
     }
-
 
 
     @Transactional(readOnly = true)

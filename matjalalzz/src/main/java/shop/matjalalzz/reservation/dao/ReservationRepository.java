@@ -38,7 +38,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         ORDER BY r.id DESC
         """)
     Slice<Reservation> findByShopIdsWithFilterAndCursor(
-        @Param("shopId") List<Long> shopIds,
+        @Param("shopIds") List<Long> shopIds,
         @Param("status") ReservationStatus status,
         @Param("cursor") Long cursor,
         Pageable pageable

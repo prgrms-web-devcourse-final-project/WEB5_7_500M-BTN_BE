@@ -17,7 +17,7 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
     
     List<Shop> findByUser(User user);
 
-    List<Shop> findShopsById(Long id);
+    List<Shop> findByUserId(Long id);
 
 //
 //

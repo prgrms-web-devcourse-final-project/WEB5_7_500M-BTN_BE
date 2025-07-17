@@ -166,6 +166,6 @@ public class ShopService {
 
     @Transactional(readOnly = true)
     public List<Shop> findByOwnerId(Long ownerId) {
-        return shopRepository.findShopsById(ownerId);
+        return shopRepository.findByUserId(ownerId);
     }
 }

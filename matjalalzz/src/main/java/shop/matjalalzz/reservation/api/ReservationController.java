@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +34,7 @@ import shop.matjalalzz.reservation.entity.ReservationStatus;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping()
+@RequestMapping
 @Tag(name = "예약 API", description = "예약 관련 API")
 public class ReservationController {
 
@@ -57,8 +58,11 @@ public class ReservationController {
         @RequestParam(required = false) Long shopId,
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
+
+
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
-            cursor, userInfo.getId(),size);
+            userInfo.getId(), cursor, size);
+
 
         return BaseResponse.ok(response, BaseStatus.OK);
     }
@@ -88,6 +92,7 @@ public class ReservationController {
         @Valid @RequestBody CreateReservationRequest request,
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
+
         CreateReservationResponse response = reservationService.createReservation(userInfo.getId(),
             shopId, partyId, request);
 
@@ -105,10 +110,9 @@ public class ReservationController {
     @PatchMapping("/reservations/{reservationId}/confirm")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> confirmReservation(
-        @PathVariable Long shopId,
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.confirmReservation(shopId, reservationId, principal.getId());
+        reservationService.confirmReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }
@@ -120,13 +124,12 @@ public class ReservationController {
             @ApiResponse(responseCode = "200", description = "예약 거절 성공"),
         }
     )
-    @PatchMapping("reservations/{reservationId}/cancel")
+    @PatchMapping("/reservations/{reservationId}/cancel")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> cancelReservation(
-        @PathVariable Long shopId,
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.cancelReservation(shopId, reservationId, principal.getId());
+        reservationService.cancelReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }
