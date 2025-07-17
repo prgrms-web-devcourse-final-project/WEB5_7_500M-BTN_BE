@@ -7,6 +7,9 @@ import shop.matjalalzz.user.entity.enums.Role;
 
 @Builder
 public record MyInfoResponse(
+    @Schema(example = "1")
+    long userId,
+
     @Schema(example = "minji97@gmail.com")
     String email,
 

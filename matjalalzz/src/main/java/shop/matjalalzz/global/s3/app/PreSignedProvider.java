@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -73,7 +74,7 @@ public class PreSignedProvider {
     }
 
     public PreSignedUrlResponse createProfileUploadUrls(long userId) {
-        return buildItem(ImageType.PROFILE_IMG, userId, "img");
+        return buildItem(ImageType.PROFILE_IMG, userId, "img_" + UUID.randomUUID());
     }
 
     // 한 개 삭제
