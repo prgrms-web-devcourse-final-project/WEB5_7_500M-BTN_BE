@@ -29,6 +29,7 @@ import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.dto.ShopsResponse;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.entity.ShopListSort;
 import shop.matjalalzz.shop.mapper.ShopMapper;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -121,7 +122,8 @@ public class ShopService {
 
     // shop 수정
     @Transactional
-    public PreSignedUrlListResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
+    public PreSignedUrlListResponse editShop(Long shopId, long userId,
+        ShopUpdateRequest updateRequest) {
 
         // 해당 유저 정보를 가져오고
         User user = userService.getUserById(userId);
@@ -136,7 +138,6 @@ public class ShopService {
         // 해당 상점을 가져온다
         List<Shop> shopList = shopRepository.findByUser(user);
         Shop getShop = shopList.stream().filter(s -> s.equals(shop)).findFirst().get();
-
 
         ShopUpdateCommand shopUpdateCommand = ShopMapper.updateToShop(updateRequest);
 
@@ -200,7 +201,8 @@ public class ShopService {
                 Long nextCursor = null;
                 if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
                     Shop last = shopSlice.getContent().getLast();
-                    double lastDistance = calculateDistanceInMeters(latitude, longitude, last.getLatitude(), last.getLongitude());
+                    double lastDistance = calculateDistanceInMeters(latitude, longitude,
+                        last.getLatitude(), last.getLongitude());
                     if (lastDistance < radius) {        //계산 돌려본 결과 좌표값이 radius 값보다 크면 null
                         nextCursor = (long) lastDistance;
                     }
@@ -217,11 +219,11 @@ public class ShopService {
     }
 
     @Transactional(readOnly = true)
-    public ShopPageResponse getShopList(String query, String sort, String cursor, int size) {
+    public ShopPageResponse getShopList(String query, ShopListSort sort, String cursor, int size) {
         return switch (sort) {
-            case "rating" -> getShopListByRating(query, cursor, size);
-            case "createdAt" -> getShopListByCreatedAt(query, cursor, size);
-            case "name" -> getShopListByName(query, cursor, size);
+            case ShopListSort.RATING -> getShopListByRating(query, cursor, size);
+            case ShopListSort.CREATED_AT -> getShopListByCreatedAt(query, cursor, size);
+            case ShopListSort.NAME -> getShopListByName(query, cursor, size);
             default -> throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA);
         };
     }

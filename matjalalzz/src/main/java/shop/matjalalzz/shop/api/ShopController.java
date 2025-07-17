@@ -26,6 +26,7 @@ import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsResponse;
+import shop.matjalalzz.shop.entity.ShopListSort;
 
 @RestController
 @RequiredArgsConstructor
@@ -94,7 +95,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopPageResponse> getShopsBySearch(
         @RequestParam(required = false) String query,
-        @RequestParam(defaultValue = "createdAt") String sort,
+        @RequestParam(defaultValue = "createdAt") ShopListSort sort,
         @RequestParam(required = false) String cursor,
         @RequestParam(defaultValue = "10") int size) {
         return BaseResponse.ok(shopService.getShopList(query, sort, cursor, size), BaseStatus.OK);
