@@ -22,6 +22,7 @@ public class UserMapper {
 
     public static MyInfoResponse toMyInfoResponse(User user, String profile) {
         return MyInfoResponse.builder()
+            .userId(user.getId())
             .email(user.getEmail())
             .nickname(user.getNickname())
             .role(user.getRole())
