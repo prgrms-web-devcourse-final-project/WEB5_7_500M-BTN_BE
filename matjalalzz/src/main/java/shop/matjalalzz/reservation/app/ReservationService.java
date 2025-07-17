@@ -45,7 +45,7 @@ public class ReservationService {
     private final PartyService partyService;
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(Long shopId, String filter, Long ownerId, Long cursor, int size) {
+    public ReservationListResponse getReservations(Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size) {
 
         Shop shop = shopService.shopFind(shopId);
 
@@ -53,7 +53,6 @@ public class ReservationService {
             throw new BusinessException(FORBIDDEN_ACCESS);
         }
 
-        ReservationStatus status = parseFilter(filter);
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
 
@@ -145,17 +144,6 @@ public class ReservationService {
         return reservation;
     }
 
-    private ReservationStatus parseFilter(String filter) {
-        if (filter == null || filter.equalsIgnoreCase("TOTAL")) {
-            return null;
-        }
-
-        try {
-            return ReservationStatus.valueOf(filter.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BusinessException(INVALID_RESERVATION_STATUS);
-        }
-    }
 
 
     @Transactional(readOnly = true)

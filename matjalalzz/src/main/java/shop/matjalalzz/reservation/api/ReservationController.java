@@ -52,7 +52,7 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReservationListResponse> getReservations(
         @PathVariable Long shopId,
-        @RequestParam(defaultValue = "TOTAL") String filter,
+        @RequestParam(required = false) ReservationStatus filter,
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size,
         @AuthenticationPrincipal PrincipalUser userInfo
