@@ -53,7 +53,7 @@ public class TokenService {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        Long userId = tokenProvider.parseJwt(refreshToken).userId();
+        Long userId = tokenProvider.parseRefreshToken(refreshToken);
         RefreshToken token = refreshTokenRepository.findByUserIdWithUser(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
         User user = token.getUser();
@@ -69,7 +69,7 @@ public class TokenService {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        Long userId = tokenProvider.parseJwt(refreshToken).userId();
+        Long userId = tokenProvider.parseRefreshToken(refreshToken);
         RefreshToken token = refreshTokenRepository.findByUserIdWithUser(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
 

@@ -14,7 +14,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenProvider;
-import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
 import shop.matjalalzz.global.security.oauth2.mapper.OAuth2Mapper;
 
@@ -38,7 +37,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null) {
             if (tokenProvider.validate(token)) {
-                TokenBodyDto tokenBodyDto = tokenProvider.parseJwt(token);
+                TokenBodyDto tokenBodyDto = tokenProvider.parseAccessToken(token);
                 PrincipalUser principalUser = OAuth2Mapper.toPrincipalUser(tokenBodyDto);
 
                 Authentication authentication = new UsernamePasswordAuthenticationToken(

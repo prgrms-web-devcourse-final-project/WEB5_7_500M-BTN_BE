@@ -36,7 +36,6 @@ public class ReviewMapper {
             .build();
     }
 
-
     public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
         Slice<MyReviewResponse> reviews) {
 

@@ -23,21 +23,7 @@ public class UserMapper {
             .build();
     }
 
-    public static void update(User user, OAuthSignUpRequest request) {
-        user.updateNickname(request.nickname());
-        user.updatePhoneNumber(request.phoneNumber());
-        user.updateName(request.name());
-        user.updateAge(request.age());
-        user.updateGender(request.gender());
-    }
-
-    private static <T> void applyIfNotNull(T value, Consumer<T> consumer) {
-        if (value != null) {
-            consumer.accept(value);
-        }
-    }
-
-    public static MyInfoResponse toMyInfoResponse(User user, String baseUrl) {
+    public static MyInfoResponse toMyInfoResponse(User user, String profile) {
         return MyInfoResponse.builder()
             .email(user.getEmail())
             .nickname(user.getNickname())
@@ -47,15 +33,7 @@ public class UserMapper {
             .gender(user.getGender())
             .point(user.getPoint())
             .phoneNumber(user.getPhoneNumber())
-            .profile(baseUrl + user.getProfileKey())
+            .profile(profile)
             .build();
     }
-
-    public static void update(User user, MyInfoUpdateRequest dto) {
-        applyIfNotNull(dto.nickname(), user::updateNickname);
-        applyIfNotNull(dto.age(), user::updateAge);
-        applyIfNotNull(dto.phoneNumber(), user::updatePhoneNumber);
-        applyIfNotNull(dto.profileKey(), user::updateProfileKey);
-    }
-
 }

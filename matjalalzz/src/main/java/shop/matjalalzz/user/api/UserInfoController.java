@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,15 +22,15 @@ import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.review.app.ReviewService;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.dto.DeleteProfileRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
-import shop.matjalalzz.party.dto.MyPartyPageResponse;
-import shop.matjalalzz.review.dto.MyReviewPageResponse;
 
 @Tag(name = "마이페이지 API", description = "마이페이지 관련 API")
 @RestController
@@ -66,7 +66,7 @@ public class UserInfoController {
             @ApiResponse(responseCode = "200", description = "수정 성공")
         }
     )
-    @PatchMapping
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateMyInfo(
         @AuthenticationPrincipal PrincipalUser userInfo,

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
@@ -36,6 +37,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final PreSignedProvider preSignedProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${custom.jwt.token-validity-time.refresh}")
@@ -96,7 +98,7 @@ public class UserService {
     public void oauthSignup(long userId, OAuthSignUpRequest request) {
         User user = findUserByIdOrThrow(userId);
 
-        UserMapper.update(user, request);
+        user.oauthSignup(request);
     }
 
     @Transactional
@@ -131,14 +133,20 @@ public class UserService {
     public MyInfoResponse getMyInfo(Long userId) {
         User user = findUserByIdOrThrow(userId);
 
-        return UserMapper.toMyInfoResponse(user, baseUrl);
+        String profile = user.getProfileKey() == null ? null : baseUrl + user.getProfileKey();
+
+        return UserMapper.toMyInfoResponse(user, profile);
     }
 
     @Transactional
     public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
         User user = findUserByIdOrThrow(userId);
 
-        UserMapper.update(user, request);
+        if(!request.profileKey().equals(user.getProfileKey())) {
+            preSignedProvider.deleteObject(user.getProfileKey());
+        }
+
+        user.update(request);
     }
 
     @Transactional(readOnly = true)

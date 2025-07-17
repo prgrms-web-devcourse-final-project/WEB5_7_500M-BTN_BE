@@ -15,6 +15,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
+import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.entity.enums.Gender;
 import shop.matjalalzz.user.entity.enums.Role;
 
@@ -77,34 +79,9 @@ public class User extends BaseEntity {
         this.profileKey = profileKey;
     }
 
-    // 닉네임 변경 메서드
-    public void updateNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    // 핸드폰번호 변경 메서드
-    public void updatePhoneNumber(String phone_number) {
-        this.phoneNumber = phone_number;
-    }
-
-    //나이 변경 메서드
-    public void updateAge(int age) {
-        this.age = age;
-    }
-
     // point 변경 메서드
     public void updatePoint(int point) {
         this.point += point;
-    }
-
-    //삭제 여부 변경 메서드
-    public void updateDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    //사진 변경 메서드
-    public void updateProfileKey(String profileKey) {
-        this.profileKey = profileKey;
     }
 
     // 권한 변경 메서드
@@ -112,11 +89,18 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void updateName(String name) {
-        this.name = name;
+    public void oauthSignup(OAuthSignUpRequest dto) {
+        this.nickname = dto.nickname();
+        this.phoneNumber = dto.phoneNumber();
+        this.name = dto.name();
+        this.age = dto.age();
+        this.gender = dto.gender();
     }
 
-    public void updateGender(Gender gender) {
-        this.gender = gender;
+    public void update(MyInfoUpdateRequest dto) {
+        this.nickname = dto.nickname();
+        this.age = dto.age();
+        this.phoneNumber = dto.phoneNumber();
+        this.profileKey = dto.profileKey();
     }
 }
