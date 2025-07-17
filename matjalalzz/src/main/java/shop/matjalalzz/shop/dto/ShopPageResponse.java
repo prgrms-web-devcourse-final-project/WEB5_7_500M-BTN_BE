@@ -6,17 +6,17 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 
 @Builder
 public record ShopPageResponse(
-    Long nextCursor,
+    String nextCursor,
     List<ShopElementResponse> shops
 ) {
 
     @Builder
     public record ShopElementResponse(
-        Long shopId,
+        long shopId,
         String name,
         FoodCategory category,
         String address,
-        Double rating,
+        double rating,
         String thumbnailUrl
     ) {
 

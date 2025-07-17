@@ -7,7 +7,7 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 
 @Builder
 public record ShopOwnerDetailResponse(
-    Long shopId,
+    long shopId,
     String shopName,
     FoodCategory category,
     String description,
@@ -16,11 +16,10 @@ public record ShopOwnerDetailResponse(
     String tel,
     LocalTime openTime,
     LocalTime closeTime,
-    Double rating,
+    double rating,
     int reservationFee,
     int reviewCount,
     List<String> images,
-    boolean canEdit,
     String businessCode
 ) {
 
