@@ -6,7 +6,7 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 
 @Builder
 public record ShopPageResponse(
-    Long nextCursor,
+    String nextCursor,
     List<ShopElementResponse> shops
 ) {
 
