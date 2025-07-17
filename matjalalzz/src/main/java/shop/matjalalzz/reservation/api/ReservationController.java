@@ -33,7 +33,7 @@ import shop.matjalalzz.reservation.entity.ReservationStatus;
 @RestController
 @RequiredArgsConstructor
 @Validated
-@RequestMapping("/shops/{shopId}/reservations")
+@RequestMapping()
 @Tag(name = "예약 API", description = "예약 관련 API")
 public class ReservationController {
 
@@ -48,13 +48,13 @@ public class ReservationController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 shopId")
         }
     )
-    @GetMapping
+    @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ReservationListResponse> getReservations(
-        @PathVariable Long shopId,
         @RequestParam(required = false) ReservationStatus filter,
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) Long shopId,
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
@@ -80,7 +80,7 @@ public class ReservationController {
                 content = @Content(schema = @Schema(implementation = CreateReservationResponse.class)))
         }
     )
-    @PostMapping
+    @PostMapping("/shops/{shopId}/reservations")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<CreateReservationResponse> createReservation(
         @PathVariable Long shopId,
@@ -102,7 +102,7 @@ public class ReservationController {
             @ApiResponse(responseCode = "200", description = "예약 수락 성공"),
         }
     )
-    @PatchMapping("/{reservationId}/confirm")
+    @PatchMapping("/reservations/{reservationId}/confirm")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> confirmReservation(
         @PathVariable Long shopId,
@@ -120,7 +120,7 @@ public class ReservationController {
             @ApiResponse(responseCode = "200", description = "예약 거절 성공"),
         }
     )
-    @PatchMapping("/{reservationId}/cancel")
+    @PatchMapping("reservations/{reservationId}/cancel")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> cancelReservation(
         @PathVariable Long shopId,

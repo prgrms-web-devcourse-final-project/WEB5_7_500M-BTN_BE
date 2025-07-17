@@ -163,4 +163,9 @@ public class ShopService {
         //shopRepository.(latitude,longitude,radius,foodCategories,sort,cursor,size+1);
 
     }
+
+    @Transactional(readOnly = true)
+    public List<Shop> findByOwnerId(Long ownerId) {
+        return shopRepository.findShopsById(ownerId);
+    }
 }

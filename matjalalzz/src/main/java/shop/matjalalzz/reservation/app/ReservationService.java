@@ -5,6 +5,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.DATA_NOT_FOUND;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.FORBIDDEN_ACCESS;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REQUEST_DATA;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_RESERVATION_STATUS;
+import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -47,23 +48,44 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public ReservationListResponse getReservations(Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size) {
 
-        Shop shop = shopService.shopFind(shopId);
-
-        if(!shop.getUser().getId().equals(ownerId)){
-            throw new BusinessException(FORBIDDEN_ACCESS);
-        }
-
-
         Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
 
-        Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursor(
-            shopId, status, cursor, pageable
+        if(shopId != null) {
+            Shop shop = shopService.shopFind(shopId); // 검증용
+
+            if (!shop.getUser().getId().equals(ownerId)) {
+                throw new BusinessException(FORBIDDEN_ACCESS);
+            }
+
+            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursor(
+                shopId, status, cursor, pageable
+            );
+
+            return reservationResponse(slice);
+        }
+
+        List<Shop> shops = shopService.findByOwnerId(ownerId);
+        if(shops.isEmpty()){
+            throw new BusinessException(SHOP_NOT_FOUND);
+        }
+
+        List<Long> shopIds = shops.stream()
+            .map(Shop::getId)
+            .toList();
+
+        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursor(
+            shopIds, status, cursor, pageable
         );
 
+        return reservationResponse(slice);
+    }
+
+    private ReservationListResponse reservationResponse(Slice<Reservation> slice) {
         List<Reservation> reservations = slice.getContent();
 
-        Long nextCursor =
-            slice.hasNext() ? reservations.get(reservations.size() - 1).getId() : null;
+        Long nextCursor = slice.hasNext()
+            ? reservations.get(reservations.size() - 1).getId()
+            : null;
 
         List<ReservationContent> content =
             ReservationMapper.toReservationContent(reservations);
@@ -150,6 +172,23 @@ public class ReservationService {
     public Reservation getReservationById(Long reservationId) {
         return reservationRepository.findById(reservationId)
             .orElseThrow(() -> new BusinessException(DATA_NOT_FOUND));
+    }
+
+    @Transactional
+    public int terminateExpiredReservations() {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(1);
+
+        List<Reservation> toTerminate = reservationRepository
+            .findAllByStatusInAndReservedAtBefore(
+                List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED),
+                threshold
+            );
+
+        for (Reservation r : toTerminate) {
+            r.changeStatus(ReservationStatus.TERMINATED);
+        }
+
+        return toTerminate.size();
     }
 }
 
