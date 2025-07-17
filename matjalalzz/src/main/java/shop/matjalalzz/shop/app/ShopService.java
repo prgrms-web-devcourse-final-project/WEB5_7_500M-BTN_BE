@@ -10,8 +10,6 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
-import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
-
 import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.dao.ReviewRepository;

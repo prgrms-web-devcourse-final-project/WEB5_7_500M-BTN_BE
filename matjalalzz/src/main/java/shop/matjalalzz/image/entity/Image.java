@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,12 +24,19 @@ import lombok.NoArgsConstructor;
     indexes = {
         @Index(name = "image_idx", columnList = "shop_id"),
         @Index(name = "image_idx", columnList = "review_id")
+    },
+    uniqueConstraints = {
+        @UniqueConstraint(name = "unique_shop_image_index", columnNames = {"shop_id",
+            "image_index"}),
+        @UniqueConstraint(name = "unique_review_image_index", columnNames = {"review_id",
+            "image_index"}),
     }
 )
 public class Image {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="image_id")
+    @Column(name = "image_id")
     private Long id;
 
     // s3 경로
@@ -39,17 +47,16 @@ public class Image {
     private long imageIndex;
 
 
-    @Column(name = "shop_id",  nullable = true)
+    @Column(name = "shop_id", nullable = true)
     private Long shopId;
 
 
-    @Column(name = "review_id",  nullable = true)
+    @Column(name = "review_id", nullable = true)
     private Long reviewId;
 
 
     //이미지 저장 성공 여부
     private boolean completed = false;
-
 
 
 }
