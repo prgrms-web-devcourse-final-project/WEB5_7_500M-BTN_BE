@@ -19,8 +19,7 @@ public record ShopDetailResponse(
     Double rating,
     int reservationFee,
     int reviewCount,
-    List<String> images,
-    boolean canEdit
+    List<String> images
 ) {
 
 }

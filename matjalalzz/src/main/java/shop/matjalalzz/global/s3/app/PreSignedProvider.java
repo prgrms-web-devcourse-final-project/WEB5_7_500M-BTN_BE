@@ -6,13 +6,17 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.image.entity.enums.ImageType;
+import shop.matjalalzz.image.mapper.ImageMapper;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
@@ -36,28 +40,41 @@ public class PreSignedProvider {
     @Value("${aws.s3.exp-min}")
     private int expMin;
 
+    @Transactional
     public PreSignedUrlListResponse createShopUploadUrls(int count, long shopId) {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            items.add(buildItem(ImageType.SHOP_IMG, shopId, "img_" + i));
+            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId, "img_" + i);
+            items.add(preSignedUrlResponse);
+
+            String s3Key = preSignedUrlResponse.key();
+            Image imageValue = ImageMapper.UrlResponseToImage(s3Key, i, shopId);
+            imageRepository.save(imageValue);
+
         }
 
         return new PreSignedUrlListResponse(items, shopId);
     }
 
+    @Transactional
     public PreSignedUrlListResponse createReviewUploadUrls(int count, long shopId, long reviewId) {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            items.add(buildItem(ImageType.SHOP_IMG, shopId, "img_review_" + reviewId + "_" + i));
+            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId, "img_review_" + reviewId + "_" + i);
+            items.add(preSignedUrlResponse);
+            String s3Key = preSignedUrlResponse.key();
+            Image imageValue = ImageMapper.UrlResponseToImage(s3Key, i, shopId);
+            imageRepository.save(imageValue);
+
         }
 
         return new PreSignedUrlListResponse(items, reviewId);
     }
 
     public PreSignedUrlResponse createProfileUploadUrls(long userId) {
-        return buildItem(ImageType.PROFILE_IMG, userId, "img");
+        return buildItem(ImageType.PROFILE_IMG, userId, "img_" + UUID.randomUUID());
     }
 
     // 한 개 삭제
@@ -71,6 +88,9 @@ public class PreSignedProvider {
 
     // 여러 개 삭제
     public void deleteObjects(List<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return;
+        }
         DeleteObjectsRequest request = DeleteObjectsRequest.builder()
             .bucket(bucketName)
             .delete(
