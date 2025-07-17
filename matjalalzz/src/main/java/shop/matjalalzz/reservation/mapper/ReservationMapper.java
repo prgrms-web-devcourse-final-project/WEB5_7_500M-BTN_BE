@@ -63,6 +63,7 @@ public class ReservationMapper {
                     .headCount(res.getHeadCount())
                 .phoneNumber(
                     res.getUser().getPhoneNumber())           // ← N+1 가능성 있음, fetch join 필요
+                .status(res.getStatus())
                 .build())
             .toList();
     }
