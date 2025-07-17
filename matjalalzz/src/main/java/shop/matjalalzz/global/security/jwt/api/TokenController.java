@@ -18,7 +18,7 @@ import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
 
-@Tag(name = "User", description = "사용자 관련 API")
+@Tag(name = "사용자 API", description = "사용자 관련 API")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
