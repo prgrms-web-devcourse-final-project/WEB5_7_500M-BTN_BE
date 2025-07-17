@@ -1,11 +1,8 @@
 package shop.matjalalzz.user.mapper;
 
 
-import java.util.function.Consumer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import shop.matjalalzz.user.dto.MyInfoResponse;
-import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
-import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
 
@@ -25,6 +22,7 @@ public class UserMapper {
 
     public static MyInfoResponse toMyInfoResponse(User user, String profile) {
         return MyInfoResponse.builder()
+            .userId(user.getId())
             .email(user.getEmail())
             .nickname(user.getNickname())
             .role(user.getRole())
