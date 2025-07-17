@@ -37,7 +37,7 @@ public record ReservationListResponse(
         @Schema(description = "예약자 전화번호", example = "010-1234-5678")
         String phoneNumber,
 
-        @Schema(description = "예약자 전화번호", example = "010-1234-5678")
+        @Schema(description = "예약상태", example = "PENDING")
         ReservationStatus status
 
     ) {
