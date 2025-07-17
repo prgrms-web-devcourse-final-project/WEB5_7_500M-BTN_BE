@@ -32,7 +32,7 @@ import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 
-@Tag(name = "User MyPage", description = "마이페이지 관련 API")
+@Tag(name = "마이페이지 API", description = "마이페이지 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/my-page")
