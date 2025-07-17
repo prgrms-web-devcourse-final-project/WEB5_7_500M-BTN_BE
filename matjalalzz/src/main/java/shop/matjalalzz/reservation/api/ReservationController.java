@@ -33,7 +33,6 @@ import shop.matjalalzz.reservation.entity.ReservationStatus;
 
 @RestController
 @RequiredArgsConstructor
-@Validated
 @RequestMapping
 @Tag(name = "예약 API", description = "예약 관련 API")
 public class ReservationController {
