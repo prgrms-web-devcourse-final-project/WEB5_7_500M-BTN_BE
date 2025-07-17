@@ -2,7 +2,6 @@ package shop.matjalalzz.global.security.jwt.app;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.JwtParser;
@@ -34,7 +33,7 @@ public class TokenProvider {
     private SecretKey secretKey;
 
     @PostConstruct
-    void init() {
+    private void init() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -101,17 +100,28 @@ public class TokenProvider {
         return false;
     }
 
-    public TokenBodyDto parseJwt(String token) {
-        Jws<Claims> parsed = Jwts.parser()
-            .verifyWith(secretKey)
-            .build()
-            .parseSignedClaims(token);
+    public TokenBodyDto parseAccessToken(String token) {
+        Claims payload = getPayload(token);
 
-        String userId = parsed.getPayload().getSubject();
-        String role = parsed.getPayload().get("role").toString();
-        String email = parsed.getPayload().get("email").toString();
+        String userId = payload.getSubject();
+        String role = payload.get("role").toString();
+        String email = payload.get("email").toString();
 
         return TokenMapper.toTokenBodyDto(Long.parseLong(userId), email, Role.valueOf(role));
+    }
+
+    public long parseRefreshToken(String token) {
+        Claims payload = getPayload(token);
+
+        return Long.parseLong(payload.getSubject());
+    }
+
+    private Claims getPayload(String token) {
+        return Jwts.parser()
+            .verifyWith(secretKey)
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
     }
 
     //log에서 마스킹 후 출력용

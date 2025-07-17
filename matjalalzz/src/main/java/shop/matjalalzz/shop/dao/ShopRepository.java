@@ -91,4 +91,6 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 
     @Query("select s from Shop s where s.id = :shopId and  s.user.id = :userId")
     Optional<Shop> findByIdAndUserId(@Param("shopId") Long shopId,@Param("userId") Long userId);
+
+    User user(User user);
 }

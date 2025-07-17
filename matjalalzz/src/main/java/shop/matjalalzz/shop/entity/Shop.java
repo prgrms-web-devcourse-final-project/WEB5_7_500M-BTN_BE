@@ -24,7 +24,7 @@ import shop.matjalalzz.user.entity.User;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(indexes = {@Index(name = "idx_shop_user", columnList = "user_id") }
+@Table(indexes = {@Index(name = "idx_shop_user", columnList = "user_id")}
 )
 public class Shop extends BaseEntity {
 
@@ -68,7 +68,7 @@ public class Shop extends BaseEntity {
     private int reservationFee; //사장이 설정한 예약금
 
     @Column(nullable = false)
-    private Double rating ; // 별점
+    private Double rating; // 별점
 
     private LocalTime openTime; //영업 시간 00:00
 
@@ -79,9 +79,10 @@ public class Shop extends BaseEntity {
     private User user;
 
     @Builder
-    public Shop( String shopName, String roadAddress, String sido, Double latitude,
+    public Shop(String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
-        String businessCode, LocalTime openTime, LocalTime closeTime, User user, String detailAddress, int reservationFee) {
+        String businessCode, LocalTime openTime, LocalTime closeTime, User user,
+        String detailAddress, int reservationFee) {
         this.shopName = shopName;
         this.roadAddress = roadAddress;
         this.sido = sido;
@@ -113,6 +114,10 @@ public class Shop extends BaseEntity {
         this.closeTime = shopUpdateVo.closeTime();
         this.detailAddress = shopUpdateVo.detailAddress();
         this.user = user;
+    }
+
+    public void updateRating(double rating) {
+        this.rating = rating;
     }
 
 }

@@ -2,11 +2,14 @@ package shop.matjalalzz.party.dao;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.party.entity.enums.PartyStatus;
 
 public interface PartyRepository extends JpaRepository<Party, Long>,
     JpaSpecificationExecutor<Party> {
@@ -27,4 +30,7 @@ public interface PartyRepository extends JpaRepository<Party, Long>,
         order by p.id desc
         """)
     Slice<MyPartyResponse> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
+
+    List<Party> findByDeadlineAfterAndStatus(LocalDateTime now, PartyStatus status);
+
 }

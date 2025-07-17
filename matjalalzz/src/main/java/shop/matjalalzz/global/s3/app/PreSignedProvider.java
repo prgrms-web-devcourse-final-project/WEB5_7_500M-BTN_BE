@@ -5,6 +5,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -74,6 +75,10 @@ public class PreSignedProvider {
 
     // 한 개 삭제
     public void deleteObject(String key) {
+        if (key == null) {
+            return;
+        }
+
         deleteObjects(List.of(key));
     }
 
@@ -87,9 +92,11 @@ public class PreSignedProvider {
             .delete(
                 Delete.builder()
                     .objects(
-                        keys.stream().map(
-                            k -> ObjectIdentifier.builder().key(k).build()
-                        ).toList()
+                        keys.stream()
+                            .filter(Objects::nonNull)
+                            .map(
+                                k -> ObjectIdentifier.builder().key(k).build()
+                            ).toList()
                     )
                     .build()
             )
