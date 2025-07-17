@@ -2,6 +2,7 @@ package shop.matjalalzz.reservation.dao;
 
 import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -24,6 +25,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         """)
     Slice<Reservation> findByShopIdWithFilterAndCursor(
         @Param("shopId") Long shopId,
+        @Param("status") ReservationStatus status,
+        @Param("cursor") Long cursor,
+        Pageable pageable
+    );
+
+    @Query("""
+        SELECT r FROM Reservation r
+        WHERE r.shop.id IN :shopIds
+          AND (:status IS NULL OR r.status = :status)
+          AND (:cursor IS NULL OR r.id < :cursor)
+        ORDER BY r.id DESC
+        """)
+    Slice<Reservation> findByShopIdsWithFilterAndCursor(
+        @Param("shopIds") List<Long> shopIds,
         @Param("status") ReservationStatus status,
         @Param("cursor") Long cursor,
         Pageable pageable
@@ -63,4 +78,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("userId") Long userId,
         @Param("cursor") Long cursor,
         Pageable pageable);
+
+    @Query("""
+    SELECT r FROM Reservation r
+    WHERE r.status IN :statuses
+      AND r.reservedAt <= :threshold
+        """)
+    List<Reservation> findAllByStatusInAndReservedAtBefore(
+        @Param("statuses") List<ReservationStatus> statuses,
+        @Param("threshold") LocalDateTime threshold);
 }

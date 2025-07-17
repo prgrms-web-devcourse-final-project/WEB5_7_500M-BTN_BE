@@ -3,6 +3,7 @@ package shop.matjalalzz.shop.dao;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,7 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 
     List<Shop> findByUser(User user);
 
+    List<Shop> findByUserId(Long id);
 
     //거리 순
     @Query("""

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 
 @Builder
 @Schema(description = "예약 목록 응답 DTO")
@@ -34,7 +35,10 @@ public record ReservationListResponse(
         int headCount,
 
         @Schema(description = "예약자 전화번호", example = "010-1234-5678")
-        String phoneNumber
+        String phoneNumber,
+
+        @Schema(description = "예약상태", example = "PENDING")
+        ReservationStatus status
 
     ) {
 

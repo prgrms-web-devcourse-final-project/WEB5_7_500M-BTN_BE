@@ -290,6 +290,11 @@ public class ShopService {
         return ShopMapper.toShopPageResponse(nextCursor, result.getContent(), thumbnailList);
     }
 
+    @Transactional(readOnly = true)
+    public List<Shop> findByOwnerId(Long ownerId) {
+        return shopRepository.findByUserId(ownerId);
+    }
+
     private ShopPageResponse getShopListByName(String query, String cursor, int size) {
         Slice<Shop> result = shopRepository.findCursorListByName(
             cursor, query, PageRequest.of(0, size));

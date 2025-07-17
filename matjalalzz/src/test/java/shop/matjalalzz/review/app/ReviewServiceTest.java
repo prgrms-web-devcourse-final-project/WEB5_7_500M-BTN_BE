@@ -372,16 +372,16 @@ class ReviewServiceTest {
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.reviews()).hasSize(2);
-            assertThat(response.reviews().getFirst().reviewId()).isEqualTo(1L);
-            assertThat(response.reviews().getFirst().content()).isEqualTo("맛있어요!");
-            assertThat(response.reviews().get(0).rating()).isEqualTo(4.5);
-            assertThat(response.reviews().get(0).userNickname()).isEqualTo("테스터1");
+            assertThat(response.content()).hasSize(2);
+            assertThat(response.content().getFirst().reviewId()).isEqualTo(1L);
+            assertThat(response.content().getFirst().content()).isEqualTo("맛있어요!");
+            assertThat(response.content().get(0).rating()).isEqualTo(4.5);
+            assertThat(response.content().get(0).userNickname()).isEqualTo("테스터1");
 
-            assertThat(response.reviews().get(1).reviewId()).isEqualTo(2L);
-            assertThat(response.reviews().get(1).content()).isEqualTo("서비스가 좋아요!");
-            assertThat(response.reviews().get(1).rating()).isEqualTo(5.0);
-            assertThat(response.reviews().get(1).userNickname()).isEqualTo("테스터2");
+            assertThat(response.content().get(1).reviewId()).isEqualTo(2L);
+            assertThat(response.content().get(1).content()).isEqualTo("서비스가 좋아요!");
+            assertThat(response.content().get(1).rating()).isEqualTo(5.0);
+            assertThat(response.content().get(1).userNickname()).isEqualTo("테스터2");
 
             // 다음 페이지가 없으므로 nextCursor는 null
             assertThat(response.nextCursor()).isNull();
@@ -427,7 +427,7 @@ class ReviewServiceTest {
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.reviews()).hasSize(2);
+            assertThat(response.content()).hasSize(2);
             // 다음 페이지가 있으므로 nextCursor는 마지막 리뷰의 ID
             assertThat(response.nextCursor()).isEqualTo(2L);
         }
@@ -449,7 +449,7 @@ class ReviewServiceTest {
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.reviews()).isEmpty();
+            assertThat(response.content()).isEmpty();
             assertThat(response.nextCursor()).isNull();
         }
 
