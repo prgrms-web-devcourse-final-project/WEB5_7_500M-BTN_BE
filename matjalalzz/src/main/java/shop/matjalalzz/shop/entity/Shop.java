@@ -14,19 +14,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.user.entity.User;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(indexes = {@Index(name = "idx_shop_user", columnList = "user_id") }
+@Table(indexes = {@Index(name = "idx_shop_user", columnList = "user_id")}
 )
 public class Shop extends BaseEntity {
 
@@ -70,7 +68,7 @@ public class Shop extends BaseEntity {
     private int reservationFee; //사장이 설정한 예약금
 
     @Column(nullable = false)
-    private Double rating ; // 별점
+    private Double rating; // 별점
 
     private LocalTime openTime; //영업 시간 00:00
 
@@ -81,9 +79,10 @@ public class Shop extends BaseEntity {
     private User user;
 
     @Builder
-    public Shop( String shopName, String roadAddress, String sido, Double latitude,
+    public Shop(String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
-        String businessCode, LocalTime openTime, LocalTime closeTime, User user, String detailAddress, int reservationFee) {
+        String businessCode, LocalTime openTime, LocalTime closeTime, User user,
+        String detailAddress, int reservationFee) {
         this.shopName = shopName;
         this.roadAddress = roadAddress;
         this.sido = sido;
@@ -114,6 +113,10 @@ public class Shop extends BaseEntity {
         this.openTime = dto.openTime();
         this.closeTime = dto.closeTime();
         this.detailAddress = dto.detailAddress();
+    }
+
+    public void updateRating(double rating) {
+        this.rating = rating;
     }
 
 }
