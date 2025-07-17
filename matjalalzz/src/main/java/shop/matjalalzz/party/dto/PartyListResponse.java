@@ -15,7 +15,8 @@ public record PartyListResponse(
     LocalDateTime metAt,
     String shopName,
     String shopRoadAddress,
-    String shopDetailAddress
+    String shopDetailAddress,
+    String shopImage
 ) {
 
 }
