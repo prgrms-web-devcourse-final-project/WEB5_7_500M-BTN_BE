@@ -18,7 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.common.BaseEntity;
-import shop.matjalalzz.shop.dto.ShopUpdateRequest;
+import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.user.entity.User;
 
 @Getter
@@ -46,10 +46,10 @@ public class Shop extends BaseEntity {
     private String sido;
 
     @Column(nullable = false)
-    private Double latitude; //위도
+    private double latitude; //위도
 
     @Column(nullable = false)
-    private Double longitude; //경도
+    private double longitude; //경도
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description; //설명
@@ -100,19 +100,20 @@ public class Shop extends BaseEntity {
         this.detailAddress = detailAddress;
     }
 
-    public void updateShop(ShopUpdateRequest dto) {
-        this.shopName = dto.shopName();
-        this.roadAddress = dto.roadAddress();
-        this.sido = dto.sido();
-        this.latitude = dto.latitude();
-        this.longitude = dto.longitude();
-        this.description = dto.description();
-        this.category = dto.category();
-        this.tel = dto.tel();
-        this.businessCode = dto.businessCode();
-        this.openTime = dto.openTime();
-        this.closeTime = dto.closeTime();
-        this.detailAddress = dto.detailAddress();
+    public void updateShop(ShopUpdateVo shopUpdateVo, User user) {
+        this.shopName = shopUpdateVo.shopName();
+        this.roadAddress = shopUpdateVo.roadAddress();
+        this.sido = shopUpdateVo.sido();
+        this.latitude = shopUpdateVo.latitude();
+        this.longitude = shopUpdateVo.longitude();
+        this.description = shopUpdateVo.description();
+        this.category = shopUpdateVo.category();
+        this.tel = shopUpdateVo.tel();
+        this.businessCode = shopUpdateVo.businessCode();
+        this.openTime = shopUpdateVo.openTime();
+        this.closeTime = shopUpdateVo.closeTime();
+        this.detailAddress = shopUpdateVo.detailAddress();
+        this.user = user;
     }
 
     public void updateRating(double rating) {
