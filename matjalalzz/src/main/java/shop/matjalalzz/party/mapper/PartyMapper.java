@@ -30,7 +30,8 @@ public class PartyMapper {
             .build();
     }
 
-    public static PartyDetailResponse toDetailResponse(Party party, Long hostId) {
+    public static PartyDetailResponse toDetailResponse(Party party, Long hostId,
+        String thumbnailImage) {
         return PartyDetailResponse.builder()
             .partyId(party.getId())
             .title(party.getTitle())
@@ -50,6 +51,7 @@ public class PartyMapper {
             .shopName(party.getShop().getShopName())
             .shopRoadAddress(party.getShop().getRoadAddress())
             .shopDetailAddress(party.getShop().getDetailAddress())
+            .thumbnailImage(thumbnailImage)
             .build();
     }
 

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.dao.PartySpecification;
 import shop.matjalalzz.party.dao.PartyUserRepository;
@@ -42,6 +44,10 @@ public class PartyService {
     private final PartySchedulerService partySchedulerService;
     private final ShopService shopService;
     private final UserService userService;
+    private final ImageRepository imageRepository;
+
+    @Value("${aws.credentials.AWS_BASE_URL}")
+    private String BASE_URL;
 
     @Transactional
     public void createParty(PartyCreateRequest request, long userId) {
@@ -70,7 +76,14 @@ public class PartyService {
             .findFirst()
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
-        return PartyMapper.toDetailResponse(party, hostId);
+        Shop shop = shopService.shopFind(party.getShop().getId());
+
+        //TODO: 추후 imageService로 이동
+        String thumbnailImage = imageRepository.findByShopIdAndImageIndex(shop.getId(), 0)
+            .map(image -> BASE_URL + image.getS3Key())
+            .orElse(null);
+
+        return PartyMapper.toDetailResponse(party, hostId, thumbnailImage);
     }
 
     @Transactional(readOnly = true)
@@ -88,6 +101,13 @@ public class PartyService {
         List<PartyListResponse> content = partyList.stream()
             .map(PartyMapper::toListResponse)
             .toList();
+
+//        Shop shop = shopService.shopFind(party.getShop().getId());
+//
+//        //TODO: 추후 imageService로 이동
+//        String thumbnailImage = imageRepository.findByShopIdAndImageIndex(shop.getId(), 0)
+//            .map(image -> BASE_URL + image.getS3Key())
+//            .orElse(null);
 
         return new PartyScrollResponse(content, nextCursor);
     }
