@@ -47,9 +47,5 @@ public class Image {
     private Long reviewId;
 
 
-    //이미지 저장 성공 여부
-    private boolean completed = false;
-
-
 
 }

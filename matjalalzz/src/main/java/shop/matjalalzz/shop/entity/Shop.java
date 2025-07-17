@@ -14,15 +14,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalTime;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.matjalalzz.global.common.BaseEntity;
-import shop.matjalalzz.shop.dto.ShopUpdateCommand;
-import shop.matjalalzz.shop.dto.ShopUpdateRequest;
+import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.user.entity.User;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value.Str;
 
 @Getter
 @Entity
@@ -102,19 +99,19 @@ public class Shop extends BaseEntity {
         this.detailAddress = detailAddress;
     }
 
-    public void updateShop(ShopUpdateCommand shopUpdateCommand, User user) {
-        this.shopName = shopUpdateCommand.shopName();
-        this.roadAddress = shopUpdateCommand.roadAddress();
-        this.sido = shopUpdateCommand.sido();
-        this.latitude = shopUpdateCommand.latitude();
-        this.longitude = shopUpdateCommand.longitude();
-        this.description = shopUpdateCommand.description();
-        this.category = shopUpdateCommand.category();
-        this.tel = shopUpdateCommand.tel();
-        this.businessCode = shopUpdateCommand.businessCode();
-        this.openTime = shopUpdateCommand.openTime();
-        this.closeTime = shopUpdateCommand.closeTime();
-        this.detailAddress = shopUpdateCommand.detailAddress();
+    public void updateShop(ShopUpdateVo shopUpdateVo, User user) {
+        this.shopName = shopUpdateVo.shopName();
+        this.roadAddress = shopUpdateVo.roadAddress();
+        this.sido = shopUpdateVo.sido();
+        this.latitude = shopUpdateVo.latitude();
+        this.longitude = shopUpdateVo.longitude();
+        this.description = shopUpdateVo.description();
+        this.category = shopUpdateVo.category();
+        this.tel = shopUpdateVo.tel();
+        this.businessCode = shopUpdateVo.businessCode();
+        this.openTime = shopUpdateVo.openTime();
+        this.closeTime = shopUpdateVo.closeTime();
+        this.detailAddress = shopUpdateVo.detailAddress();
         this.user = user;
     }
 

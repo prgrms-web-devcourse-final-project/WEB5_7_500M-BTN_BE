@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.image.entity.enums.ImageType;
+import shop.matjalalzz.image.mapper.ImageMapper;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
@@ -39,7 +41,13 @@ public class PreSignedProvider {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            items.add(buildItem(ImageType.SHOP_IMG, shopId, "img_" + i));
+            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId, "img_" + i);
+            items.add(preSignedUrlResponse);
+
+            String s3Key = preSignedUrlResponse.key();
+            Image imageValue = ImageMapper.UrlResponseToImage(s3Key, i, shopId);
+            imageRepository.save(imageValue);
+
         }
 
         return new PreSignedUrlListResponse(items, shopId);
@@ -49,7 +57,12 @@ public class PreSignedProvider {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            items.add(buildItem(ImageType.SHOP_IMG, shopId, "img_review_" + reviewId + "_" + i));
+            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId, "img_review_" + reviewId + "_" + i);
+            items.add(preSignedUrlResponse);
+            String s3Key = preSignedUrlResponse.key();
+            Image imageValue = ImageMapper.UrlResponseToImage(s3Key, i, shopId);
+            imageRepository.save(imageValue);
+
         }
 
         return new PreSignedUrlListResponse(items, reviewId);
@@ -66,6 +79,9 @@ public class PreSignedProvider {
 
     // 여러 개 삭제
     public void deleteObjects(List<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return;
+        }
         DeleteObjectsRequest request = DeleteObjectsRequest.builder()
             .bucket(bucketName)
             .delete(

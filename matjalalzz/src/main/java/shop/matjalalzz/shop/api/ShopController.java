@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,11 +20,12 @@ import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.dto.OwnerShopsList;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
+import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
-import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsResponse;
 
@@ -31,6 +33,7 @@ import shop.matjalalzz.shop.dto.ShopsResponse;
 @RequiredArgsConstructor
 @Tag(name = "식당 API", description = "식당 관련 API")
 public class ShopController {
+
     private final ShopService shopService;
 
     @Operation(summary = "식당 생성", description = "새로운 식당을 생성합니다.")
@@ -39,7 +42,7 @@ public class ShopController {
     public BaseResponse<PreSignedUrlListResponse> createShop(@RequestBody ShopCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
         PreSignedUrlListResponse preSignedUrlListResponse = shopService.newShop(principal.getId(), request);
-        return BaseResponse.ok(preSignedUrlListResponse,BaseStatus.CREATED);
+        return BaseResponse.ok(preSignedUrlListResponse, BaseStatus.CREATED);
     }
 
 
@@ -51,23 +54,35 @@ public class ShopController {
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
+    //사장의 식당 리스트 조회
+    @Operation(summary = "사장이 가진 식당들 조회", description = "사장 한명이 가진 식당들 리스트들을 조회합니다.")
+    @GetMapping("/owner/shops")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<OwnerShopsList> getOwnerShops(@AuthenticationPrincipal PrincipalUser principal) {
+        OwnerShopsList response = shopService.getOwnerShopList(principal.getId());
+        return BaseResponse.ok(response, BaseStatus.OK);
+    }
+
+
+
     @Operation(summary = "사장의 식당 상세 조회", description = "특정 식당의 상세 정보를 조회합니다.")
     @GetMapping("/owner/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopOwnerDetailResponse> getDetailShopOwner(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        ShopOwnerDetailResponse response = shopService.getShopOwner(shopId, principal.getId());
+        ShopOwnerDetailResponse response = shopService.getOwnerShop(shopId, principal.getId());
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
 
     @Operation(summary = "사장 식당 정보 수정", description = "식당 정보를 수정합니다.")
-    @PatchMapping("/owner/shops/{shopId}")
+    @PutMapping("/owner/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PreSignedUrlListResponse> updateShop(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal,
         @RequestBody @Valid ShopUpdateRequest shopUpdateRequest) {
-        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(), shopUpdateRequest);
+        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(),
+            shopUpdateRequest);
         return BaseResponse.ok(urlResponse, BaseStatus.OK);
     }
 
@@ -85,14 +100,16 @@ public class ShopController {
         return BaseResponse.ok(shops, BaseStatus.OK);
     }
 
-    @Operation(summary = "식당 검색", description = "키워드로 식당을 검색합니다.")
+    @Operation(summary = "식당 검색", description = "키워드로 식당을 검색합니다."
+        + "정렬기준: name, createdAt, rating  (Completed)")
     @GetMapping("/shops/search")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<ShopPageResponse> getShopsBySearch(@RequestParam String query,
-        @RequestParam String sort,
-        @RequestParam(required = false) Long cursor,
+    public BaseResponse<ShopPageResponse> getShopsBySearch(
+        @RequestParam(required = false) String query,
+        @RequestParam(defaultValue = "createdAt") String sort,
+        @RequestParam(required = false) String cursor,
         @RequestParam(defaultValue = "10") int size) {
-        return BaseResponse.ok(ShopPageResponse.builder().build(), BaseStatus.OK);
+        return BaseResponse.ok(shopService.getShopList(query, sort, cursor, size), BaseStatus.OK);
     }
 
 

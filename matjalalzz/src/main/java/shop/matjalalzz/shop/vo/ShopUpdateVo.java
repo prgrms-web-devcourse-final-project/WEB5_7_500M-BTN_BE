@@ -1,4 +1,4 @@
-package shop.matjalalzz.shop.dto;
+package shop.matjalalzz.shop.vo;
 
 import java.time.LocalTime;
 import lombok.Builder;
@@ -6,7 +6,7 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 
 
 @Builder
-public record ShopUpdateCommand (
+public record ShopUpdateVo(
      String shopName,
      String roadAddress,
      String detailAddress,
