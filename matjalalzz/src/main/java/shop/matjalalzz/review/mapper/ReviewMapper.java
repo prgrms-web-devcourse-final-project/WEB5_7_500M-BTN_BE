@@ -32,7 +32,7 @@ public class ReviewMapper {
     public static ReviewPageResponse toReviewPageResponse(Long nextCursor, List<Review> reviews) {
         return ReviewPageResponse.builder()
             .nextCursor(nextCursor)
-            .reviews(reviews.stream().map(ReviewMapper::toReviewResponse).toList())
+            .content(reviews.stream().map(ReviewMapper::toReviewResponse).toList())
             .build();
     }
 
