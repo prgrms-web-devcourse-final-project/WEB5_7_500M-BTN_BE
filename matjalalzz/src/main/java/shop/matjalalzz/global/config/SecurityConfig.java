@@ -77,10 +77,14 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/reservations").hasRole("OWNER")
                     .requestMatchers(HttpMethod.PATCH,"/reservations/{reservationId}/**").hasRole("OWNER")
 
-                    .requestMatchers(HttpMethod.GET,"/shops/{shopId}").permitAll()
+
+                    .requestMatchers(HttpMethod.GET, "/shops/{shopId}").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops/search").permitAll()
-                    .requestMatchers("/owner/**").hasAnyRole("OWNER","ADMIN")
+                    .requestMatchers("/owner/**").hasAnyRole("OWNER", "ADMIN")
+
+                    .requestMatchers(HttpMethod.GET, "/parties/{partyId}/comments").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reviews").permitAll()
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
 
