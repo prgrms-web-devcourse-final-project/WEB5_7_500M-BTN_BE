@@ -247,7 +247,8 @@ class ReservationRepositoryTest {
             em.clear();
 
             // when
-            boolean exists = reservationRepository.existsByShopIdAndReservationAt(shop.getId(), reservedAt);
+            boolean exists = reservationRepository.existsByShopIdAndReservationAt(shop.getId(),
+                reservedAt);
 
             // then
             assertThat(exists).isTrue();

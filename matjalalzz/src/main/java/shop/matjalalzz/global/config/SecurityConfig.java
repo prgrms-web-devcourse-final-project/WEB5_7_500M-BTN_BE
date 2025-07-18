@@ -73,7 +73,7 @@ public class SecurityConfig {
                         "/swagger-ui/**", "/error", "/oauth2/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}", "/parties").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
-
+                    .requestMatchers("/shops/presigned-urls").hasAnyRole("ADMIN", "OWNER", "USER")
                     .requestMatchers(HttpMethod.GET, "/reservations").hasRole("OWNER")
                     .requestMatchers(HttpMethod.PATCH, "/reservations/{reservationId}/**")
                     .hasRole("OWNER")
@@ -88,7 +88,8 @@ public class SecurityConfig {
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
 
-                    .anyRequest().hasAnyRole("USER", "ADMIN") //나머지 요청은 USER 또는 ADMiN 권한을 가져야 접근 가능
+                    .anyRequest().hasAnyRole("USER", "ADMIN", "OWNER")
+                //나머지 요청은 USER 또는 ADMiN 권한을 가져야 접근 가능
             )
             .exceptionHandling(handler ->
                 handler.authenticationEntryPoint(entryPoint))
