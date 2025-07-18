@@ -75,8 +75,8 @@ public class SecurityConfig {
                     .requestMatchers("/admin/**").hasRole("ADMIN")
 
                     .requestMatchers(HttpMethod.GET, "/reservations").hasRole("OWNER")
-                    .requestMatchers(HttpMethod.PATCH,"/reservations/{reservationId}/**").hasRole("OWNER")
-
+                    .requestMatchers(HttpMethod.PATCH, "/reservations/{reservationId}/**")
+                    .hasRole("OWNER")
 
                     .requestMatchers(HttpMethod.GET, "/shops/{shopId}").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops").permitAll()
