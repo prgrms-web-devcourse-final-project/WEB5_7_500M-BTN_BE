@@ -27,7 +27,6 @@ import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.app.ShopService;
-import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.util.TestUtil;
@@ -287,11 +286,11 @@ class ReservationServiceTest {
                     java.util.Optional.of(reservation));
 
                 // when
-                reservationService.cancelReservation(reservation.getId(),
+                reservationService.refuseReservation(reservation.getId(),
                     user.getId());
 
                 // then
-                assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELLED);
+                assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.REFUSED);
             }
 
             @Test
@@ -329,13 +328,13 @@ class ReservationServiceTest {
                 Reservation reservation = TestUtil.createReservation(shop, user, null,
                     LocalDateTime.now());
                 ReflectionTestUtils.setField(reservation, "id", 4L);
-                reservation.changeStatus(ReservationStatus.CANCELLED); // 이미 거절됨
+                reservation.changeStatus(ReservationStatus.REFUSED); // 이미 거절됨
 
                 given(reservationRepository.findById(4L)).willReturn(Optional.of(reservation));
 
                 // when & then
                 assertThrows(BusinessException.class, () ->
-                    reservationService.cancelReservation(reservation.getId(),
+                    reservationService.refuseReservation(reservation.getId(),
                         user.getId())
                 );
             }

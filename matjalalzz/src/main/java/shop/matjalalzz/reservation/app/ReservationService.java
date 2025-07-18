@@ -143,9 +143,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelReservation(Long reservationId, Long ownerId) {
+    public void refuseReservation(Long reservationId, Long ownerId) {
         Reservation reservation = validateOwnerPermissionAndPending(reservationId, ownerId);
-        reservation.changeStatus(ReservationStatus.CANCELLED);
+        reservation.changeStatus(ReservationStatus.REFUSED);
     }
 
 
@@ -176,8 +176,8 @@ public class ReservationService {
         LocalDateTime threshold = LocalDateTime.now().minusDays(1);
 
         List<Reservation> toTerminate = reservationRepository
-            .findAllByStatusInAndReservedAtBefore(
-                List.of(ReservationStatus.PENDING, ReservationStatus.CONFIRMED),
+            .findAllByStatusAndReservedAtBefore(
+                ReservationStatus.CONFIRMED,
                 threshold
             );
 
@@ -186,6 +186,23 @@ public class ReservationService {
         }
 
         return toTerminate.size();
+    }
+
+    @Transactional
+    public int refuseExpiredPendingReservations() {
+        LocalDateTime threshold = LocalDateTime.now().minusHours(1);
+
+        List<Reservation> toRefuse = reservationRepository
+            .findAllByStatusAndReservedAtBefore(
+                ReservationStatus.PENDING,
+                threshold
+            );
+
+        for (Reservation r : toRefuse) {
+            r.changeStatus(ReservationStatus.REFUSED);
+        }
+
+        return toRefuse.size();
     }
 }
 

@@ -1,13 +1,10 @@
 package shop.matjalalzz.reservation.dao;
 
-import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
@@ -81,10 +78,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
     SELECT r FROM Reservation r
-    WHERE r.status IN :statuses
+    WHERE r.status = :status
       AND r.reservedAt <= :threshold
         """)
-    List<Reservation> findAllByStatusInAndReservedAtBefore(
-        @Param("statuses") List<ReservationStatus> statuses,
+    List<Reservation> findAllByStatusAndReservedAtBefore(
+        @Param("status") ReservationStatus status,
         @Param("threshold") LocalDateTime threshold);
 }

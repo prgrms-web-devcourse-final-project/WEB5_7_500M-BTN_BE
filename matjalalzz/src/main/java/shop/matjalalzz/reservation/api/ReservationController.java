@@ -9,10 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +39,7 @@ public class ReservationController {
 
     @Operation(
         summary = "식당 예약 목록 조회",
-        description = "shopId에 해당하는 식당의 예약 목록을 필터와 커서 기반으로 조회한다.(Completed)",
+        description = "식당의 예약 목록을 필터와 커서 기반으로 조회한다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 목록 조회 성공",
                 content = @Content(schema = @Schema(implementation = ReservationListResponse.class))),
@@ -101,7 +99,7 @@ public class ReservationController {
 
     @Operation(
         summary = "예약 수락",
-        description = "reservationId에 해당하는 예약을 CONFIRMED 상태로 변경한다. (Inprogress)",
+        description = "reservationId에 해당하는 예약을 CONFIRMED 상태로 변경한다. (Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 수락 성공"),
         }
@@ -118,17 +116,17 @@ public class ReservationController {
 
     @Operation(
         summary = "예약 거절",
-        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Inprogress)",
+        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 거절 성공"),
         }
     )
     @PatchMapping("/reservations/{reservationId}/cancel")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> cancelReservation(
+    public BaseResponse<Void> refuseReservation(
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.cancelReservation(reservationId, principal.getId());
+        reservationService.refuseReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }
