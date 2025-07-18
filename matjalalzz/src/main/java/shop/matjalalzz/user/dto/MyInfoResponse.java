@@ -23,7 +23,7 @@ public record MyInfoResponse(
     String name,
 
     @Schema(example = "28")
-    int age,
+    Integer age,
 
     @Schema(example = "W", description = "성별: M or W")
     Gender gender,

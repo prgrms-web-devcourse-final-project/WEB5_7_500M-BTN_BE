@@ -32,13 +32,11 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
     private String oauthId;
 
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -51,13 +49,12 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 20)
     private String name;
 
-    private int age;
+    private Integer age;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(nullable = false, length = 20)
+    @Column(length = 20)
     private String phoneNumber;
 
     private int point = 0;
@@ -66,12 +63,13 @@ public class User extends BaseEntity {
     private String profileKey;
 
     @Builder
-    public User(String email, String oauthId, String password, String nickname, String phoneNumber,
-        String name, int age, Gender gender, String profileKey) {
+    public User(String email, String oauthId, Role role, String password, String nickname, String phoneNumber,
+        String name, Integer age, Gender gender, String profileKey) {
         this.email = email;
         this.oauthId = oauthId;
         this.password = password;
         this.nickname = nickname;
+        this.role = role;
         this.phoneNumber = phoneNumber;
         this.name = name;
         this.age = age;
