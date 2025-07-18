@@ -46,7 +46,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 정보 조회",
-        description = "로그인한 사용자의 마이페이지 정보를 조회합니다.(Inprogress)",
+        description = "로그인한 사용자의 마이페이지 정보를 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
         }
@@ -61,7 +61,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 정보 수정",
-        description = "로그인한 사용자의 마이페이지 정보를 수정합니다.(Inprogress)",
+        description = "로그인한 사용자의 마이페이지 정보를 수정합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "수정 성공")
         }
@@ -79,7 +79,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "프로필 이미지 업로드를 위한 pre-signed url 생성",
-        description = "내 정보 수정 항목 중 프로필 이미지를 업로드하기 위한 pre-signed url을 생성합니다.(Inprogress)",
+        description = "내 정보 수정 항목 중 프로필 이미지를 업로드하기 위한 pre-signed url을 생성합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "생성 성공")
         }
@@ -96,7 +96,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "프로필 이미지 삭제",
-        description = "프로필 수정 작업 중 예외 발생으로 업로드된 이미지를 삭제합니다.(Inprogress)",
+        description = "프로필 수정 작업 중 예외 발생으로 업로드된 이미지를 삭제합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "삭제 성공")
         }
@@ -111,7 +111,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 예약 정보 조회",
-        description = "로그인한 사용자의 예약 목록을 커서 기반 페이징 방식으로 조회합니다.(Inprogress)",
+        description = "로그인한 사용자의 예약 목록을 커서 기반 페이징 방식으로 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
@@ -130,7 +130,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 파티 정보 조회",
-        description = "로그인한 사용자의 파티 목록을 커서 기반 페이징 방식으로 조회합니다.(Inprogress)",
+        description = "로그인한 사용자의 파티 목록을 커서 기반 페이징 방식으로 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
@@ -150,7 +150,7 @@ public class UserInfoController {
 
     @Operation(
         summary = "내 리뷰 정보 조회",
-        description = "로그인한 사용자가 작성한 리뷰 목록을 커서 기반 페이징 방식으로 조회합니다.(Inprogress)",
+        description = "로그인한 사용자가 작성한 리뷰 목록을 커서 기반 페이징 방식으로 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
