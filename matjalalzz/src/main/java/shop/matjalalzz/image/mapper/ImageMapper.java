@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import shop.matjalalzz.global.s3.dto.PreSignedCompliedRequest;
 import shop.matjalalzz.global.s3.dto.PreSignedCompliedReviewRequest;
-import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.image.entity.Image;
 
 
@@ -46,11 +45,19 @@ public class ImageMapper {
     }
 
 
-    public static Image UrlResponseToImage( String s3Key, int i, long shopId) {
+    public static Image UrlResponseToImage(String s3Key, int i, long shopId) {
         return Image.builder()
             .s3Key(s3Key)
             .imageIndex(i)
             .shopId(shopId)
+            .build();
+    }
+
+    public static Image UrlResponseToReviewImage(String s3Key, int i, long reviewId) {
+        return Image.builder()
+            .s3Key(s3Key)
+            .imageIndex(i)
+            .reviewId(reviewId)
             .build();
     }
 

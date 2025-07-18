@@ -1,25 +1,18 @@
 package shop.matjalalzz.reservation.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
@@ -36,6 +29,7 @@ import shop.matjalalzz.util.TestUtil;
 @SpringBootTest
 @Transactional
 @Rollback
+@AutoConfigureTestDatabase(replace = Replace.ANY)
 @DisplayName("ReservationService 예약 생성 테스트")
 class ReservationCreateReservationTest {
 
@@ -65,7 +59,8 @@ class ReservationCreateReservationTest {
             User user = userRepository.save(TestUtil.createUser());
             Shop shop = shopRepository.save(TestUtil.createShop(user));
             Party party = partyRepository.save(TestUtil.createParty(shop));
-            CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "19:00", 2, 10000);
+            CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "19:00",
+                2, 10000);
 
             // when
             CreateReservationResponse response = reservationService.createReservation(
@@ -84,7 +79,8 @@ class ReservationCreateReservationTest {
             // given
             User user = userRepository.save(TestUtil.createUser());
             Shop shop = shopRepository.save(TestUtil.createShop(user));
-            CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "20:00", 2, 10000);
+            CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "20:00",
+                2, 10000);
 
             // when
             CreateReservationResponse response = reservationService.createReservation(
@@ -124,14 +120,13 @@ class ReservationCreateReservationTest {
 
             List<Reservation> filtered = all.stream()
                 .filter(r -> r.getReservedAt().equals(reservedAt))
-                .filter(r -> r.getUser().getId().equals(user1.getId()) || r.getUser().getId().equals(user2.getId()))
+                .filter(r -> r.getUser().getId().equals(user1.getId()) || r.getUser().getId()
+                    .equals(user2.getId()))
                 .toList();
 
             assertThat(filtered).hasSize(2);
             assertThat(filtered).allMatch(r -> r.getReservedAt().equals(reservedAt));
         }
-
-
 
 //        @Transactional(propagation = Propagation.NOT_SUPPORTED)
 //        @Nested
