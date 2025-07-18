@@ -9,10 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -125,10 +123,10 @@ public class ReservationController {
     )
     @PatchMapping("/reservations/{reservationId}/cancel")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<Void> cancelReservation(
+    public BaseResponse<Void> refuseReservation(
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.cancelReservation(reservationId, principal.getId());
+        reservationService.refuseReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }
