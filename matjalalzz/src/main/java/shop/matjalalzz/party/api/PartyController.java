@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +24,7 @@ import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
-import shop.matjalalzz.party.dto.PartySearchCondition;
+import shop.matjalalzz.party.dto.PartySearchParam;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,14 +51,29 @@ public class PartyController {
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
-    @Operation(summary = "파티 목록 조회", description = "파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다.(Completed)")
+    @Operation(summary = "파티 목록 조회", description = """
+        파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다. (Completed)
+                
+        예시 /parties?status=RECRUITING&minAge=10&categories=CHICKEN&categories=JAPANESE
+                
+        | 필드 명     | 자료형    | 필수 여부  | 설명                                            | 기본값                   |
+        |------------|---------|-----------|-------------------------------------------------|------------------------|
+        | status     | string  | Optional  | 파티 상태                                        | 전체                    |
+        | gender     | string  | Optional  | 모집 성별 조건(A일 시 성별 무관인 파티만 조회합니다.)   |  전체                   |
+        | minAge     | int     | Optional  | 모집 최소 나이                                    | 전체                    |
+        | maxAge     | int     | Optional  | 모집 최대 나이                                    | 전체                    |
+        | location   | string  | Optional  | 시/도 단위 파티 위치                               | 전체                    |
+        | category   | string  | Optional  | 음식 카테고리 (다중 선택 가능)                       | 전체                    |
+        | query      | string  | Optional  | 파티 제목 검색 키워드                               | 전체                    |
+        | cursor       | int  | Optional   | 페이징 마지막 파티 id                               | null (첫번째 페이지일 시) |
+        """)
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyScrollResponse> getParties(
-        @ParameterObject @ModelAttribute PartySearchCondition condition,
+        @ParameterObject PartySearchParam param,
         @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        PartyScrollResponse response = partyService.searchParties(condition, size);
+        PartyScrollResponse response = partyService.searchParties(param, size);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
