@@ -65,7 +65,7 @@ public class PartyController {
         | location   | string  | Optional  | 시/도 단위 파티 위치                               | 전체                    |
         | category   | string  | Optional  | 음식 카테고리 (다중 선택 가능)                       | 전체                    |
         | query      | string  | Optional  | 파티 제목 검색 키워드                               | 전체                    |
-        | cursor       | int  | Optional   | 페이징 마지막 파티 id                               | null (첫번째 페이지일 시) |
+        | cursor       | int  | Optional   | 페이징 마지막 파티 id                               | 첫번째 페이지            |
         """)
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
