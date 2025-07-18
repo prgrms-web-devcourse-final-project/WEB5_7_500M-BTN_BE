@@ -3,6 +3,8 @@ package shop.matjalalzz.review.app;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,9 +23,13 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
@@ -48,6 +54,9 @@ class ReviewServiceTest {
     @Mock
     private ShopService shopService;
 
+    @Mock
+    private PreSignedProvider preSignedProvider;
+
     @InjectMocks
     private ReviewService reviewService;
 
@@ -70,16 +79,18 @@ class ReviewServiceTest {
                 .reservationId(reservationId)
                 .content("맛있어요!")
                 .rating(rating)
+                .imageCount(1)
                 .build();
 
             User writer = mock(User.class);
             when(writer.getId()).thenReturn(writerId);
-            when(writer.getNickname()).thenReturn("테스터");
 
             Shop shop = mock(Shop.class);
+            when(shop.getId()).thenReturn(shopId);
 
             Reservation reservation = mock(Reservation.class);
             when(reservation.getUser()).thenReturn(writer);
+            when(reservation.getStatus()).thenReturn(ReservationStatus.TERMINATED);
 
             Review review = Review.builder()
                 .id(reviewId)
@@ -94,6 +105,10 @@ class ReviewServiceTest {
             when(shopService.shopFind(shopId)).thenReturn(shop);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
             when(reviewRepository.save(any(Review.class))).thenReturn(review);
+            when(preSignedProvider.createReviewUploadUrls(anyInt(), anyLong(),
+                anyLong())).thenReturn(
+                new PreSignedUrlListResponse(List.of(new PreSignedUrlResponse("key", "url")),
+                    shopId));
 
             // when
             PreSignedUrlListResponse response = reviewService.createReview(request, writerId);
@@ -179,6 +194,7 @@ class ReviewServiceTest {
 
             Reservation reservation = mock(Reservation.class);
             when(reservation.getUser()).thenReturn(writer);
+            when(reservation.getStatus()).thenReturn(ReservationStatus.TERMINATED);
 
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
@@ -216,6 +232,7 @@ class ReviewServiceTest {
             Reservation reservation = mock(Reservation.class);
             when(reservation.getUser()).thenReturn(reservationUser);
             when(reservation.getParty()).thenReturn(null); // 파티 예약이 아닌 경우
+            when(reservation.getStatus()).thenReturn(ReservationStatus.TERMINATED);
 
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(
@@ -268,11 +285,19 @@ class ReviewServiceTest {
             User writer = mock(User.class);
             when(writer.getId()).thenReturn(writerId);
 
+            Image image1 = mock(Image.class);
+            when(image1.getS3Key()).thenReturn("key1");
+
+            Shop shop1 = mock(Shop.class);
+            when(shop1.getRating()).thenReturn(4.2);
+
             Review review = Review.builder()
                 .id(reviewId)
                 .content("맛있어요!")
                 .rating(4.5)
+                .shop(shop1)
                 .writer(writer)
+                .images(List.of(image1))
                 .build();
 
             when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
@@ -340,6 +365,9 @@ class ReviewServiceTest {
             Long cursor = 0L;
             int size = 10;
 
+            Image image1 = mock(Image.class);
+            when(image1.getS3Key()).thenReturn("key1");
+
             User writer1 = mock(User.class);
             when(writer1.getNickname()).thenReturn("테스터1");
 
@@ -351,6 +379,7 @@ class ReviewServiceTest {
                 .content("맛있어요!")
                 .rating(4.5)
                 .writer(writer1)
+                .images(List.of(image1))
                 .build();
 
             Review review2 = Review.builder()
@@ -358,6 +387,7 @@ class ReviewServiceTest {
                 .content("서비스가 좋아요!")
                 .rating(5.0)
                 .writer(writer2)
+                .images(List.of(image1))
                 .build();
 
             List<Review> reviews = List.of(review1, review2);
@@ -395,6 +425,9 @@ class ReviewServiceTest {
             Long cursor = 0L;
             int size = 2;
 
+            Image image1 = mock(Image.class);
+            when(image1.getS3Key()).thenReturn("key1");
+
             User writer1 = mock(User.class);
             when(writer1.getNickname()).thenReturn("테스터1");
 
@@ -406,6 +439,7 @@ class ReviewServiceTest {
                 .content("맛있어요!")
                 .rating(4.5)
                 .writer(writer1)
+                .images(List.of(image1))
                 .build();
 
             Review review2 = Review.builder()
@@ -413,6 +447,7 @@ class ReviewServiceTest {
                 .content("서비스가 좋아요!")
                 .rating(5.0)
                 .writer(writer2)
+                .images(List.of(image1))
                 .build();
 
             List<Review> reviews = List.of(review1, review2);
