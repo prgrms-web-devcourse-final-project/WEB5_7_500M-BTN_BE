@@ -4,11 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,162 +18,153 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.s3.app.PreSignedProvider;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
+import shop.matjalalzz.global.security.PrincipalUser;
+import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.dto.MyPartyPageResponse;
+import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
+import shop.matjalalzz.review.app.ReviewService;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.user.app.UserService;
+import shop.matjalalzz.user.dto.DeleteProfileRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
-import shop.matjalalzz.user.dto.MyPartiesResponse;
-import shop.matjalalzz.user.dto.MyReservationsResponse;
-import shop.matjalalzz.user.dto.MyReviewsResponse;
-import shop.matjalalzz.user.dto.PartyResponse;
-import shop.matjalalzz.user.dto.ReservationResponse;
-import shop.matjalalzz.user.dto.ReviewResponse;
 
-@Tag(name = "User MyPage", description = "마이페이지 관련 API")
+@Tag(name = "마이페이지 API", description = "마이페이지 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/my-page")
 public class UserInfoController {
 
+    private final UserService userService;
+    private final ReservationService reservationService;
+    private final PartyService partyService;
+    private final ReviewService reviewService;
+    private final PreSignedProvider preSignedProvider;
+
     @Operation(
         summary = "내 정보 조회",
-        description = "로그인한 사용자의 마이페이지 정보를 조회합니다.",
+        description = "로그인한 사용자의 마이페이지 정보를 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
         }
     )
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyInfoResponse> getMyInfo() {
-        // todo: 이후 구현
-        MyInfoResponse data = MyInfoResponse.builder()
-            .email("minji97@gmail.com")
-            .nickname("맛잘알민지")
-            .role("USER")
-            .name("김민지")
-            .age(28)
-            .gender("W")
-            .point(1800)
-            .phoneNumber("010-1234-5678")
-            .bucketId("UUID_a.png")
-            .profile("https://s3.amazonaws.com/bucket/uploads/reviews/UUID_a.png")
-            .build();
+    public BaseResponse<MyInfoResponse> getMyInfo(@AuthenticationPrincipal PrincipalUser userInfo) {
+        MyInfoResponse result = userService.getMyInfo(userInfo.getId());
 
-        return BaseResponse.ok(data, BaseStatus.OK);
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 
     @Operation(
         summary = "내 정보 수정",
-        description = "로그인한 사용자의 마이페이지 정보를 수정합니다.",
+        description = "로그인한 사용자의 마이페이지 정보를 수정합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "수정 성공")
         }
     )
-    @PatchMapping
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> updateMyInfo(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @Valid @RequestBody MyInfoUpdateRequest request
     ) {
-        // todo: 이후 구현
+        userService.updateMyInfo(userInfo.getId(), request);
+
         return BaseResponse.ok(BaseStatus.OK);
     }
 
     @Operation(
+        summary = "프로필 이미지 업로드를 위한 pre-signed url 생성",
+        description = "내 정보 수정 항목 중 프로필 이미지를 업로드하기 위한 pre-signed url을 생성합니다.(Completed)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "생성 성공")
+        }
+    )
+    @PostMapping("/presigned-urls")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BaseResponse<PreSignedUrlResponse> getProfilePresignedUrl(
+        @AuthenticationPrincipal PrincipalUser userInfo
+    ) {
+        PreSignedUrlResponse result = preSignedProvider.createProfileUploadUrls(userInfo.getId());
+
+        return BaseResponse.ok(result, BaseStatus.OK);
+    }
+
+    @Operation(
+        summary = "프로필 이미지 삭제",
+        description = "프로필 수정 작업 중 예외 발생으로 업로드된 이미지를 삭제합니다.(Completed)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "삭제 성공")
+        }
+    )
+    @DeleteMapping("/profile-img")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProfile(
+        @Valid @RequestBody DeleteProfileRequest request
+    ) {
+        preSignedProvider.deleteObject(request.profileKey());
+    }
+
+    @Operation(
         summary = "내 예약 정보 조회",
-        description = "로그인한 사용자의 예약 목록을 커서 기반 페이징 방식으로 조회합니다.",
+        description = "로그인한 사용자의 예약 목록을 커서 기반 페이징 방식으로 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
     )
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyReservationsResponse> getMyReservations(
+    public BaseResponse<MyReservationPageResponse> getMyReservations(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        // todo: 이후 구현
-        MyReservationsResponse data = MyReservationsResponse.builder()
-            .nextCursor(100L)
-            .content(List.of(
-                ReservationResponse.builder()
-                    .reservationId(90L)
-                    .shopName("신전떡볶이 강남점")
-                    .name("이초롱")
-                    .reservedAt("2025-07-10T18:00:00")
-                    .headCount(2)
-                    .reservationFee(4000)
-                    .status("CONFIRMED")
-                    .build()
-            ))
-            .build();
-        return BaseResponse.ok(data, BaseStatus.OK);
+        MyReservationPageResponse result = reservationService.findMyReservationPage(userInfo.getId(), cursor, size);
+
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 
     @Operation(
         summary = "내 파티 정보 조회",
-        description = "로그인한 사용자의 파티 목록을 커서 기반 페이징 방식으로 조회합니다.",
+        description = "로그인한 사용자의 파티 목록을 커서 기반 페이징 방식으로 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
     )
     @GetMapping("/parties")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyPartiesResponse> getMyParties(
+    public BaseResponse<MyPartyPageResponse> getMyParties(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        // todo: 이후 구현
-        MyPartiesResponse data = MyPartiesResponse.builder()
-            .nextCursor(10L)
-            .content(List.of(
-                PartyResponse.builder()
-                    .partyId(9L)
-                    .title("신전떡볶이 먹을 사람?")
-                    .shopName("신전떡볶이 강남점")
-                    .metAt("2025-07-10T18:00:00")
-                    .deadline("2025-07-09T18:00:00")
-                    .status("COMPLETED")
-                    .maxCount(5)
-                    .minCount(2)
-                    .currentCount(3)
-                    .genderCondition("M")
-                    .ageCondition(20)
-                    .discription("신전떡볶이 강남점은 뭔가 맛이 다르다는데, 가보실 분 구합니다!")
-                    .build()
-            ))
-            .build();
+        MyPartyPageResponse result = partyService.findMyReservationPage(
+            userInfo.getId(), cursor, size);
 
-        return BaseResponse.ok(data, BaseStatus.OK);
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 
     @Operation(
         summary = "내 리뷰 정보 조회",
-        description = "로그인한 사용자가 작성한 리뷰 목록을 커서 기반 페이징 방식으로 조회합니다.",
+        description = "로그인한 사용자가 작성한 리뷰 목록을 커서 기반 페이징 방식으로 조회합니다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "조회 성공")
         }
     )
     @GetMapping("/reviews")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<MyReviewsResponse> getMyReviews(
+    public BaseResponse<MyReviewPageResponse> getMyReviews(
+        @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyReviewsResponse data = MyReviewsResponse.builder()
-            .nextCursor(20L)
-            .content(List.of(
-                ReviewResponse.builder()
-                    .reviewId(19L)
-                    .shopName("엽기떡볶이 잠실점")
-                    .rating(4.5)
-                    .content("맵찔이도 먹기 좋았어요!")
-                    .createdAt("2025-07-01T15:32:00")
-                    .images(List.of(
-                        "https://s3.amazonaws.com/bucket/uploads/reviews/UUID_a.png",
-                        "https://s3.amazonaws.com/bucket/uploads/reviews/UUID_b.jpg"
-                    ))
-                    .build()
-            ))
-            .build();
+        MyReviewPageResponse result = reviewService.findMyReviewPage(
+            userInfo.getId(), cursor, size);
 
-        return BaseResponse.ok(data, BaseStatus.OK);
+        return BaseResponse.ok(result, BaseStatus.OK);
     }
 }

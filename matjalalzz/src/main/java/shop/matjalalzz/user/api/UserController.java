@@ -24,16 +24,15 @@ import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 
-@Tag(name = "User", description = "사용자 관련 API")
+@Tag(name = "사용자 API", description = "사용자 관련 API")
 @RestController
 @RequiredArgsConstructor
-@Validated
 @RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "회원가입", description = "폼 로그인 회원가입")
+    @Operation(summary = "회원가입", description = "폼 로그인 회원가입(Completed)")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/signup")
     public BaseResponse<Void> signup(@RequestBody @Valid SignUpRequest signUpRequestDto) {
@@ -41,17 +40,17 @@ public class UserController {
         return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 
-    @Operation(summary = "회원가입", description = "OAuth 추가 회원가입")
+    @Operation(summary = "회원가입", description = "OAuth 추가 회원가입(Completed)")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/signup/oauth")
     public BaseResponse<Void> oauthSignup(
         @AuthenticationPrincipal PrincipalUser userInfo,
         @RequestBody @Valid OAuthSignUpRequest oauthSignUpRequestDto) {
-        userService.oauthSignup(userInfo.getEmail(), oauthSignUpRequestDto);
+        userService.oauthSignup(userInfo.getId(), oauthSignUpRequestDto);
         return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 
-    @Operation(summary = "회원탈퇴", description = "회원 탈퇴 기능")
+    @Operation(summary = "회원탈퇴", description = "회원 탈퇴 기능(Inprogress)")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/delete")
     public void deleteUser(
@@ -63,7 +62,7 @@ public class UserController {
 
     @Operation(
         summary = "Form 로그인",
-        description = "폼 로그인으로 로그인합니다. 성공 시 액세스 토큰은 헤더, 리프레시 토큰은 쿠키에 포함됩니다."
+        description = "폼 로그인으로 로그인합니다. 성공 시 액세스 토큰은 헤더, 리프레시 토큰은 쿠키에 포함됩니다.(Completed)"
     )
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/login")

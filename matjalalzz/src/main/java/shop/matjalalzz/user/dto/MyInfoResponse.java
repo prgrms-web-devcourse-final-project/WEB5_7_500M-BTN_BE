@@ -2,9 +2,14 @@ package shop.matjalalzz.user.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import shop.matjalalzz.user.entity.enums.Gender;
+import shop.matjalalzz.user.entity.enums.Role;
 
 @Builder
 public record MyInfoResponse(
+    @Schema(example = "1")
+    long userId,
+
     @Schema(example = "minji97@gmail.com")
     String email,
 
@@ -12,7 +17,7 @@ public record MyInfoResponse(
     String nickname,
 
     @Schema(example = "USER")
-    String role,
+    Role role,
 
     @Schema(example = "김민지")
     String name,
@@ -21,16 +26,13 @@ public record MyInfoResponse(
     int age,
 
     @Schema(example = "W", description = "성별: M or W")
-    String gender,
+    Gender gender,
 
     @Schema(example = "1800")
     int point,
 
     @Schema(example = "010-1234-5678")
     String phoneNumber,
-
-    @Schema(example = "UUID_a.png")
-    String bucketId,
 
     @Schema(example = "https://s3.amazonaws.com/bucket/uploads/reviews/UUID_a.png")
     String profile

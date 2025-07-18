@@ -23,7 +23,9 @@ public record PartyDetailResponse(
     Long hostId,
     Long shopId,
     String shopName,
-    String shopAddress
+    String shopRoadAddress,
+    String shopDetailAddress,
+    String shopImage
 ) {
 
 }

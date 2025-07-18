@@ -10,12 +10,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.shop.entity.Shop;
@@ -26,6 +29,7 @@ import shop.matjalalzz.user.entity.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@SQLRestriction("deleted = false")
 public class Reservation extends BaseEntity {
 
     @Id
@@ -55,8 +59,12 @@ public class Reservation extends BaseEntity {
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "party_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "party_id")
     private Party party;
+
+    public void changeStatus(ReservationStatus status){
+        this.status = status;
+    }
 
 }

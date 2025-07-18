@@ -6,19 +6,21 @@ import lombok.Builder;
 import shop.matjalalzz.shop.entity.FoodCategory;
 
 @Builder
-public record ShopResponse(
-    Long shopId,
-    String name,
+public record ShopOwnerDetailResponse(
+    long shopId,
+    String shopName,
     FoodCategory category,
     String description,
-    String address,
-    String phone,
+    String roadAddress,
+    String detailAddress,
+    String tel,
     LocalTime openTime,
     LocalTime closeTime,
-    Double rating,
+    double rating,
     int reservationFee,
     int reviewCount,
-    List<String> images
+    List<String> images,
+    String businessCode
 ) {
 
 }

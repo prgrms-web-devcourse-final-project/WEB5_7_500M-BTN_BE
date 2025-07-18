@@ -19,13 +19,19 @@ spring:
       hibernate:
         format_sql: true
     generate-ddl: true
+    defer-datasource-initialization: true
+    database-platform: ${JPA_DIALECT}
 
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
-      timeout: ${REDIS_TIMEOUT}
+  sql:
+    init:
+      mode: always
+
+    data:
+      redis:
+        host: ${REDIS_HOST}
+        port: ${REDIS_PORT}
+        password: ${REDIS_PASSWORD}
+        timeout: ${REDIS_TIMEOUT}
   security:
     oauth2:
       client:
@@ -75,13 +81,22 @@ custom:
       refresh: ${REFRESH_TOKEN_TTL} # 7일
     secret: ${JWT_SECRET}
     redirect-login-success: ${custom.cors.allowed-origin}/auth/callback
+aws:
+  credentials:
+    AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+    AWS_SECRET_KEY: ${AWS_SECRET_KEY}
+    AWS_BASE_URL: ${AWS_BASE_URL}
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    path: ${AWS_S3_PATH}
+    exp-min: ${AWS_S3_PRESIGN_EXP}
 
 toss:
   secret-key: ${TOSS_SECRET_KEY}
   client-key: ${TOSS_CLIENT_KEY}
 
 logging:
-  level:
-    root: INFO
+  root: INFO
 server:
   port: ${SERVER_PORT}

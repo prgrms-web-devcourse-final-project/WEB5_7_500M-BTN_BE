@@ -37,7 +37,21 @@ public record ShopCreateRequest(
     @NotBlank
     String businessCode,
 
-    @Schema(description = "음식 카테고리")
+    @Schema(description =
+        """
+            음식 카테고리 (아래 값 중 하나를 입력하세요):
+            - CHICKEN: 치킨
+            - CHINESE: 중식
+            - JAPANESE: 일식
+            - PIZZA: 피자
+            - FASTFOOD: 패스트푸드
+            - STEW_SOUP: 찜/탕
+            - JOK_BO: 족발/보쌈
+            - KOREAN: 한식
+            - SNACK: 분식
+            - WESTERN: 양식
+            - DESSERT: 카페/디저트
+            """)
     @NotNull
     FoodCategory category,
 
@@ -45,17 +59,21 @@ public record ShopCreateRequest(
     @NotNull
     int reservationFee,
 
-    @Schema(description = "영업 시작 시간")
+    @Schema(description = "영업 시작 시간", example = "09:00:00", type = "string")
     LocalTime openTime,
 
-    @Schema(description = "영업 종료 시간")
+    @Schema(description = "영업 종료 시간", example = "23:00:00", type = "string")
     LocalTime closeTime,
 
     @Schema(description = "상점 설명")
     @NotBlank
-    String description
+    String description,
 
-    //TODO: Image 추가
+    @Schema(description = "전화번호")
+    @NotNull
+    String tel,
+
+    int imageCount
 
 ) {
 

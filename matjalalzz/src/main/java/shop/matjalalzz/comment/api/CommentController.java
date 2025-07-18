@@ -2,6 +2,7 @@ package shop.matjalalzz.comment.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @Operation(summary = "댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.")
+    @Operation(summary = "댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.(Completed)")
     @GetMapping("/parties/{partyId}/comments")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<List<CommentResponse>> getComments(
@@ -36,18 +37,18 @@ public class CommentController {
             BaseStatus.OK);
     }
 
-    @Operation(summary = "댓글 작성", description = "특정 모임에 댓글을 작성합니다.")
+    @Operation(summary = "댓글 작성", description = "특정 모임에 댓글을 작성합니다.(Completed)")
     @PostMapping("/parties/{partyId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createComment(
         @PathVariable Long partyId,
-        @RequestBody CommentCreateRequest request,
+        @Valid @RequestBody CommentCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
         commentService.createComment(request, partyId, principal.getId());
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
-    @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
+    @Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.(Completed)")
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(

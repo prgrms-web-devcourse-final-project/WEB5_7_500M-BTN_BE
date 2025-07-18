@@ -9,13 +9,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
@@ -31,6 +35,7 @@ import shop.matjalalzz.user.entity.User;
         @Index(name = "idx_review_shop", columnList = "shop_id")
     }
 )
+@SQLRestriction("deleted = false")
 public class Review extends BaseEntity {
 
     @Id
@@ -57,8 +62,8 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "writer_id", nullable = false)
     private User writer;
 
-    //TODO: image 속성 추가
-//    @OneToMany(mappedBy = "review")
-//    private List<MockImage> images;
+    @OneToMany
+    @JoinColumn(name = "review_id")
+    private List<Image> images;
 
 }

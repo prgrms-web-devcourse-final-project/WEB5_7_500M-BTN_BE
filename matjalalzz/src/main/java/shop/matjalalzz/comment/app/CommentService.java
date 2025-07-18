@@ -11,9 +11,9 @@ import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.comment.mapper.CommentMapper;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -21,26 +21,25 @@ import shop.matjalalzz.user.entity.User;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final PartyRepository partyRepository;
-    private final UserRepository userRepository;
+    private final PartyService partyService;
+    private final UserService userService;
 
     @Transactional
     public CommentResponse createComment(CommentCreateRequest request, Long partyId,
         Long writerId) {
-        Party party = partyRepository.findById(partyId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
-        User writer = userRepository.findById(writerId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
+        Party party = partyService.findById(partyId);
+        User writer = userService.getUserById(writerId);
         Comment parent = null;
         if (request.parentId() != null) {
             parent = getComment(request.parentId());
         }
         Comment comment = CommentMapper.fromCommentCreateRequest(request, parent, party, writer);
-        commentRepository.save(comment);
-        return CommentMapper.toCommentResponse(comment);
+        Comment result = commentRepository.save(comment);
+        return validateMap(result);
     }
 
-    private Comment getComment(Long commentId) {
+    @Transactional(readOnly = true)
+    public Comment getComment(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(
             () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
@@ -48,7 +47,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public CommentResponse findComment(Long commentId) {
         Comment comment = getComment(commentId);
-        return CommentMapper.toCommentResponse(comment);
+        return validateMap(comment);
     }
 
     @Transactional
@@ -68,7 +67,12 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentResponse> findCommentsByParty(Long partyId) {
         List<Comment> comments = commentRepository.findAllByPartyId(partyId);
-        return comments.stream().map(CommentMapper::toCommentResponse).toList();
+        return comments.stream().map(this::validateMap).toList();
+    }
+
+    private CommentResponse validateMap(Comment comment) {
+        Long parentId = comment.getParent() != null ? comment.getParent().getId() : null;
+        return CommentMapper.toCommentResponse(comment, parentId);
     }
 
 }

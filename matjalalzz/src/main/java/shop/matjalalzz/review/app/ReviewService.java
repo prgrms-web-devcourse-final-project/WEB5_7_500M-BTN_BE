@@ -1,23 +1,31 @@
 package shop.matjalalzz.review.app;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.reservation.dao.ReservationRepository;
+import shop.matjalalzz.global.s3.app.PreSignedProvider;
+import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.image.entity.Image;
+import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.entity.PartyUser;
+import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
+import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dao.ReviewRepository;
+import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
-import shop.matjalalzz.review.dto.ReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
-import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -25,47 +33,73 @@ import shop.matjalalzz.user.entity.User;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;
-    private final ShopRepository shopRepository;
+    private final UserService userService;
+    private final ReservationService reservationService;
+    private final PartyService partyService;
+    private final ShopService shopService;
+    private final PreSignedProvider preSignedProvider;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
         Review review = getReview(reviewId);
         validatePermission(review, userId);
         review.delete();
+        List<String> imageKeys = review.getImages().stream().map(Image::getS3Key).toList();
+        preSignedProvider.deleteObjects(imageKeys);
+        removeShopRating(review.getShop(), review.getRating());
     }
 
     @Transactional
-    public ReviewResponse createReview(ReviewCreateRequest request, Long writerId) {
-        User writer = userRepository.findById(writerId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
-        Reservation reservation = reservationRepository.findById(request.reservationId())
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); // TODO: 개선
-        Shop shop = shopRepository.findById(request.shopId())
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND)); //TODO: 개선
+    public PreSignedUrlListResponse createReview(ReviewCreateRequest request, Long writerId) {
+        if (reviewRepository.existsByReservationIdAndWriterId(request.reservationId(), writerId)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_DATA);
+        }
+
+        User writer = userService.getUserById(writerId);
+        Reservation reservation = reservationService.getReservationById(request.reservationId());
+
+        if (reservation.getStatus() != ReservationStatus.TERMINATED) {
+            throw new BusinessException(ErrorCode.INVALID_RESERVATION_STATUS);
+        }
+
+        validateReservationPermission(reservation, writerId);
+
+        Shop shop = shopService.shopFind(request.shopId());
+
+        addShopRating(shop, request.rating());
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
-        reviewRepository.save(review);
-        return ReviewMapper.toReviewResponse(review);
+        Review result = reviewRepository.save(review);
+        return preSignedProvider.createReviewUploadUrls(request.imageCount(), shop.getId(),
+            result.getId());
     }
 
     @Transactional(readOnly = true)
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
-        Page<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
+        Slice<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
             PageRequest.of(0, size));
         Long nextCursor = null;
         if (comments.hasNext()) {
             nextCursor = comments.getContent().getLast().getId();
         }
-        return ReviewPageResponse.builder()
-            .nextCursor(nextCursor)
-            .reviews(comments.stream().map(ReviewMapper::toReviewResponse).toList())
-            .build();
-
+        return ReviewMapper.toReviewPageResponse(nextCursor, comments.getContent());
     }
 
-    private Review getReview(Long reviewId) {
+    @Transactional(readOnly = true)
+    public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
+        Slice<MyReviewResponse> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
+            PageRequest.of(0, size));
+
+        Long nextCursor = null;
+        if (comments.hasNext()) {
+            nextCursor = comments.getContent().getLast().reviewId();
+        }
+
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, comments);
+    }
+
+    @Transactional(readOnly = true)
+    public Review getReview(Long reviewId) {
         return reviewRepository.findById(reviewId).orElseThrow(
             () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
@@ -75,5 +109,38 @@ public class ReviewService {
         if (!review.getWriter().getId().equals(actorId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
+    }
+
+    private void validateReservationPermission(Reservation reservation, Long actorId) {
+        if (reservation.getParty() != null) {
+            // Party 프록시를 초기화시키지 않고 PartyUsers조회 -> 쿼리 1개 감소
+            List<PartyUser> partyUsers = partyService.getPartyUsers(reservation.getParty().getId());
+            List<Long> partyUserIds = partyUsers.stream().map(pu ->
+                pu.getUser().getId()).toList();
+            if (!partyUserIds.contains(actorId)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+        } else if (!reservation.getUser().getId().equals(actorId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    private void addShopRating(Shop shop, Double rating) {
+        Double currentRating = shop.getRating();
+        int currentCount = reviewRepository.countReviewByShop(shop);
+        double newRating = currentRating * currentCount + rating;
+        newRating /= (currentCount + 1);
+        shop.updateRating(newRating);
+    }
+
+    private void removeShopRating(Shop shop, Double rating) {
+        Double currentRating = shop.getRating();
+        int currentCount = reviewRepository.countReviewByShop(shop);
+        double newRating = currentRating * currentCount - rating;
+        newRating /= (currentCount - 1);
+        if (newRating < 0) {
+            newRating = 0.0;
+        }
+        shop.updateRating(newRating);
     }
 }

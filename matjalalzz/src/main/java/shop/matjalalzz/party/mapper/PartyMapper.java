@@ -2,13 +2,13 @@ package shop.matjalalzz.party.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.global.exception.domain.ErrorCode;
+import org.springframework.data.domain.Slice;
+import shop.matjalalzz.party.dto.MyPartyPageResponse;
+import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.shop.entity.Shop;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,7 +30,8 @@ public class PartyMapper {
             .build();
     }
 
-    public static PartyDetailResponse toDetailResponse(Party party) {
+    public static PartyDetailResponse toDetailResponse(Party party, Long hostId,
+        String shopImage) {
         return PartyDetailResponse.builder()
             .partyId(party.getId())
             .title(party.getTitle())
@@ -45,19 +46,16 @@ public class PartyMapper {
             .metAt(party.getMetAt())
             .deadline(party.getDeadline())
             .createdAt(party.getCreatedAt())
-            .hostId(party.getPartyUsers().stream()
-                .filter(PartyUser::isHost)
-                .map(pu -> pu.getUser().getId())
-                .findFirst()
-                .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND))
-            )
+            .hostId(hostId)
             .shopId(party.getId())
-            .shopName(party.getShop().getName())
-            .shopAddress(party.getShop().getAddress())
+            .shopName(party.getShop().getShopName())
+            .shopRoadAddress(party.getShop().getRoadAddress())
+            .shopDetailAddress(party.getShop().getDetailAddress())
+            .shopImage(shopImage)
             .build();
     }
 
-    public static PartyListResponse toListResponse(Party party) {
+    public static PartyListResponse toListResponse(Party party, String shopImage) {
         return PartyListResponse.builder()
             .partyId(party.getId())
             .title(party.getTitle())
@@ -65,21 +63,19 @@ public class PartyMapper {
             .minCount(party.getMinCount())
             .maxCount(party.getMaxCount())
             .currentCount(party.getCurrentCount())
-            .genderCondition(party.getGenderCondition())
-            .minAge(party.getMinAge())
-            .maxAge(party.getMaxAge())
             .metAt(party.getMetAt())
-            .deadline(party.getDeadline())
-            .createdAt(party.getCreatedAt())
-            .hostId(party.getPartyUsers().stream()
-                .filter(PartyUser::isHost)
-                .map(pu -> pu.getUser().getId())
-                .findFirst()
-                .orElse(null)
-            )
-            .shopName(party.getShop().getName())
-            .shopAddress(party.getShop().getAddress())
+            .shopName(party.getShop().getShopName())
+            .shopRoadAddress(party.getShop().getRoadAddress())
+            .shopDetailAddress(party.getShop().getDetailAddress())
+            .shopImage(shopImage)
             .build();
     }
 
+    public static MyPartyPageResponse toMyPartyPageResponse(Long nextCursor,
+        Slice<MyPartyResponse> parties) {
+        return MyPartyPageResponse.builder()
+            .nextCursor(nextCursor)
+            .content(parties.getContent())
+            .build();
+    }
 }

@@ -11,11 +11,11 @@ import shop.matjalalzz.user.entity.User;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {
 
-    public static CommentResponse toCommentResponse(Comment comment) {
+    public static CommentResponse toCommentResponse(Comment comment, Long parentId) {
         return CommentResponse.builder()
             .commentId(comment.getId())
-            .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
-            .content(comment.isDeleted() ? "삭제된 댓글입니다." : comment.getContent())
+            .parentId(parentId)
+            .content(comment.getContent())
             .createdAt(comment.getCreatedAt())
             .writer(CommentResponse.Writer.builder()
                 .userId(comment.getWriter().getId())
