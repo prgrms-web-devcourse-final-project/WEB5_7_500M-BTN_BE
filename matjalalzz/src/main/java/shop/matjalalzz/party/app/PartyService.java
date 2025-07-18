@@ -25,7 +25,7 @@ import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
-import shop.matjalalzz.party.dto.PartySearchCondition;
+import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
@@ -81,7 +81,7 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public PartyScrollResponse searchParties(PartySearchCondition condition, int size) {
+    public PartyScrollResponse searchParties(PartySearchParam condition, int size) {
         Specification<Party> spec = PartySpecification.createSpecification(condition);
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));

@@ -20,6 +20,7 @@ spring:
         format_sql: true
     generate-ddl: true
     defer-datasource-initialization: true
+    database-platform: ${JPA_DIALECT:org.hibernate.dialect.MySQL8Dialect}
 
   sql:
     init:
@@ -96,6 +97,6 @@ toss:
   client-key: ${TOSS_CLIENT_KEY}
 
 logging:
-    root: INFO
+  root: INFO
 server:
   port: ${SERVER_PORT}

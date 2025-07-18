@@ -5,7 +5,7 @@ import static org.springframework.util.StringUtils.hasText;
 import jakarta.persistence.criteria.Predicate;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
-import shop.matjalalzz.party.dto.PartySearchCondition;
+import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
@@ -74,7 +74,7 @@ public class PartySpecification {
             cursor != null ? cb.lessThan(root.get("id"), cursor) : null;
     }
 
-    public static Specification<Party> createSpecification(PartySearchCondition condition) {
+    public static Specification<Party> createSpecification(PartySearchParam condition) {
         return Specification.where(hasStatus(condition.status()))
             .and(hasGender(condition.gender()))
 //            .and(matchesAge(condition.ageFilter(), userAge))

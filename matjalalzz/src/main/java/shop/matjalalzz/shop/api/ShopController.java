@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -90,12 +91,12 @@ public class ShopController {
 
     @Operation(summary = "식당 목록 조회", description = """
         위치 기반으로 식당 목록을 조회합니다. (Completed)
-        
+                
         반경은 m 단위로 주시면 되며 ->  3km (3000)
         만약 사용자가 자신의 위치를 허용한다면 latitude과 longitude에 사용자 위도 경도, 원하는 범위를 넣어서 요청을 보내고 그렇지 않는다면 기본값으론 종로구 좌표에 3km 범위 식당을 가져옵니다
-        
+                
         예시 /shops?radius=1000000&sort=rating
-        
+                
         | 필드 명     | 자료형  | 필수 여부 | 설명                   | 기본값           |
         |------------|---------|-----------|-------------------------|------------------|
         | latitude   | double  | Required  | 사용자 위치의 위도         | 37.5724          |
@@ -103,12 +104,12 @@ public class ShopController {
         | radius     | double  | Optional  | 검색 반경 (단위: m)       | 3000.0           |
         | category   | string  | Optional  | 음식 카테고리             | 전체             |
         | sort       | string  | Optional  | 정렬 기준 (근처순, 평점순) | 근처 순(distance) |
-        
+                
         """)
     @GetMapping("/shops")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopsResponse> getShops(
-        ShopLocationSearchParam param,
+        @ParameterObject ShopLocationSearchParam param,
         @RequestParam(defaultValue = "distance") String sort, //정렬 기준(근처순, 평점순) (근처순이 기본(distance))
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10") int size) {
