@@ -1,6 +1,7 @@
 package shop.matjalalzz.user.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -33,23 +34,23 @@ public class UserServiceTest {
     @DisplayName("내 정보 조회 테스트")
     void getMyInfoTest() {
         // given
-        User user = User.builder()
-            .email("minji97@gmail.com")
-            .nickname("맛잘알민지")
-            .age(28)
-            .gender(Gender.W)
-            .phoneNumber("010-1234-5678")
-            .profileKey("/profile/1/img.png")
-            .build();
+        User user = mock(User.class);
+
+        when(user.getId()).thenReturn(1L);
+        when(user.getEmail()).thenReturn("minji97@gmail.com");
+        when(user.getGender()).thenReturn(Gender.W);
+        when(user.getProfileKey()).thenReturn("/profile/1/img.png");
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         // when
-        MyInfoResponse resp = userService.getMyInfo(1L);
+        MyInfoResponse response = userService.getMyInfo(1L);
 
         // then
-        assertThat(resp.email()).isEqualTo("minji97@gmail.com");
-        assertThat(resp.profile()).contains(user.getProfileKey());
+        assertThat(response.userId()).isEqualTo(1L);
+        assertThat(response.gender()).isEqualTo(Gender.W);
+        assertThat(response.email()).isEqualTo("minji97@gmail.com");
+        assertThat(response.profile()).contains(user.getProfileKey());
     }
 
     @Test
@@ -65,7 +66,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        MyInfoUpdateRequest dto = MyInfoUpdateRequest.builder()
+        MyInfoUpdateRequest request = MyInfoUpdateRequest.builder()
             .nickname("newNick")
             .age(25)
             .phoneNumber("010-2222-2222")
@@ -73,7 +74,7 @@ public class UserServiceTest {
             .build();
 
         // when
-        userService.updateMyInfo(1L, dto);
+        userService.updateMyInfo(1L, request);
 
         // then
         assertThat(user.getNickname()).isEqualTo("newNick");
