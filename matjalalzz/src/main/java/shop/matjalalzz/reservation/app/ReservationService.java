@@ -176,8 +176,8 @@ public class ReservationService {
         LocalDateTime threshold = LocalDateTime.now().minusDays(1);
 
         List<Reservation> toTerminate = reservationRepository
-            .findAllByStatusInAndReservedAtBefore(
-                List.of(ReservationStatus.CONFIRMED),
+            .findAllByStatusAndReservedAtBefore(
+                ReservationStatus.CONFIRMED,
                 threshold
             );
 
@@ -193,8 +193,8 @@ public class ReservationService {
         LocalDateTime threshold = LocalDateTime.now().minusHours(1);
 
         List<Reservation> toRefuse = reservationRepository
-            .findAllByStatusInAndReservedAtBefore(
-                List.of(ReservationStatus.PENDING),
+            .findAllByStatusAndReservedAtBefore(
+                ReservationStatus.PENDING,
                 threshold
             );
 
