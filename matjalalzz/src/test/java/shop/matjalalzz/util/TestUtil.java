@@ -12,6 +12,7 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Gender;
+import shop.matjalalzz.user.entity.enums.Role;
 
 public class TestUtil {
 
@@ -19,6 +20,7 @@ public class TestUtil {
         String randomEmail = "testEmail" + UUID.randomUUID() + "@naver.com";
         return User.builder()
             .email(randomEmail)
+            .role(Role.USER)
             .password("test-password")
             .nickname("nickname")
             .name("홍길동")

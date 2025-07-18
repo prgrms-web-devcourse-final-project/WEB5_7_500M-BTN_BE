@@ -28,6 +28,20 @@ class AuthorizationTest {
     }
 
     @Test
+    @DisplayName("임시 계정 접근 제한 테스트")
+    @WithCustomMockUser(role = Role.TMP)
+    void tmpAccountAccessTest() throws Exception {
+        mvc.perform(get("/test"))
+            .andExpect(status().isForbidden());
+
+        mvc.perform(get("/owner/test"))
+            .andExpect(status().isForbidden());
+
+        mvc.perform(get("/admin/test"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("user 접근 제한 테스트")
     @WithCustomMockUser(role = Role.USER)
     void userAccessTest() throws Exception {
