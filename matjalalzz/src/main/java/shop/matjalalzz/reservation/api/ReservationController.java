@@ -39,7 +39,7 @@ public class ReservationController {
 
     @Operation(
         summary = "식당 예약 목록 조회",
-        description = "shopId에 해당하는 식당의 예약 목록을 필터와 커서 기반으로 조회한다.(Completed)",
+        description = "식당의 예약 목록을 필터와 커서 기반으로 조회한다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 목록 조회 성공",
                 content = @Content(schema = @Schema(implementation = ReservationListResponse.class))),
@@ -99,7 +99,7 @@ public class ReservationController {
 
     @Operation(
         summary = "예약 수락",
-        description = "reservationId에 해당하는 예약을 CONFIRMED 상태로 변경한다. (Inprogress)",
+        description = "reservationId에 해당하는 예약을 CONFIRMED 상태로 변경한다. (Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 수락 성공"),
         }
@@ -116,7 +116,7 @@ public class ReservationController {
 
     @Operation(
         summary = "예약 거절",
-        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Inprogress)",
+        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 거절 성공"),
         }
