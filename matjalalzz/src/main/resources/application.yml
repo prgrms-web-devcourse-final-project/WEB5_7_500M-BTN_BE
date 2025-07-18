@@ -20,7 +20,7 @@ spring:
         format_sql: true
     generate-ddl: true
     defer-datasource-initialization: true
-    database-platform: ${JPA_DIALECT:org.hibernate.dialect.MySQL8Dialect}
+    database-platform: ${JPA_DIALECT}
 
   sql:
     init:

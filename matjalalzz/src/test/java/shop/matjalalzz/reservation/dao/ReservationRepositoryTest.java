@@ -212,7 +212,7 @@ class ReservationRepositoryTest {
             Party party = TestUtil.createParty(shop);
             em.persist(party);
 
-            LocalDateTime reservedAt = LocalDateTime.now().plusHours(1);
+            LocalDateTime reservedAt = LocalDateTime.now().plusHours(1).withNano(0);
             Reservation reservation = TestUtil.createReservation(shop, user, party, reservedAt);
 
             // when
@@ -240,7 +240,7 @@ class ReservationRepositoryTest {
             Party party = TestUtil.createParty(shop);
             em.persist(party);
 
-            LocalDateTime reservedAt = LocalDateTime.now().plusHours(1);
+            LocalDateTime reservedAt = LocalDateTime.now().plusHours(1).withNano(0);
             Reservation reservation = TestUtil.createReservation(shop, user, party, reservedAt);
             em.persist(reservation);
             em.flush();
