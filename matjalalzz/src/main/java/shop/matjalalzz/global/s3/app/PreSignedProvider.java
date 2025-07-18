@@ -45,7 +45,8 @@ public class PreSignedProvider {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId, "img_" + i);
+            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId,
+                "img_" + i);
             items.add(preSignedUrlResponse);
 
             String s3Key = preSignedUrlResponse.key();
@@ -62,10 +63,11 @@ public class PreSignedProvider {
         List<PreSignedUrlResponse> items = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId, "img_review_" + reviewId + "_" + i);
+            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.SHOP_IMG, shopId,
+                "img_review_" + reviewId + "_" + i);
             items.add(preSignedUrlResponse);
             String s3Key = preSignedUrlResponse.key();
-            Image imageValue = ImageMapper.UrlResponseToImage(s3Key, i, shopId);
+            Image imageValue = ImageMapper.UrlResponseToReviewImage(s3Key, i, reviewId);
             imageRepository.save(imageValue);
 
         }
