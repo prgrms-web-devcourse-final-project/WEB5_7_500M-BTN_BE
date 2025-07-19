@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.OAuth2Exception;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.oauth2.dto.GoogleResponseDto;
@@ -60,7 +61,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         String email = oAuth2ResponseDto.getEmail();
         userRepository.findByEmail(email).ifPresent(user -> {
-            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new OAuth2Exception(ErrorCode.EMAIL_ALREADY_EXISTS);
         });
 
         User newUser = userRepository.save(OAuth2Mapper.toUser(oAuth2ResponseDto));

@@ -35,21 +35,19 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (token != null) {
-            if (tokenProvider.validate(token)) {
-                TokenBodyDto tokenBodyDto = tokenProvider.parseAccessToken(token);
-                PrincipalUser principalUser = OAuth2Mapper.toPrincipalUser(tokenBodyDto);
+        if (tokenProvider.validate(token)) {
+            TokenBodyDto tokenBodyDto = tokenProvider.parseAccessToken(token);
+            PrincipalUser principalUser = OAuth2Mapper.toPrincipalUser(tokenBodyDto);
 
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    principalUser, token, principalUser.getAuthorities()
-                );
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                principalUser, token, principalUser.getAuthorities()
+            );
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                response.setStatus(ErrorCode.INVALID_ACCESS_TOKEN.getStatus().value());
-                response.getWriter().write(ErrorCode.INVALID_ACCESS_TOKEN.getMessage());
-                return;
-            }
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            response.setStatus(ErrorCode.INVALID_ACCESS_TOKEN.getStatus().value());
+            response.getWriter().write(ErrorCode.INVALID_ACCESS_TOKEN.getMessage());
+            return;
         }
 
         filterChain.doFilter(request, response);
