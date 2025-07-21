@@ -90,9 +90,9 @@ public class UserService {
             throw new BusinessException(EMAIL_ALREADY_EXISTS);  //409
         }
 
-        User user = UserMapper.toUser(dto, passwordEncoder);
+        String encodedPassword = passwordEncoder.encode(dto.password());
 
-        user.updateRole(Role.USER);
+        User user = UserMapper.toUser(dto, encodedPassword, Role.USER);
 
         userRepository.save(user);
     }
