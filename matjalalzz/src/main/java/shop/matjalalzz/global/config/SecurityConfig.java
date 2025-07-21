@@ -85,6 +85,7 @@ public class SecurityConfig {
 
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}/comments").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reviews").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
 
                     //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
 
