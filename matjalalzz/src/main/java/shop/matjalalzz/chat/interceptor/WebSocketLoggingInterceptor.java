@@ -1,4 +1,4 @@
-package shop.matjalalzz.chat.config;
+package shop.matjalalzz.chat.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
