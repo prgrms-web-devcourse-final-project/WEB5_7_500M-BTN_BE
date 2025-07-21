@@ -91,7 +91,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}/comments").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reviews").permitAll()
 
-                    //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
+                    .requestMatchers("/users/delete", "/users/logout").authenticated()
 
                     .anyRequest().hasAnyRole("USER", "ADMIN", "OWNER")
                 //나머지 요청은 USER 또는 ADMiN 권한을 가져야 접근 가능
