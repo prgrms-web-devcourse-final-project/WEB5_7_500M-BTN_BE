@@ -8,7 +8,10 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import shop.matjalalzz.chat.app.ChatService;
+import shop.matjalalzz.chat.dto.ChatJoinRequest;
 import shop.matjalalzz.chat.dto.ChatMessageDto;
+import shop.matjalalzz.chat.entity.MessageType;
+import shop.matjalalzz.global.security.PrincipalUser;
 
 @Controller
 @RequiredArgsConstructor
@@ -26,12 +29,18 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.addUser")
-    public void addUser(@Payload ChatMessageDto message, SimpMessageHeaderAccessor headerAccessor) {
-        log.info("Adding user: " + message);
-        headerAccessor.getSessionAttributes().put("username", message.sender());
-        headerAccessor.getSessionAttributes().put("roomId", message.partyId());
+    public void addUser(@Payload ChatJoinRequest request,
+        SimpMessageHeaderAccessor headerAccessor) {
+        PrincipalUser user = (PrincipalUser) headerAccessor.getSessionAttributes().get("user");
+        log.info("Adding user: {} Into {}", user.getId(), request.partyId());
 
-        messagingTemplate.convertAndSend("/topic/party/" + message.partyId(), message);
+        ChatMessageDto message = ChatMessageDto.builder()
+            .partyId(request.partyId())
+            .type(MessageType.JOIN)
+            .sender(user.getEmail())
+            .build();
+
+        messagingTemplate.convertAndSend("/topic/party/" + request.partyId(), message);
     }
 
 //    @MessageMapping("/chat/load")

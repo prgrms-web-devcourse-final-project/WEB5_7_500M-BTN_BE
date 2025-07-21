@@ -15,6 +15,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketLoggingInterceptor webSocketLoggingInterceptor;
     private final WebSocketAuthInterceptor webSocketAuthInterceptor;
+    private final HandshakeAuthInterceptor handshakeAuthInterceptor;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -27,6 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
             .setAllowedOriginPatterns("*")
+            .addInterceptors(handshakeAuthInterceptor)
             .withSockJS();
     }
 
