@@ -21,6 +21,7 @@ import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.dto.OwnerShopsList;
+import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
@@ -37,6 +38,13 @@ public class ShopController {
 
     private final ShopService shopService;
 
+    @Operation(summary = "관리자가 식당에 대한 정보를 봄", description = "관리자는 요청이 들어온 식당에 대한 정보를 볼 수 있습니다. 식당의 등록 상태가 뭐든 볼 수 있음 (Completed)")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/admin/shops/{shopId}")
+    public BaseResponse<ShopAdminDetailResponse> getShopAdminDetail(@PathVariable Long shopId) {
+        return BaseResponse.ok(shopService.adminGetShop(shopId), BaseStatus.OK);
+    }
+
     @Operation(summary = "식당 생성", description = "새로운 식당을 생성합니다.(Completed)")
     @PostMapping("/shops/presigned-urls")
     @ResponseStatus(HttpStatus.CREATED)
@@ -49,7 +57,7 @@ public class ShopController {
     }
 
 
-    @Operation(summary = "식당 상세 조회", description = "사용자가 특정 식당의 상세 정보를 조회합니다. 식당 상태가 APPROVED인 식당들만 조회 가능 (Completed)")
+    @Operation(summary = "식당 상세 조회", description = "사용자가 특정 식당의 상세 정보를 조회합니다. 식당 등록 상태가 APPROVED인 식당들만 조회 가능 (Completed)")
     @GetMapping("/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopDetailResponse> getDetailShop(@PathVariable Long shopId) {

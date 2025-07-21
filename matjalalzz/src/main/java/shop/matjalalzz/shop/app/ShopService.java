@@ -20,6 +20,7 @@ import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
 import shop.matjalalzz.shop.dto.OwnerShopsList;
+import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
@@ -52,6 +53,21 @@ public class ShopService {
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
+
+
+    // 관리자가 샵에 대한 정보를 보는 용도 (상저에 상태와 관계 없이 다 가져옴)
+    @Transactional(readOnly = true)
+    public ShopAdminDetailResponse adminGetShop(long shopId) {
+
+        Shop ownerShop = shopFind(shopId);
+        User owner = ownerShop.getUser();
+
+        List<String> images = imageRepository.findByShopImage(shopId);
+
+        return ShopMapper.shopToShopAdminDetailResponse(ownerShop, images, owner);
+
+    }
+
 
     @Transactional
     public PreSignedUrlListResponse newShop(long userId, ShopCreateRequest shopCreateRequest) {

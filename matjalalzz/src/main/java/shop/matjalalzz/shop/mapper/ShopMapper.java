@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
+import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
@@ -155,6 +156,31 @@ public class ShopMapper {
             .thumbnailUrl(thumbnailUrl)
             .approve(shop.getApprove())
             .rating(shop.getRating()).build();
+
+    }
+
+    public static ShopAdminDetailResponse shopToShopAdminDetailResponse (Shop shop, List<String> images, User user) {
+        return ShopAdminDetailResponse.builder()
+            .userId(user.getId())
+            .nickName(user.getName())
+            .shopId(shop.getId())
+            .shopName(shop.getShopName())
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
+            .category(shop.getCategory())
+            .description(shop.getDescription())
+            .roadAddress(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
+            .tel(shop.getTel())
+            .openTime(shop.getOpenTime())
+            .closeTime(shop.getCloseTime())
+            .rating(shop.getRating())
+            .reservationFee(shop.getReservationFee())
+            .images(images)
+            .businessCode(shop.getBusinessCode())
+            .approve(shop.getApprove())
+            .build();
+
 
     }
 
