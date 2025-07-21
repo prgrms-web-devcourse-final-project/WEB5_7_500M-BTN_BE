@@ -27,6 +27,7 @@ import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.entity.enums.Role;
 import shop.matjalalzz.user.mapper.UserMapper;
 
 @Slf4j
@@ -90,6 +91,8 @@ public class UserService {
         }
 
         User user = UserMapper.toUser(dto, passwordEncoder);
+
+        user.updateRole(Role.USER);
 
         userRepository.save(user);
     }
