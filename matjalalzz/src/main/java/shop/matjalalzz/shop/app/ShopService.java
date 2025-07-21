@@ -18,8 +18,11 @@ import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.shop.dao.ShopRepository;
+import shop.matjalalzz.shop.dto.ApproveRequest;
+import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
 import shop.matjalalzz.shop.dto.OwnerShopsList;
+import shop.matjalalzz.shop.dto.PendingShop;
 import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
@@ -37,6 +40,7 @@ import shop.matjalalzz.shop.entity.ShopListSort;
 import shop.matjalalzz.shop.mapper.ShopMapper;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.entity.enums.Role;
 
 @Service
 @RequiredArgsConstructor
@@ -54,8 +58,32 @@ public class ShopService {
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
 
+    // 관리자가 등록을 원하는 상점들 리스트를 전부 가져옴
+    @Transactional(readOnly = true)
+    public GetAllPendingShopListResponse adminGetAllPendingShop(){
+        List<Shop> shopList = shopRepository.findByApprove(Approve.PENDING);
+        return ShopMapper.getAllPendingShopResponse(shopList);
 
-    // 관리자가 샵에 대한 정보를 보는 용도 (상저에 상태와 관계 없이 다 가져옴)
+    }
+
+    @Transactional
+    public void approve(long shopId, ApproveRequest approveRequest ) {
+        Approve approve = approveRequest.approve();
+
+        Shop shop = shopFind(shopId);
+        shop.updateApprove(approve);
+
+        // approved 시 사용자의 권한도 식당 사장인 OWNER로 바꿔줘야 함
+        if (approve == Approve.APPROVED) {
+            User owner = shop.getUser();
+            owner.updateRole(Role.OWNER);
+        }
+
+    }
+
+
+
+    // 관리자가 상점에 대한 상세 정보를 보는 용도 (상점에 상태와 관계 없이 다 가져옴)
     @Transactional(readOnly = true)
     public ShopAdminDetailResponse adminGetShop(long shopId) {
 

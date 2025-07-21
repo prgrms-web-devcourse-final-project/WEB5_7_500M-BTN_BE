@@ -125,4 +125,6 @@ public class Shop extends BaseEntity {
         this.rating = rating;
     }
 
+    public void updateApprove(Approve approve) {this.approve = approve;}
+
 }

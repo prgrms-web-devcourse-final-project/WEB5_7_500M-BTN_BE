@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
+import shop.matjalalzz.shop.dto.PendingShop;
 import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
@@ -183,6 +185,26 @@ public class ShopMapper {
 
 
     }
+
+    public static GetAllPendingShopListResponse getAllPendingShopResponse(List<Shop> shopList) {
+        List<PendingShop> pendingShopList = shopList.stream().map(ShopMapper::shopToPendingShop).toList();
+        return new GetAllPendingShopListResponse(pendingShopList);
+    }
+
+
+    public static PendingShop shopToPendingShop(Shop shop) {
+        return PendingShop.builder()
+            .shopId(shop.getId())
+            .shopName(shop.getShopName())
+            .userId(shop.getUser().getId())
+            .userName(shop.getUser().getName())
+            .tel(shop.getTel())
+            .address(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
+            .approve(shop.getApprove())
+            .build();
+    }
+
 
 
 }

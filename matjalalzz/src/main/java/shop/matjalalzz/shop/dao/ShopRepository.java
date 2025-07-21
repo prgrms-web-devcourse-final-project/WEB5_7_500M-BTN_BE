@@ -17,6 +17,8 @@ import shop.matjalalzz.user.entity.User;
 
 public interface ShopRepository extends JpaRepository<Shop, Long> {
 
+    List<Shop> findByApprove(Approve approve);
+
     Optional<Shop> findByIdAndApprove(Long id, Approve approved);
 
     Optional<Shop> findByBusinessCodeOrRoadAddressAndDetailAddress(String businessCode,

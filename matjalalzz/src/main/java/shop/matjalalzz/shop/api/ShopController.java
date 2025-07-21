@@ -20,7 +20,10 @@ import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.dto.ApproveRequest;
+import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopsList;
+import shop.matjalalzz.shop.dto.PendingShop;
 import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
@@ -37,6 +40,22 @@ import shop.matjalalzz.shop.entity.ShopListSort;
 public class ShopController {
 
     private final ShopService shopService;
+
+    @Operation(summary = "관리자가 pending 상태인 식당들 리스트를 가져옴", description = "관리자는 등록을 원하는 식당 리스트를 볼 수 있습니다. (Completed)")
+    @GetMapping("/admin/shops")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<GetAllPendingShopListResponse> getPendingShop (){
+        return BaseResponse.ok(shopService.adminGetAllPendingShop(), BaseStatus.OK);
+    }
+
+    @Operation(summary = "관리자가 식당 등록에 대한 요청을 승인 또는 거절 ", description = "APPROVED(승인) 또는 REJECTED(거절) (Completed)")
+    @PostMapping("/admin/shops/{shopId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void getPendingShop (@PathVariable Long shopId, @RequestBody ApproveRequest approveRequest) {
+        shopService.approve(shopId, approveRequest);
+    }
+
+
 
     @Operation(summary = "관리자가 식당에 대한 정보를 봄", description = "관리자는 요청이 들어온 식당에 대한 정보를 볼 수 있습니다. 식당의 등록 상태가 뭐든 볼 수 있음 (Completed)")
     @ResponseStatus(HttpStatus.OK)
