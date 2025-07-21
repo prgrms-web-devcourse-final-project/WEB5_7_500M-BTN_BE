@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.entity.enums.Role;
 
 public class UserMapper {
 
@@ -16,6 +17,7 @@ public class UserMapper {
             .phoneNumber(signUpRequest.phoneNumber())
             .age(signUpRequest.age())
             .name(signUpRequest.name())
+            .role(Role.USER)
             .gender(signUpRequest.gender())
             .build();
     }
