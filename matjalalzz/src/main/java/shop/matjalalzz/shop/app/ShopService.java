@@ -24,6 +24,7 @@ import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopLocationSearchParam;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
+import shop.matjalalzz.shop.entity.Approve;
 import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
@@ -75,8 +76,8 @@ public class ShopService {
     @Transactional(readOnly = true)
     public ShopDetailResponse getShop(Long shopId) {
 
-        // 해당 상점이 없으면 에러
-        Shop shop = shopFind(shopId);
+        // 등록 된 상태인 식당들만 가져와서 보여줌
+        Shop shop = shopRepository.findByIdAndApprove(shopId, Approve.APPROVED).orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
         List<String> imageUrllList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
@@ -94,7 +95,8 @@ public class ShopService {
     @Transactional(readOnly = true)
     public OwnerShopsList getOwnerShopList (Long userId){
 
-        List<Shop> shopList = shopRepository.findByUser(userFind(userId));
+        // 승인 된 자신의 식당들 리스트를 가져옴
+        List<Shop> shopList = shopRepository.findByUserId(userId);
 
         List<OwnerShopItem> shops = shopList.stream().map(shop ->
             {
@@ -109,7 +111,7 @@ public class ShopService {
 
 
     @Transactional(readOnly = true)
-    // 사장이 자신의 shop을 조회 한 경우 조회 허용
+    // 사장이 자신의 shop 하나를 상세 조회
     public ShopOwnerDetailResponse getOwnerShop(Long shopId, Long userId) {
 
         // 해당 상점이 없으면 에러
@@ -162,9 +164,9 @@ public class ShopService {
     public User userFind(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
-
+    // 승인 된 식당만 조회, 수정 가능
     public Shop ownerShopFind(Long shopId, Long userId) {
-        return shopRepository.findByIdAndUserId(shopId, userId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
+        return shopRepository.findByIdAndUserId(shopId, userId ).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
     }
 
 
@@ -181,8 +183,8 @@ public class ShopService {
         switch (sort) {
             case "rating" -> {
                 Double ratingCursor = cursor != null ? cursor.doubleValue() : 5.0; //별점이 높은 순으로 가져오니 max
-                Slice<Shop> shopSlice = shopRepository.findByRatingCursor(
-                    latitude, longitude, radius, foodCategories, ratingCursor, PageRequest.of(0, size)
+                Slice<Shop> shopSlice = shopRepository.findByRatingCursorAndApprove(
+                    latitude, longitude, radius, foodCategories, ratingCursor, Approve.APPROVED ,PageRequest.of(0, size)
                 );
 
                 Long nextCursor = null;
@@ -197,8 +199,8 @@ public class ShopService {
             }
 
             case "distance" -> {
-                Slice<Shop> shopSlice = shopRepository.findByDistance(
-                    latitude, longitude, radius, foodCategories, cursor, PageRequest.of(0, size)
+                Slice<Shop> shopSlice = shopRepository.findByDistanceAndApprove(
+                    latitude, longitude, radius, Approve.APPROVED, foodCategories, cursor, PageRequest.of(0, size)
                 );
 
                 Long nextCursor = null;
@@ -244,7 +246,7 @@ public class ShopService {
         }
 
         Slice<Shop> result = shopRepository.findCursorListByRating(
-            ratingCursor, query, PageRequest.of(0, size));
+            ratingCursor, query,Approve.APPROVED ,PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
@@ -273,7 +275,7 @@ public class ShopService {
         }
 
         Slice<Shop> result = shopRepository.findCursorListByCreatedAt(
-            timeCursor, query, PageRequest.of(0, size));
+            timeCursor, query,Approve.APPROVED ,PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getCreatedAt());
@@ -297,7 +299,7 @@ public class ShopService {
 
     private ShopPageResponse getShopListByName(String query, String cursor, int size) {
         Slice<Shop> result = shopRepository.findCursorListByName(
-            cursor, query, PageRequest.of(0, size));
+            cursor, query, Approve.APPROVED, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getShopName());

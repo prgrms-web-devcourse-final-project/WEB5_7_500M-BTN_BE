@@ -78,6 +78,10 @@ public class Shop extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Approve approve;
+
     @Builder
     public Shop(String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
@@ -98,6 +102,7 @@ public class Shop extends BaseEntity {
         this.closeTime = closeTime;
         this.user = user;
         this.detailAddress = detailAddress;
+        this.approve = Approve.PENDING; // 기본으로 대기 상태
     }
 
     public void updateShop(ShopUpdateVo shopUpdateVo, User user) {

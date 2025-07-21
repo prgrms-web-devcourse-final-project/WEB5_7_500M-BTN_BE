@@ -62,6 +62,8 @@ public class ShopMapper {
         return ShopDetailResponse.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
             .category(shop.getCategory())
             .description(shop.getDescription())
             .roadAddress(shop.getRoadAddress())
@@ -73,6 +75,7 @@ public class ShopMapper {
             .reviewCount(reviewCount)
             .images(imageListUrl)
             .detailAddress(shop.getDetailAddress())
+            .approve(shop.getApprove())
             .build();
     }
 
@@ -85,6 +88,8 @@ public class ShopMapper {
             .shopId(shop.getId())
             .shopName(shop.getShopName())
             .category(shop.getCategory())
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
             .description(shop.getDescription())
             .roadAddress(shop.getRoadAddress())
             .tel(shop.getTel())
@@ -96,6 +101,7 @@ public class ShopMapper {
             .images(imageListUrl)
             .detailAddress(shop.getDetailAddress())
             .businessCode(shop.getBusinessCode())
+            .approve(shop.getApprove())
             .build();
     }
 
@@ -130,9 +136,12 @@ public class ShopMapper {
             .shopId(shop.getId())
             .name(shop.getShopName())
             .category(shop.getCategory())
-            .address(shop.getRoadAddress() + shop.getDetailAddress())
+            .address(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
             .rating(shop.getRating())
             .thumbnailUrl(thumbnailUrl)
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
             .build();
     }
 
@@ -144,6 +153,7 @@ public class ShopMapper {
             .roadAddress(shop.getRoadAddress())
             .detailAddress(shop.getDetailAddress())
             .thumbnailUrl(thumbnailUrl)
+            .approve(shop.getApprove())
             .rating(shop.getRating()).build();
 
     }
