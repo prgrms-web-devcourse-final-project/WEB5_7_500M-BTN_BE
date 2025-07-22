@@ -32,6 +32,8 @@ public class PartyStatusService {
             party.deleteParty();
         }
         log.info("파티 상태 변경 완료");
+
+        // todo: 자동 예약 기능 추가
     }
 
 }

@@ -146,6 +146,8 @@ public class ReservationService {
     public void refuseReservation(Long reservationId, Long ownerId) {
         Reservation reservation = validateOwnerPermissionAndPending(reservationId, ownerId);
         reservation.changeStatus(ReservationStatus.REFUSED);
+
+        // todo: 거절 시, 파티 제거 기능 추가
     }
 
 
