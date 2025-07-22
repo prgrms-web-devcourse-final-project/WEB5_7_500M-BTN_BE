@@ -31,6 +31,8 @@ public class PartyUser extends BaseEntity {
 
     private boolean isHost;
 
+    private boolean paymentCompleted;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "party_id", nullable = false)
     private Party party;
@@ -44,6 +46,7 @@ public class PartyUser extends BaseEntity {
         this.isHost = isHost;
         this.party = party;
         this.user = user;
+        this.paymentCompleted = false;
     }
 
     public static PartyUser createHost(Party party, User user) {
@@ -60,5 +63,9 @@ public class PartyUser extends BaseEntity {
             .user(user)
             .isHost(false)
             .build();
+    }
+
+    public void completePayment(){
+        this.paymentCompleted = true;
     }
 }
