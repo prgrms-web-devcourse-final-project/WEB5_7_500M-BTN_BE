@@ -33,8 +33,8 @@ public class HandshakeAuthInterceptor implements HandshakeInterceptor {
         if (tokenProvider.validate(token)) {
             TokenBodyDto tokenBodyDto = tokenProvider.parseAccessToken(token);
             PrincipalUser principalUser = OAuth2Mapper.toPrincipalUser(tokenBodyDto);
-            
-            attributes.put("user", principalUser);
+
+            attributes.put("principal", principalUser);
 
         } else {
             response.setStatusCode(ErrorCode.INVALID_ACCESS_TOKEN.getStatus());

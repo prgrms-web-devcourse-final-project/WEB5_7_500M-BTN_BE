@@ -1,28 +1,58 @@
 package shop.matjalalzz.chat.app;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.dao.ChatMessageRepository;
-import shop.matjalalzz.chat.dto.ChatMessageDto;
+import shop.matjalalzz.chat.dto.ChatJoinRequest;
+import shop.matjalalzz.chat.dto.ChatLoadRequest;
+import shop.matjalalzz.chat.dto.ChatMessageRequest;
+import shop.matjalalzz.chat.dto.ChatMessageResponse;
+import shop.matjalalzz.chat.entity.ChatMessage;
+import shop.matjalalzz.chat.mapper.ChatMapper;
+import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.user.app.UserService;
+import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
 public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
+    private final UserService userService;
+    private final PartyService partyService;
 
     @Transactional
-    public ChatMessageDto save(ChatMessageDto chatMessage) {
-        return ChatMessageDto.fromEntity(chatMessageRepository.save(chatMessage.toEntity()));
+    public ChatMessageResponse sendMessage(ChatMessageRequest request, Long userId) {
+
+        User user = userService.getUserById(userId);
+        Party party = partyService.findById(request.partyId());
+
+        ChatMessage chatMessage = chatMessageRepository.save(
+            ChatMapper.fromChatMessageRequest(request, user, party));
+
+        return ChatMapper.toChatMessageResponse(chatMessage);
     }
 
-//    @Transactional(readOnly = true)
-//    public List<ChatMessageDto> loadMessages(ChatLoadRequest request) {
-//        return chatMessageRepository.findAllByIdGreaterThanAndRoomIdOrderById(
-//                request.lastMessageId(), request.roomId())
-//            .stream()
-//            .map(ChatMessageDto::fromEntity)
-//            .toList();
-//    }
+    @Transactional
+    public ChatMessageResponse join(ChatJoinRequest request, Long userId) {
+        User user = userService.getUserById(userId);
+        Party party = partyService.findById(request.partyId());
+
+        ChatMessage chatMessage = chatMessageRepository.save(
+            ChatMapper.fromChatJoinRequest(request, user, party)
+        );
+        return ChatMapper.toChatMessageResponse(chatMessage);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessageResponse> loadMessages(ChatLoadRequest request) {
+        return chatMessageRepository.findAllByIdGreaterThanAndPartyIdOrderById(
+                request.lastMessageId(), request.partyId())
+            .stream()
+            .map(ChatMapper::toChatMessageResponse)
+            .toList();
+    }
 }

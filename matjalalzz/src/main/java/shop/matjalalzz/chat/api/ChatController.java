@@ -1,16 +1,17 @@
 package shop.matjalalzz.chat.api;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import shop.matjalalzz.chat.app.ChatService;
 import shop.matjalalzz.chat.dto.ChatJoinRequest;
-import shop.matjalalzz.chat.dto.ChatMessageDto;
-import shop.matjalalzz.chat.entity.MessageType;
+import shop.matjalalzz.chat.dto.ChatLoadRequest;
+import shop.matjalalzz.chat.dto.ChatMessageRequest;
+import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 
 @Controller
@@ -22,48 +23,32 @@ public class ChatController {
     private final ChatService chatService;
 
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload ChatMessageDto message) {
+    public void sendMessage(@Payload ChatMessageRequest message,
+        PrincipalUser user) {
         log.info("Sending message: " + message);
-        ChatMessageDto sendMessage = chatService.save(message);
-        messagingTemplate.convertAndSend("/topic/party/" + message.partyId(), sendMessage);
+
+        ChatMessageResponse messageResponse = chatService.sendMessage(message, user.getId());
+        messagingTemplate.convertAndSend("/topic/party/" + message.partyId(), messageResponse);
     }
 
     @MessageMapping("/chat.addUser")
     public void addUser(@Payload ChatJoinRequest request,
-        SimpMessageHeaderAccessor headerAccessor) {
-        PrincipalUser user = (PrincipalUser) headerAccessor.getSessionAttributes().get("user");
+        PrincipalUser user) {
         log.info("Adding user: {} Into {}", user.getId(), request.partyId());
 
-        ChatMessageDto message = ChatMessageDto.builder()
-            .partyId(request.partyId())
-            .type(MessageType.JOIN)
-            .sender(user.getEmail())
-            .build();
+        ChatMessageResponse messageResponse = chatService.join(request, user.getId());
 
-        messagingTemplate.convertAndSend("/topic/party/" + request.partyId(), message);
+        messagingTemplate.convertAndSend("/topic/party/" + request.partyId(), messageResponse);
     }
 
-//    @MessageMapping("/chat/load")
-//    public void loadChatHistory(@Payload ChatLoadRequest chatLoadRequest,
-//        SimpMessageHeaderAccessor headerAccessor) {
-//        log.info("Loading chat history for request: " + chatLoadRequest);
-//
-//        List<ChatMessageDto> chatMessageDtos = chatService.loadMessages(chatLoadRequest);
-//
-//        // 세션 ID 가져오기 (여러 방법 시도)
-//        String sessionId = null;
-//
-//        // 방법 1: Principal에서 가져오기
-//        if (headerAccessor.getUser() != null) {
-//            sessionId = headerAccessor.getUser().getName();
-//        }
-//
-//        if (sessionId != null) {
-//            log.info("Sending {} messages to session: {}", chatMessageDtos.size(), sessionId);
-//
-//            messagingTemplate.convertAndSendToUser(sessionId, "/queue/load", chatMessageDtos);
-//        } else {
-//            log.warn("Session ID is null, cannot send chat history");
-//        }
-//    }
+    @MessageMapping("/chat/load")
+    public void loadChatHistory(@Payload ChatLoadRequest chatLoadRequest,
+        PrincipalUser user) {
+        log.info("Loading chat history for request: " + chatLoadRequest);
+
+        List<ChatMessageResponse> chatMessageRequests = chatService.loadMessages(chatLoadRequest);
+
+        messagingTemplate.convertAndSendToUser(user.getName(), "/queue/load",
+            chatMessageRequests);
+    }
 }

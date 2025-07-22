@@ -6,8 +6,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
@@ -23,15 +21,11 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             StompHeaderAccessor.class);
 
         if (accessor.getCommand().equals(StompCommand.CONNECT)) {
-            PrincipalUser user = (PrincipalUser) accessor.getSessionAttributes().get("user");
+            PrincipalUser user = (PrincipalUser) accessor.getSessionAttributes().get("principal");
             if (user == null) {
                 throw new BusinessException(ErrorCode.AUTHENTICATION_REQUIRED);
             }
-            Authentication authentication = new PreAuthenticatedAuthenticationToken(
-                user, null, user.getAuthorities()
-            );
-            //TODO: PrincipalUser가 Principal을 구현해야 하는가?
-            accessor.setUser(authentication);
+            accessor.setUser(user);
         }
         return message;
     }
