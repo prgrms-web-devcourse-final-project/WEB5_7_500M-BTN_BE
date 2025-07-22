@@ -27,7 +27,7 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                 throw new BusinessException(ErrorCode.AUTHENTICATION_REQUIRED);
             }
             StompPrincipal principal = StompPrincipal.builder()
-                .sessionId(accessor.getSessionId())
+                .userId(user.getId())
                 .principalUser(user)
                 .build();
             accessor.setUser(principal);

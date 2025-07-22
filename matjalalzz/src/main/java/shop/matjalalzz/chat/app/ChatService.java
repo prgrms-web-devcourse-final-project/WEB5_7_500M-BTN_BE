@@ -11,6 +11,8 @@ import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.chat.entity.ChatMessage;
 import shop.matjalalzz.chat.mapper.ChatMapper;
+import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.user.app.UserService;
@@ -26,6 +28,9 @@ public class ChatService {
 
     @Transactional
     public ChatMessageResponse sendMessage(ChatMessageRequest request, Long userId) {
+        if (!partyService.isInParty(request.partyId(), userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
 
         User user = userService.getUserById(userId);
         Party party = partyService.findById(request.partyId());
@@ -38,6 +43,10 @@ public class ChatService {
 
     @Transactional
     public ChatMessageResponse join(ChatJoinRequest request, Long userId) {
+        if (!partyService.isInParty(request.partyId(), userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
         User user = userService.getUserById(userId);
         Party party = partyService.findById(request.partyId());
 
@@ -48,11 +57,15 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> loadMessages(ChatLoadRequest request) {
+    public List<ChatMessageResponse> loadMessages(ChatLoadRequest request, Long userId) {
+        if (!partyService.isInParty(request.partyId(), userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
         return chatMessageRepository.findAllByIdGreaterThanAndPartyIdOrderById(
                 request.lastMessageId(), request.partyId())
             .stream()
             .map(ChatMapper::toChatMessageResponse)
             .toList();
     }
+
 }

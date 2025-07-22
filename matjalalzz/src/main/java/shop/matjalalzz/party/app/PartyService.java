@@ -267,4 +267,10 @@ public class PartyService {
     public List<PartyUser> getPartyUsers(Long partyId) {
         return partyUserRepository.findAllByPartyId(partyId);
     }
+
+    @Transactional(readOnly = true)
+
+    public boolean isInParty(Long partyId, Long userId) {
+        return partyUserRepository.existsByUserIdAndPartyId(userId, partyId);
+    }
 }

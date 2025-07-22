@@ -14,15 +14,15 @@ import shop.matjalalzz.global.security.PrincipalUser;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StompPrincipal implements Principal {
 
-    private String sessionId;
+    private Long userId;
     private PrincipalUser principalUser;
 
     public Long getId() {
-        return principalUser.getId();
+        return userId;
     }
 
     @Override
     public String getName() {
-        return sessionId;
+        return userId.toString();
     }
 }

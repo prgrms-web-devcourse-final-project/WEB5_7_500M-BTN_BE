@@ -10,4 +10,6 @@ public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
     Optional<PartyUser> findByUserIdAndPartyId(Long userId, Long partyId);
 
     List<PartyUser> findAllByPartyId(Long partyId);
+
+    boolean existsByUserIdAndPartyId(Long userId, Long partyId);
 }

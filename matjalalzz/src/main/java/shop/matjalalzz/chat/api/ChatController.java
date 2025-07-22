@@ -3,6 +3,7 @@ package shop.matjalalzz.chat.api;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -14,6 +15,9 @@ import shop.matjalalzz.chat.dto.ChatLoadRequest;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.chat.dto.StompPrincipal;
+import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.global.exception.dto.ErrorResponse;
 
 @Controller
 @RequiredArgsConstructor
@@ -44,12 +48,30 @@ public class ChatController {
 
     @MessageMapping("/chat/load")
     public void loadChatHistory(@Payload ChatLoadRequest chatLoadRequest,
-        StompHeaderAccessor accessor) {
+        StompHeaderAccessor accessor, StompPrincipal user) {
         log.info("Loading chat history for request: " + chatLoadRequest);
 
-        List<ChatMessageResponse> chatMessageRequests = chatService.loadMessages(chatLoadRequest);
+        List<ChatMessageResponse> chatMessageRequests = chatService.loadMessages(chatLoadRequest,
+            user.getId());
 
-        messagingTemplate.convertAndSendToUser(accessor.getSessionId(), "/queue/load",
+        messagingTemplate.convertAndSend("/queue/load-" + accessor.getSessionId(),
             chatMessageRequests);
+    }
+
+    @MessageExceptionHandler(BusinessException.class)
+    public void handleException(StompHeaderAccessor accessor, BusinessException ex) {
+        ErrorCode code = ex.getErrorCode();
+
+        log.warn("WebSocket Business Exception occurred - Code: {}, Message: {}, Session: {}",
+            code.name(), code.getMessage(), accessor.getSessionId());
+
+        ErrorResponse response = ErrorResponse.builder()
+            .status(code.getStatus().value())
+            .code(code.name())
+            .message(code.getMessage())
+            .path("/ws/chat")
+            .build();
+
+        messagingTemplate.convertAndSend("/queue/error-" + accessor.getSessionId(), response);
     }
 }
