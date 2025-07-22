@@ -55,7 +55,7 @@ public class PaymentService {
         if (point < 1) {
             throw new BusinessException(ErrorCode.ZERO_AMOUNT_PAYMENT_NOT_ALLOWED); // 0원 결제 시 400
         }
-        user.updatePoint(point);
+        user.increasePoint(point);
 
         //객체 생성 후 반환 코드 필요
         PaymentSuccessResponse Response = PaymentSuccessResponse.builder()
