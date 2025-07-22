@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
+import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.shop.entity.Shop;
 
 @Entity
@@ -68,6 +70,9 @@ public class Party extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
+
+    @OneToOne(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Reservation reservation;
 
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyUser> partyUsers;
@@ -120,5 +125,13 @@ public class Party extends BaseEntity {
 
     public boolean isRecruiting() {
         return this.status == PartyStatus.RECRUITING;
+    }
+
+    public void increaseTotalReservationFee(int reservationFee) {
+        this.totalReservationFee += reservationFee;
+    }
+
+    public void decreaseTotalReservationFee(int reservationFee) {
+        this.totalReservationFee -= reservationFee;
     }
 }
