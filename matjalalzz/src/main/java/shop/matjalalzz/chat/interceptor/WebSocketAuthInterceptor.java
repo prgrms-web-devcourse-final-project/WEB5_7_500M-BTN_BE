@@ -7,6 +7,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
+import shop.matjalalzz.chat.dto.StompPrincipal;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.PrincipalUser;
@@ -25,7 +26,11 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             if (user == null) {
                 throw new BusinessException(ErrorCode.AUTHENTICATION_REQUIRED);
             }
-            accessor.setUser(user);
+            StompPrincipal principal = StompPrincipal.builder()
+                .sessionId(accessor.getSessionId())
+                .principalUser(user)
+                .build();
+            accessor.setUser(principal);
         }
         return message;
     }

@@ -1,7 +1,6 @@
 package shop.matjalalzz.global.security;
 
 
-import java.security.Principal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,7 @@ import shop.matjalalzz.user.entity.enums.Role;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 //구현 필수 메서드
-public class PrincipalUser implements UserDetails, OAuth2User, Principal {
+public class PrincipalUser implements UserDetails, OAuth2User {
 
     private long id;
     private String email;
