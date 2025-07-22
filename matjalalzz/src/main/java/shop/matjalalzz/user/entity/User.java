@@ -78,8 +78,12 @@ public class User extends BaseEntity {
     }
 
     // point 변경 메서드
-    public void updatePoint(int point) {
+    public void increasePoint(int point) {
         this.point += point;
+    }
+
+    public void decreasePoint(int point) {
+        this.point -= point;
     }
 
     // 권한 변경 메서드
