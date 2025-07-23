@@ -10,6 +10,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 import shop.matjalalzz.chat.interceptor.StompAuthInterceptor;
 import shop.matjalalzz.chat.interceptor.StompLoggingInterceptor;
 import shop.matjalalzz.chat.interceptor.StompSessionInterceptor;
+import shop.matjalalzz.chat.interceptor.StompSubscriptionInterceptor;
 import shop.matjalalzz.chat.interceptor.WebsocketAuthInterceptor;
 
 @Configuration
@@ -21,6 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final StompAuthInterceptor stompAuthInterceptor;
     private final WebsocketAuthInterceptor websocketAuthInterceptor;
     private final StompSessionInterceptor stompSessionInterceptor;
+    private final StompSubscriptionInterceptor stompSubscriptionInterceptor;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -41,6 +43,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(stompLoggingInterceptor);
         registration.interceptors(stompAuthInterceptor);
+        registration.interceptors(stompSubscriptionInterceptor);
         registration.interceptors(stompSessionInterceptor);
     }
 }

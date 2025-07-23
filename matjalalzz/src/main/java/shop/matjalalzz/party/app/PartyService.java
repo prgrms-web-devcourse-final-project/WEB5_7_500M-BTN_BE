@@ -269,7 +269,6 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-
     public boolean isInParty(Long partyId, Long userId) {
         return partyUserRepository.existsByUserIdAndPartyId(userId, partyId);
     }
