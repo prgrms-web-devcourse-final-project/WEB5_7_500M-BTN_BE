@@ -3,7 +3,6 @@ package shop.matjalalzz.tosspay.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +18,7 @@ import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.tosspay.app.OrderService;
 import shop.matjalalzz.tosspay.dto.OrderSaveRequest;
+import shop.matjalalzz.tosspay.dto.PaymentScrollResponse;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 
@@ -29,8 +29,8 @@ import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 // Toss 결제 성공 후 백엔드에서 결제를 최종 승인하고 포인트 충전
 public class PaymentController {
 
-    private final PaymentService paymentService;
     private final OrderService orderService;
+    private final PaymentService 
 
     // 결제 승인 api
     @ResponseStatus(HttpStatus.CREATED)
@@ -65,10 +65,11 @@ public class PaymentController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<> getPaymentHistories(
+    public BaseResponse<PaymentScrollResponse> getPaymentHistories(
         @RequestParam(required = false, defaultValue = "10") int size,
-        @AuthenticationPrincipal PrincipalUser principal){
-        paymentService.getPaymentHistories(principal.getId());
+        @RequestParam(required = false) Long cursor,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        paymentService.getPaymentHistories(size, cursor, principal.getId());
     }
 
 

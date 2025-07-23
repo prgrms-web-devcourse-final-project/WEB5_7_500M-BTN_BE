@@ -7,7 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -21,6 +24,7 @@ import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmResponse;
 import shop.matjalalzz.tosspay.entity.Order;
 import shop.matjalalzz.tosspay.entity.OrderStatus;
+import shop.matjalalzz.tosspay.entity.Payment;
 import shop.matjalalzz.tosspay.entity.PaymentStatus;
 import shop.matjalalzz.tosspay.mapper.PaymentMapper;
 import shop.matjalalzz.user.app.UserService;
@@ -83,8 +87,19 @@ public class PaymentService {
         paymentRepository.save(PaymentMapper.toEntity(response, user, order));
     }
 
-    public PaymentScrollResponse getPaymentHistories(long userId, int size) {
-        PageRequest.of(0, size, Sort.by(Direction.))
-        return null;
+    @Transactional(readOnly = true)
+    public PaymentScrollResponse getPaymentHistories(int size, Long cursor, long userId) {
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
+        Slice<Payment> payments = paymentRepository.findByUserIdAndCursor(userId, cursor, pageable);
+
+        Long nextCursor = null;
+        if (payments.hasNext()) {
+            nextCursor = payments.getContent().getLast().getId();
+        }
+        List<PaymentHistoryResponse> content = payments.stream()
+            .map(payment -> PaymentMapper.toPaymentHistoryResponse(payment))
+            .toList();
+
+        return new PaymentScrollResponse(content, nextCursor);
     }
 }
