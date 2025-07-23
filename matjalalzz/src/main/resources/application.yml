@@ -103,5 +103,5 @@ server:
 
 discord:
   bot:
-    token: ${discord_bot_token}
-    channel: ${discord_channel_Id}
+    token: ${DISCORD_BOT_TOKEN}
+    channel: ${DISCORD_CHANNEL_ID}
