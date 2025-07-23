@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
@@ -74,7 +75,6 @@ public class ReservationService {
             .map(Shop::getId)
             .toList();
 
-
         Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursor(
             shopIds, status, cursor, pageable
         );
@@ -86,7 +86,7 @@ public class ReservationService {
         List<Reservation> reservations = slice.getContent();
 
         Long nextCursor = slice.hasNext()
-            ? reservations.get(reservations.size() - 1).getId()
+            ? reservations.getLast().getId()
             : null;
 
         List<ReservationContent> content =
@@ -110,29 +110,30 @@ public class ReservationService {
     }
 
     @Transactional
-    public CreateReservationResponse createReservation(Long userId, Long shopId, Long partyId,
+    public CreateReservationResponse createReservation(Long userId, Long shopId,
         CreateReservationRequest request) {
 
-        LocalDateTime reservedAt = LocalDateTime.parse(request.date() + "T" + request.time());
-
-        User reservationUser = userService.getUserById(userId);
-
         Shop reservationShop = shopService.shopFind(shopId);
+        User reservationUser = userService.getUserById(userId);
+        int reservationFee = reservationShop.getReservationFee() * request.headCount();
 
-        Party reservationParty = null;
-        if (partyId != null) {
-            reservationParty = partyService.findById(partyId);
+        if (reservationUser.getPoint() < reservationFee) {
+            throw new BusinessException(ErrorCode.LACK_OF_BALANCE);
         }
+
+        LocalDateTime reservedAt = LocalDateTime.parse(request.date() + "T" + request.time());
 
         Reservation reservation = ReservationMapper.toEntity(
             request,
             reservedAt,
             reservationShop,
-            reservationUser,
-            reservationParty
+            reservationUser
         );
 
         Reservation savedReservation = reservationRepository.save(reservation);
+
+        reservationUser.decreasePoint(reservationFee);
+
         return ReservationMapper.toCreateReservationResponse(savedReservation);
     }
 
@@ -145,11 +146,41 @@ public class ReservationService {
     @Transactional
     public void refuseReservation(Long reservationId, Long ownerId) {
         Reservation reservation = validateOwnerPermissionAndPending(reservationId, ownerId);
-        reservation.changeStatus(ReservationStatus.REFUSED);
 
-        // todo: 거절 시, 파티 제거 기능 추가
+        refuseReservation(reservation);
     }
 
+    @Transactional
+    public void cancelReservation(Long reservationId, Long userId) {
+        Reservation reservation = getReservationById(reservationId);
+        User user = userService.getUserById(userId);
+
+        // 예약한 본인인지 확인
+        if (!reservation.getUser().getId().equals(userId)) {
+            throw new BusinessException(FORBIDDEN_ACCESS);
+        }
+
+        Party party = reservation.getParty();
+        if (party != null) {
+            partyService.breakParty(party);
+            return;
+        }
+
+        ReservationStatus status = reservation.getStatus();
+
+        // 예약 상태 확인
+        if (status != ReservationStatus.CONFIRMED && status != ReservationStatus.PENDING) {
+            throw new BusinessException(ALREADY_PROCESSED);
+        }
+
+        // 예약일로부터 하루도 안남았으면, 취소 불가
+        if (reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1))) {
+            throw new BusinessException(ErrorCode.CANNOT_CANCEL_D_DAY);
+        }
+
+        user.increasePoint(reservation.getReservationFee());
+        reservation.changeStatus(ReservationStatus.CANCELLED);
+    }
 
     private Reservation validateOwnerPermissionAndPending(Long reservationId,
         Long ownerId) {
@@ -165,7 +196,6 @@ public class ReservationService {
 
         return reservation;
     }
-
 
     @Transactional(readOnly = true)
     public Reservation getReservationById(Long reservationId) {
@@ -185,6 +215,15 @@ public class ReservationService {
 
         for (Reservation r : toTerminate) {
             r.changeStatus(ReservationStatus.TERMINATED);
+
+            Party party = r.getParty();
+
+            if (party != null) {
+                party.terminate();
+            }
+
+            // 예약금 정산
+            reservationRepository.settleReservationFee(r.getShop().getId(), r.getReservationFee());
         }
 
         return toTerminate.size();
@@ -201,10 +240,22 @@ public class ReservationService {
             );
 
         for (Reservation r : toRefuse) {
-            r.changeStatus(ReservationStatus.REFUSED);
+            refuseReservation(r);
         }
 
         return toRefuse.size();
+    }
+
+    private void refuseReservation(Reservation reservation) {
+        Party party = reservation.getParty();
+
+        if (party != null) {
+            partyService.breakParty(party);
+        } else {
+            reservation.getUser().increasePoint(reservation.getReservationFee());
+        }
+
+        reservation.changeStatus(ReservationStatus.REFUSED);
     }
 }
 
