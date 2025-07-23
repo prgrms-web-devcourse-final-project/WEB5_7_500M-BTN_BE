@@ -42,10 +42,12 @@ public class TokenController {
         description = "쿠키의 리프레시 토큰을 무효화하고 로그아웃 처리합니다."
     )
     @PostMapping("/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<Void> logout(
         @CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
         tokenService.logout(refreshToken, response);
+
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
     @Operation(

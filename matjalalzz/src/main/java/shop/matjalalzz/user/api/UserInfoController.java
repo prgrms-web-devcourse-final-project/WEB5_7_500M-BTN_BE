@@ -142,7 +142,7 @@ public class UserInfoController {
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyPartyPageResponse result = partyService.findMyReservationPage(
+        MyPartyPageResponse result = partyService.findMyPartyPage(
             userInfo.getId(), cursor, size);
 
         return BaseResponse.ok(result, BaseStatus.OK);
