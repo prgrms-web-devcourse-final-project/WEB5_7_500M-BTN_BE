@@ -18,8 +18,7 @@ public class StompAuthInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.getAccessor(message,
-            StompHeaderAccessor.class);
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (accessor.getCommand().equals(StompCommand.CONNECT)) {
             PrincipalUser user = (PrincipalUser) accessor.getSessionAttributes().get("principal");
