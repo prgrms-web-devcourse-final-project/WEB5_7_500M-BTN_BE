@@ -164,6 +164,7 @@ public class ShopMapper {
     public static ShopAdminDetailResponse shopToShopAdminDetailResponse (Shop shop, List<String> images, User user) {
         return ShopAdminDetailResponse.builder()
             .userId(user.getId())
+            .name(user.getName())
             .nickName(user.getName())
             .shopId(shop.getId())
             .shopName(shop.getShopName())

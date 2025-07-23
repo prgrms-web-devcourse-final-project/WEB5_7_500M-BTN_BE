@@ -112,8 +112,7 @@ public class ShopService {
         shopRepository.save(newShop);
 
         // 프리사이드 url 링크 반환
-        return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(),
-            newShop.getId());
+        return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(), newShop.getId());
 
     }
 

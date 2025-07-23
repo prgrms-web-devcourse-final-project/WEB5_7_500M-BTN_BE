@@ -9,6 +9,7 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 @Builder
 public record ShopAdminDetailResponse (
     long userId,
+    String name,
     String nickName,
     long shopId,
     String shopName,
