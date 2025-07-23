@@ -27,6 +27,7 @@ import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.entity.enums.Role;
 import shop.matjalalzz.user.mapper.UserMapper;
 
 @Slf4j
@@ -89,7 +90,9 @@ public class UserService {
             throw new BusinessException(EMAIL_ALREADY_EXISTS);  //409
         }
 
-        User user = UserMapper.toUser(dto, passwordEncoder);
+        String encodedPassword = passwordEncoder.encode(dto.password());
+
+        User user = UserMapper.toUser(dto, encodedPassword, Role.USER);
 
         userRepository.save(user);
     }

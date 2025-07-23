@@ -108,7 +108,7 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public MyPartyPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
+    public MyPartyPageResponse findMyPartyPage(Long userId, Long cursor, int size) {
         Slice<MyPartyResponse> parties = partyRepository.findByUserIdAndCursor(userId, cursor,
             PageRequest.of(0, size));
 
