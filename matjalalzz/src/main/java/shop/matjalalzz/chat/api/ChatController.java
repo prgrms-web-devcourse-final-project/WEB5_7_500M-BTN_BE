@@ -27,7 +27,7 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatService chatService;
 
-    @MessageMapping("/chat.sendMessage")
+    @MessageMapping("/chat.send")
     public void sendMessage(@Payload ChatMessageRequest message,
         StompPrincipal user) {
         log.info("Sending message: " + message);
@@ -36,7 +36,7 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/party/" + message.partyId(), messageResponse);
     }
 
-    @MessageMapping("/chat.addUser")
+    @MessageMapping("/chat.join")
     public void addUser(@Payload ChatJoinRequest request,
         StompPrincipal user) {
         log.info("Adding user: {} Into {}", user.getId(), request.partyId());
@@ -46,7 +46,7 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/party/" + request.partyId(), messageResponse);
     }
 
-    @MessageMapping("/chat/load")
+    @MessageMapping("/chat.load")
     public void loadChatHistory(@Payload ChatLoadRequest chatLoadRequest,
         StompHeaderAccessor accessor, StompPrincipal user) {
         log.info("Loading chat history for request: " + chatLoadRequest);
