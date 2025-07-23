@@ -71,6 +71,7 @@ public enum ErrorCode {
     ZERO_AMOUNT_PAYMENT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "0원 결제는 허용되지 않습니다."),
     INVALID_PAYMENT_REQUEST(HttpStatus.BAD_REQUEST, "결제가 취소되었거나, 실패했습니다."),
     INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "결제 금액이 올바르지 않습니다."),
+    NOT_MATCH_ORDER_USER(HttpStatus.BAD_REQUEST, "사용자 정보가 주문 정보와 일치하지 않습니다."),
 
     /**
      * party

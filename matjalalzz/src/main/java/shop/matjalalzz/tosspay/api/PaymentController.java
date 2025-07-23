@@ -33,7 +33,7 @@ public class PaymentController {
     private final OrderService orderService;
 
     // 결제 승인 api
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/confirm")
     @Operation(summary = "Confirm", description = """
         TOSS_SECRET_KEY=test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
@@ -41,10 +41,10 @@ public class PaymentController {
         혹여나 프론트와 토스페이 api 통신이 되지 않으면  https://github.com/prgrms-be-devcourse/NBE5-7-2-Team09  링크에 프론트 코드 링크 참조해주세요""")
     public BaseResponse<PaymentSuccessResponse> confirm(
         @RequestBody @Valid TossPaymentConfirmRequest request,
-        @AuthenticationPrincipal PrincipalUser principalUser) {
+        @AuthenticationPrincipal PrincipalUser principle) {
         PaymentSuccessResponse response = paymentService.confirmPayment(request,
-            principalUser.getId());
-        return BaseResponse.ok(response, BaseStatus.OK);
+            principle.getId());
+        return BaseResponse.ok(response, BaseStatus.CREATED);
     }
 
     // 1️⃣ 결제 요청 전에 주문 정보를 서버에 저장 (임시)
@@ -53,8 +53,9 @@ public class PaymentController {
     // → 변조 방지, 악의적인 금액 조작 차단
     @PostMapping("/order")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<Void> saveOrder(@RequestBody OrderSaveRequest request) {
-        orderService.saveOrder(request);
+    public BaseResponse<Void> saveOrder(@RequestBody OrderSaveRequest request,
+        @AuthenticationPrincipal PrincipalUser principle) {
+        orderService.saveOrder(request, principle.getId());
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
