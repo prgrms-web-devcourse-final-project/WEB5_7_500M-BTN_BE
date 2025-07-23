@@ -38,8 +38,7 @@ public class Inquiry extends BaseEntity {
 
 
     @Builder
-    public Inquiry(Long id, String title, String content, User user) {
-        this.id = id;
+    public Inquiry( String title, String content, User user) {
         this.title = title;
         this.content = content;
         this.user = user;

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DiscordMessageConverter {
 
     private static final ZoneId ZONE_ID = ZoneId.of("Asia/Seoul");
