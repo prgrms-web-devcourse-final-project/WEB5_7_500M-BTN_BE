@@ -3,6 +3,7 @@ package shop.matjalalzz.party.dao;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -23,6 +24,7 @@ public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
         """)
     Optional<User> findPartyHostByPartyId(@Param("partyId") Long partyId);
 
+    @Modifying
     @Query("""
         update User u
         set u.point = u.point + :refundAmount

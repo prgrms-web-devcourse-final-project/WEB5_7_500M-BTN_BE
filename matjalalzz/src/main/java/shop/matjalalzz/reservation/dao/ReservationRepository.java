@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
@@ -77,11 +78,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         Pageable pageable);
 
     @Query("""
-    SELECT r FROM Reservation r
-    WHERE r.status = :status
-      AND r.reservedAt <= :threshold
+        SELECT r FROM Reservation r
+        WHERE r.status = :status
+          AND r.reservedAt <= :threshold
         """)
     List<Reservation> findAllByStatusAndReservedAtBefore(
         @Param("status") ReservationStatus status,
         @Param("threshold") LocalDateTime threshold);
+
+    @Modifying
+    @Query("""
+        update User u
+        set u.point = u.point + :reservationFee
+        where u.id = (select s.user.id from Shop s where s.id = :shopId)
+        """)
+    void settleReservationFee(
+        @Param("shopId") long shopId,
+        @Param("reservationFee") int reservationFee);
 }
