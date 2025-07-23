@@ -21,6 +21,7 @@ import shop.matjalalzz.tosspay.dto.OrderSaveRequest;
 import shop.matjalalzz.tosspay.dto.PaymentScrollResponse;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
+import shop.matjalalzz.tosspay.app.PaymentService;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 public class PaymentController {
 
     private final OrderService orderService;
-    private final PaymentService 
+    private final PaymentService paymentService;
 
     // 결제 승인 api
     @ResponseStatus(HttpStatus.CREATED)
@@ -63,14 +64,19 @@ public class PaymentController {
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("/payment")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PaymentScrollResponse> getPaymentHistories(
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false) Long cursor,
         @AuthenticationPrincipal PrincipalUser principal) {
-        paymentService.getPaymentHistories(size, cursor, principal.getId());
+//        PaymentScrollResponse response = paymentService.getPaymentHistories(size, cursor,
+//            principal.getId());
+        PaymentScrollResponse response = paymentService.getPaymentHistories(size, cursor,
+            1L); //테스트용
+        return BaseResponse.ok(response,BaseStatus.OK);
     }
+
 
 
 }
