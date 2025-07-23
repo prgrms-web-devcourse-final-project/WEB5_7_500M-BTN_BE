@@ -30,7 +30,7 @@ public class ChatController {
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload ChatMessageRequest message,
         StompPrincipal user) {
-        log.info("Sending message: " + message);
+        log.trace("Sending message: {}", message);
 
         ChatMessageResponse messageResponse = chatService.sendMessage(message, user.getId());
         messagingTemplate.convertAndSend("/topic/party/" + message.partyId(), messageResponse);
@@ -39,7 +39,7 @@ public class ChatController {
     @MessageMapping("/chat.join")
     public void addUser(@Payload ChatJoinRequest request,
         StompPrincipal user) {
-        log.info("Adding user: {} Into {}", user.getId(), request.partyId());
+        log.trace("Adding user: {} Into {}", user.getId(), request.partyId());
 
         ChatMessageResponse messageResponse = chatService.join(request, user.getId());
 
@@ -49,7 +49,7 @@ public class ChatController {
     @MessageMapping("/chat.load")
     public void loadChatHistory(@Payload ChatLoadRequest chatLoadRequest,
         StompHeaderAccessor accessor, StompPrincipal user) {
-        log.info("Loading chat history for request: " + chatLoadRequest);
+        log.trace("Loading chat history for request: " + chatLoadRequest);
 
         List<ChatMessageResponse> chatMessageRequests = chatService.loadMessages(chatLoadRequest,
             user.getId());
@@ -62,7 +62,7 @@ public class ChatController {
     public void handleException(StompHeaderAccessor accessor, BusinessException ex) {
         ErrorCode code = ex.getErrorCode();
 
-        log.warn("WebSocket Business Exception occurred - Code: {}, Message: {}, Session: {}",
+        log.debug("WebSocket Business Exception occurred - Code: {}, Message: {}, Session: {}",
             code.name(), code.getMessage(), accessor.getSessionId());
 
         ErrorResponse response = ErrorResponse.builder()

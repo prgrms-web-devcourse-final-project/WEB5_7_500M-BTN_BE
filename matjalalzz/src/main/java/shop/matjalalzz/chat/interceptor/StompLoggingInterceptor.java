@@ -17,13 +17,13 @@ public class StompLoggingInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (accessor != null && accessor.getCommand() != null) {
-            log.info("[{}] -> {} | SessionId: {}",
+            log.debug("[{}] -> {} | SessionId: {}",
                 accessor.getCommand(),
                 accessor.getDestination(),
                 accessor.getSessionId());
 
             if (accessor.getCommand() == StompCommand.SEND) {
-                log.info("Message payload: {}", new String((byte[]) message.getPayload()));
+                log.debug("Message payload: {}", new String((byte[]) message.getPayload()));
             }
         }
 

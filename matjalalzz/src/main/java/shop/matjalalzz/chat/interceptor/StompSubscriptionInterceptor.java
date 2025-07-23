@@ -36,7 +36,7 @@ public class StompSubscriptionInterceptor implements ChannelInterceptor {
 
     private void validateUser(StompHeaderAccessor accessor) {
         if (accessor.getUser() == null) {
-            log.info("User not logged in");
+            log.debug("User not logged in");
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
@@ -48,7 +48,7 @@ public class StompSubscriptionInterceptor implements ChannelInterceptor {
                 destination.substring(destination.indexOf("/party/") + 7));
             Long userId = ((StompPrincipal) accessor.getUser()).getId();
             if (!partyService.isInParty(partyId, userId)) {
-                log.info("User not in Party");
+                log.debug("User not in Party");
                 throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
             }
         }
