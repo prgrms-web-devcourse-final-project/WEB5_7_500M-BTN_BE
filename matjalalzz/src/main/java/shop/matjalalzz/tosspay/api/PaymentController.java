@@ -39,6 +39,23 @@ public class PaymentController {
     private final OrderService orderService;
     private final PaymentService paymentService;
 
+    @PostMapping("/order")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "주문 정보 임시 저장 api", description = """
+        1. 결제 요청 전에 주문 정보를 서버에 저장
+           결제하기 버튼을 누를 때 (실제 결제 요청 api 보내기 전) 호출하면 됩니다. orderId는 클라이언트에서 임의의 랜덤한 숫자로 제작합니다.
+        2. orderId, amount 저장
+        3. 이후 결제 요청 / 결제 성공 시 서버에 저장된 값과 비교
+         → 변조 방지, 악의적인 금액 조작 차단
+         (Completed)
+        """)
+    public BaseResponse<Void> saveOrder(@RequestBody @Valid OrderSaveRequest request,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        orderService.saveOrder(request, principal.getId());
+//        orderService.saveOrder(request, 1L); //테스트용
+        return BaseResponse.ok(BaseStatus.CREATED);
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("payment/confirm")
     @Operation(summary = "결제 승인 api ", description = """
@@ -55,23 +72,6 @@ public class PaymentController {
 //        PaymentSuccessResponse response = paymentService.confirmPayment(request,
 //            1L); //테스트용
         return BaseResponse.ok(response, BaseStatus.CREATED);
-    }
-
-    @PostMapping("/order")
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "주문 정보 임시 저장 api", description = """
-        1. 결제 요청 전에 주문 정보를 서버에 저장
-           결제하기 버튼을 누를 때 (실제 결제 요청 api 보내기 전) 호출하면 됩니다. orderId는 클라이언트에서 임의의 랜덤한 숫자로 제작합니다.
-        2. orderId, amount 저장
-        3. 이후 결제 요청 / 결제 성공 시 서버에 저장된 값과 비교
-         → 변조 방지, 악의적인 금액 조작 차단
-         (Completed)
-        """)
-    public BaseResponse<Void> saveOrder(@RequestBody @Valid OrderSaveRequest request,
-        @AuthenticationPrincipal PrincipalUser principal) {
-        orderService.saveOrder(request, principal.getId());
-//        orderService.saveOrder(request, 1L); //테스트용
-        return BaseResponse.ok(BaseStatus.CREATED);
     }
 
     @GetMapping("/payment")
