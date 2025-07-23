@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
+import shop.matjalalzz.tosspay.app.OrderService;
 import shop.matjalalzz.tosspay.app.PaymentService;
+import shop.matjalalzz.tosspay.dto.OrderSaveRequest;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 
@@ -28,7 +30,9 @@ import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final OrderService orderService;
 
+    // 결제 승인 api
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/confirm")
     @Operation(summary = "Confirm", description = """
@@ -42,4 +46,17 @@ public class PaymentController {
             principalUser.getId());
         return BaseResponse.ok(response, BaseStatus.OK);
     }
+
+    // 1️⃣ 결제 요청 전에 주문 정보를 서버에 저장 (임시)
+    // 2️⃣ orderId, amount 저장
+    // 3️⃣ 이후 결제 요청 / 결제 성공 시 서버에 저장된 값과 비교
+    // → 변조 방지, 악의적인 금액 조작 차단
+    @PostMapping("/order")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BaseResponse<Void> saveOrder(@RequestBody OrderSaveRequest request) {
+        orderService.saveOrder(request);
+        return BaseResponse.ok(BaseStatus.CREATED);
+    }
+
+
 }

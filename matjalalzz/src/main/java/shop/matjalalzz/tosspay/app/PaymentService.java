@@ -2,7 +2,6 @@ package shop.matjalalzz.tosspay.app;
 
 
 import java.util.Base64;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +13,9 @@ import shop.matjalalzz.tosspay.config.TossApiClient;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmResponse;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.tosspay.entity.Order;
+import shop.matjalalzz.tosspay.entity.OrderStatus;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
 @Slf4j
@@ -23,7 +24,8 @@ import shop.matjalalzz.user.entity.User;
 public class PaymentService {
 
     private final TossApiClient tossApiClient;
-    private final UserRepository userRepository;
+    private final UserService userService;
+    private final OrderService orderService;
 
     @Value("${toss.secret-key}")
     private String secretKey;
@@ -32,12 +34,28 @@ public class PaymentService {
     public PaymentSuccessResponse confirmPayment(TossPaymentConfirmRequest tossRequest,
         Long userId) {
 
-        //유저 검증
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND); //404
-        }
+        // 1. 유저 검증
+        User user = userService.getUserById(userId);
 
+        // 2. 결제 데이터 무결성 확인
+        Order order = orderService.validateOrder(tossRequest);
+
+        // 3. 토스 api 결제 요청
+        confirmPaymentWithTossApi(tossRequest);
+
+        // 4. 결제 성공 처리
+        user.updatePoint(tossRequest.amount()); //사용자의 포인트 올려줌
+        order.updateStatus(OrderStatus.DONE); //주문 완료 처리
+
+        //TODO: 객체 생성 후 반환 코드 필요
+        return PaymentSuccessResponse.builder()
+            .orderId(tossRequest.orderId())
+            .amount(tossRequest.amount()).build();
+
+    }
+
+    //토스 API 외부 요청
+    private void confirmPaymentWithTossApi(TossPaymentConfirmRequest tossRequest) {
         //인증 헤더 생성
         String encodedKey = Base64.getEncoder().encodeToString((secretKey + ":").getBytes());
 
@@ -45,23 +63,9 @@ public class PaymentService {
         TossPaymentConfirmResponse response = tossApiClient.confirmPayment("Basic " + encodedKey,
             tossRequest);
 
+        // 토스 api 응답이 DONE이 아닐 경우 결제 실패 처리
         if (!"DONE".equals(response.status())) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA); //400
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT_REQUEST); //400
         }
-
-        User user = userOptional.get();
-        int point = tossRequest.amount(); //int로 바꿨는데 에러 없는지 확인 필요
-
-        if (point < 1) {
-            throw new BusinessException(ErrorCode.ZERO_AMOUNT_PAYMENT_NOT_ALLOWED); // 0원 결제 시 400
-        }
-        user.updatePoint(point);
-
-        //객체 생성 후 반환 코드 필요
-        PaymentSuccessResponse Response = PaymentSuccessResponse.builder()
-            .orderId(tossRequest.orderId())
-            .amount(tossRequest.amount()).build();
-
-        return Response;
     }
 }
