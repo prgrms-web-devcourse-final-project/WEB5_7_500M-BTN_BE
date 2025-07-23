@@ -9,6 +9,7 @@ import shop.matjalalzz.tosspay.dao.OrderRepository;
 import shop.matjalalzz.tosspay.dto.OrderSaveRequest;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 import shop.matjalalzz.tosspay.entity.Order;
+import shop.matjalalzz.tosspay.entity.OrderStatus;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 
@@ -36,11 +37,19 @@ public class OrderService {
             .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getUser().getId().equals(userId)) {
-            throw new BusinessException(ErrorCode.NOT_MATCH_ORDER_USER);
+            throw new BusinessException(ErrorCode.NOT_MATCH_ORDER);
         }
 
         if (order.getAmount() != request.amount()) {
-            throw new BusinessException(ErrorCode.INVALID_PAYMENT_AMOUNT);
+            throw new BusinessException(ErrorCode.NOT_MATCH_ORDER);
+        }
+
+        if (!order.getOrderId().equals(request.orderId())) {
+            throw new BusinessException(ErrorCode.NOT_MATCH_ORDER);
+        }
+
+        if (order.getStatus() != OrderStatus.READY) {
+            throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         return order;

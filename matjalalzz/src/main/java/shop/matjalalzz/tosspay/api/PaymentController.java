@@ -9,7 +9,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
@@ -23,7 +22,6 @@ import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/payments")
 @Validated
 @Tag(name = "결제 API", description = "토스Payment API")
 // Toss 결제 성공 후 백엔드에서 결제를 최종 승인하고 포인트 충전
@@ -34,7 +32,7 @@ public class PaymentController {
 
     // 결제 승인 api
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/confirm")
+    @PostMapping("payment/confirm")
     @Operation(summary = "Confirm", description = """
         TOSS_SECRET_KEY=test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
         TOSS_CLIENT_KEY=test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
@@ -42,8 +40,11 @@ public class PaymentController {
     public BaseResponse<PaymentSuccessResponse> confirm(
         @RequestBody @Valid TossPaymentConfirmRequest request,
         @AuthenticationPrincipal PrincipalUser principle) {
+//        PaymentSuccessResponse response = paymentService.confirmPayment(request,
+//            principle.getId());
+
         PaymentSuccessResponse response = paymentService.confirmPayment(request,
-            principle.getId());
+            1L); //테스트용
         return BaseResponse.ok(response, BaseStatus.CREATED);
     }
 
@@ -55,7 +56,8 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> saveOrder(@RequestBody OrderSaveRequest request,
         @AuthenticationPrincipal PrincipalUser principle) {
-        orderService.saveOrder(request, principle.getId());
+//        orderService.saveOrder(request, principle.getId());
+        orderService.saveOrder(request, 1L); //테스트용
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 

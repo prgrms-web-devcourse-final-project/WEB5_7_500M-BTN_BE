@@ -34,7 +34,7 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private PaymentStatus status;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String paymentKey;
 
     @ManyToOne(fetch = FetchType.LAZY)
