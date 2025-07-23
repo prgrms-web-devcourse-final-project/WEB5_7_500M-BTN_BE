@@ -32,8 +32,10 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
+import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
+import shop.matjalalzz.reservation.mapper.ReservationMapper;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
@@ -49,6 +51,7 @@ public class PartyService {
     private final ShopService shopService;
     private final UserService userService;
     private final ImageRepository imageRepository;
+    private final ReservationRepository reservationRepository;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -147,11 +150,17 @@ public class PartyService {
             throw new BusinessException(ErrorCode.CANNOT_QUIT_PARTY_STATUS);
         }
 
-        if(partyUser.isPaymentCompleted()) {
+        // 파티 나갔을 때, 최소 인원보다 적을 시 파티 제거
+        if(party.getMinCount() > party.getCurrentCount() - 1) {
+            breakParty(party);
+            return;
+        }
+
+        if (partyUser.isPaymentCompleted()) {
             int fee = party.getTotalReservationFee() / party.getCurrentCount();
             party.decreaseTotalReservationFee(fee);
 
-            if(reservation != null) {
+            if (reservation != null) {
                 reservation.decreaseHeadCount();
                 reservation.decreaseReservationFee(fee);
             }
@@ -160,15 +169,13 @@ public class PartyService {
         partyUser.delete();
         party.decreaseCurrentCount();
 
-        // todo: 파티 탈퇴할 때, 조건 불만족시 파티 터뜨리기 구현
-
         // todo: 파티 탈퇴 시, 채팅 메시지는 어떻게 할 지 상의 필요
     }
 
     @Transactional
     public KickoutResponse kickout(Long partyId, long userId, long kickoutUserId) {
         // 본인 강퇴 불가
-        if(userId == kickoutUserId) {
+        if (userId == kickoutUserId) {
             throw new BusinessException(ErrorCode.CANNOT_KICK_OUT_SELF);
         }
 
@@ -183,14 +190,14 @@ public class PartyService {
         PartyUser kickoutPartyUser = findPartyUser(kickoutUserId, party);
 
         // 예약금 결제 완료한 팀원은 강퇴 불가
-        if(kickoutPartyUser.isPaymentCompleted()) {
+        if (kickoutPartyUser.isPaymentCompleted()) {
             throw new BusinessException(ErrorCode.CANNOT_KICK_OUT_PAYMENT_COMPLETE);
         }
 
-        if(party.getStatus() == PartyStatus.COMPLETED
+        // 강퇴 후, 최소 인원 불만족 시 파티 해체
+        if (party.getStatus() == PartyStatus.COMPLETED
             && party.getMinCount() > party.getCurrentCount() - 1) {
-            // todo: 파티 터칠 때 예약금 사용하는 service 코드
-            party.deleteParty();
+            breakParty(party);
             return new KickoutResponse(true);
         }
 
@@ -201,9 +208,36 @@ public class PartyService {
     }
 
     @Transactional
+    public void breakParty(Party party) {
+        // 삭제됐거나 종료된 상태의 파티는 삭제 불가
+        if(party.isDeleted() || party.getStatus() == PartyStatus.TERMINATED) {
+            throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_TERMINATED);
+        }
+
+        Reservation reservation = party.getReservation();
+
+        // 예약일 하루 전이라면 파티 삭제 불가
+        if(reservation != null && reservation.getStatus() == ReservationStatus.CONFIRMED
+            && reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1))) {
+            throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_D_DAY);
+        }
+
+        // 예약금 환불
+        int fee = party.getShop().getReservationFee();
+        partyUserRepository.refundReservationFee(party.getId(), fee);
+
+        // 예약 취소
+        if(reservation != null) {
+            // todo: 사장한테 예약 취소 알림 기능 필요
+            reservation.changeStatus(ReservationStatus.CANCELLED);
+        }
+
+        party.deleteParty();
+    }
+
+    @Transactional
     public void deleteParty(Long partyId, long userId) {
-        Party party = findById(partyId);
-        userService.getUserById(userId); //검증용
+        Party party = findByIdWithPartyUsers(partyId);
         PartyUser partyUser = findPartyUser(userId, party);
 
         // 호스트인 경우만 파티 삭제 가능
@@ -211,11 +245,7 @@ public class PartyService {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS_DELETE_PARTY);
         }
 
-        // 모집 중인 파티만 삭제 가능
-        if (!party.isRecruiting()) {
-            throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_STATUS);
-        }
-        party.deleteParty(); //파티 유저와 댓글까지 cascade 삭제
+        breakParty(party);
     }
 
     @Transactional
@@ -236,7 +266,7 @@ public class PartyService {
         }
 
         // 파티 최소 인원 충족 검사
-        if(party.getCurrentCount() < party.getMinCount()) {
+        if (party.getCurrentCount() < party.getMinCount()) {
             throw new BusinessException(ErrorCode.CANNOT_CHANGE_PARTY_STATUS_MIN_COUNT);
         }
 
@@ -248,15 +278,22 @@ public class PartyService {
         User user = userService.getUserById(userId);
         Party party = findByIdWithPartyUsers(partyId);
 
+        // 파티 모집 중일 때는 예약금 지불 불가
+        if(party.getStatus() == PartyStatus.RECRUITING) {
+            throw new BusinessException(ErrorCode.CANNOT_PAY_FEE_RECRUITING);
+        }
+
         PartyUser partyUser = findPartyUser(userId, party);
 
-        if(partyUser.isPaymentCompleted()) {
+        // 이미 예약금을 지불한 파티원의 중복 지불 방지
+        if (partyUser.isPaymentCompleted()) {
             throw new BusinessException(ErrorCode.ALREADY_PAID_USER);
         }
 
         int reservationFee = party.getShop().getReservationFee();
 
-        if(user.getPoint() < reservationFee) {
+        // 파티원의 보유 포인트 확인
+        if (user.getPoint() < reservationFee) {
             throw new BusinessException(ErrorCode.LACK_OF_BALANCE);
         }
 
@@ -264,9 +301,17 @@ public class PartyService {
         party.increaseTotalReservationFee(reservationFee);
         partyUser.completePayment();
 
+        // 모두 결제 했으면, 예약 자동 생성
+        /*
+        todo: ReservationService 에서 PartyService 를 의존성 주입받고 있어서,
+              순환 참조 문제로 ReservationService을 직접 의존 불가
+              repository를 직접 사용하는 예약 생성 로직을 퍼사드 패턴으로 리팩토링 필요
+        */
         boolean allPaid = party.getPartyUsers().stream().allMatch(PartyUser::isPaymentCompleted);
-        if(allPaid) {
-
+        if (allPaid) {
+            User host = findPartyHost(partyId);
+            Reservation reservation = ReservationMapper.toEntity(party, host);
+            reservationRepository.save(reservation);
         }
     }
 
@@ -343,11 +388,6 @@ public class PartyService {
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 
-    private Party findByIdWithReservation(Long partyId) {
-        return partyRepository.findPartyByIdWithReservation(partyId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
-    }
-
     private Party findByIdWithPartyUsers(Long partyId) {
         return partyRepository.findPartyByIdWithPartyUsers(partyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
@@ -358,6 +398,11 @@ public class PartyService {
             .filter(pu -> pu.getUser().getId().equals(userId))
             .findFirst()
             .orElseThrow(() -> new BusinessException(ErrorCode.NOT_JOIN_PARTY));
+    }
+
+    private User findPartyHost(long partyId) {
+        return partyUserRepository.findPartyHostByPartyId(partyId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
