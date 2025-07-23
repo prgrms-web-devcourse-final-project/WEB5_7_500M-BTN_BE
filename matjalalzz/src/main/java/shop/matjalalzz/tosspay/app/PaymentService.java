@@ -2,15 +2,20 @@ package shop.matjalalzz.tosspay.app;
 
 
 import java.util.Base64;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.tosspay.config.TossApiClient;
 import shop.matjalalzz.tosspay.dao.PaymentRepository;
+import shop.matjalalzz.tosspay.dto.PaymentHistoryResponse;
+import shop.matjalalzz.tosspay.dto.PaymentScrollResponse;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmResponse;
@@ -76,5 +81,10 @@ public class PaymentService {
         }
 
         paymentRepository.save(PaymentMapper.toEntity(response, user, order));
+    }
+
+    public PaymentScrollResponse getPaymentHistories(long userId, int size) {
+        PageRequest.of(0, size, Sort.by(Direction.))
+        return null;
     }
 }

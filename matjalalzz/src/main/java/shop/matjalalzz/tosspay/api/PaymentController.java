@@ -3,19 +3,21 @@ package shop.matjalalzz.tosspay.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.tosspay.app.OrderService;
-import shop.matjalalzz.tosspay.app.PaymentService;
 import shop.matjalalzz.tosspay.dto.OrderSaveRequest;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
@@ -39,9 +41,9 @@ public class PaymentController {
         혹여나 프론트와 토스페이 api 통신이 되지 않으면  https://github.com/prgrms-be-devcourse/NBE5-7-2-Team09  링크에 프론트 코드 링크 참조해주세요""")
     public BaseResponse<PaymentSuccessResponse> confirm(
         @RequestBody @Valid TossPaymentConfirmRequest request,
-        @AuthenticationPrincipal PrincipalUser principle) {
+        @AuthenticationPrincipal PrincipalUser principal) {
 //        PaymentSuccessResponse response = paymentService.confirmPayment(request,
-//            principle.getId());
+//            principal.getId());
 
         PaymentSuccessResponse response = paymentService.confirmPayment(request,
             1L); //테스트용
@@ -55,10 +57,18 @@ public class PaymentController {
     @PostMapping("/order")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> saveOrder(@RequestBody OrderSaveRequest request,
-        @AuthenticationPrincipal PrincipalUser principle) {
-//        orderService.saveOrder(request, principle.getId());
+        @AuthenticationPrincipal PrincipalUser principal) {
+//        orderService.saveOrder(request, principal.getId());
         orderService.saveOrder(request, 1L); //테스트용
         return BaseResponse.ok(BaseStatus.CREATED);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<> getPaymentHistories(
+        @RequestParam(required = false, defaultValue = "10") int size,
+        @AuthenticationPrincipal PrincipalUser principal){
+        paymentService.getPaymentHistories(principal.getId());
     }
 
 
