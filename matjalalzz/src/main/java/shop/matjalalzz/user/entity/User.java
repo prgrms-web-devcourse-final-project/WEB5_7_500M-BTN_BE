@@ -69,7 +69,7 @@ public class User extends BaseEntity {
         this.oauthId = oauthId;
         this.password = password;
         this.nickname = nickname;
-        //this.role = role;
+        this.role = role;
         this.phoneNumber = phoneNumber;
         this.name = name;
         this.age = age;
