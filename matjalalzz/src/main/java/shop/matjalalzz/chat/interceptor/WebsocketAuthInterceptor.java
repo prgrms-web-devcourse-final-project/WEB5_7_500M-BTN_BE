@@ -17,7 +17,7 @@ import shop.matjalalzz.global.security.oauth2.mapper.OAuth2Mapper;
 
 @Component
 @RequiredArgsConstructor
-public class HandshakeAuthInterceptor implements HandshakeInterceptor {
+public class WebsocketAuthInterceptor implements HandshakeInterceptor {
 
     private final TokenProvider tokenProvider;
 

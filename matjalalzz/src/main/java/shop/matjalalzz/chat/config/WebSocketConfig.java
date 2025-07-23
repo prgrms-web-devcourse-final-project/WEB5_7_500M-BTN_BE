@@ -7,20 +7,20 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import shop.matjalalzz.chat.interceptor.HandshakeAuthInterceptor;
-import shop.matjalalzz.chat.interceptor.WebSocketAuthInterceptor;
-import shop.matjalalzz.chat.interceptor.WebSocketLoggingInterceptor;
-import shop.matjalalzz.chat.interceptor.WebsocketSessionInterceptor;
+import shop.matjalalzz.chat.interceptor.StompAuthInterceptor;
+import shop.matjalalzz.chat.interceptor.StompLoggingInterceptor;
+import shop.matjalalzz.chat.interceptor.StompSessionInterceptor;
+import shop.matjalalzz.chat.interceptor.WebsocketAuthInterceptor;
 
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final WebSocketLoggingInterceptor webSocketLoggingInterceptor;
-    private final WebSocketAuthInterceptor webSocketAuthInterceptor;
-    private final HandshakeAuthInterceptor handshakeAuthInterceptor;
-    private final WebsocketSessionInterceptor websocketSessionInterceptor;
+    private final StompLoggingInterceptor stompLoggingInterceptor;
+    private final StompAuthInterceptor stompAuthInterceptor;
+    private final WebsocketAuthInterceptor websocketAuthInterceptor;
+    private final StompSessionInterceptor stompSessionInterceptor;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -33,14 +33,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
             .setAllowedOriginPatterns("*")
-            .addInterceptors(handshakeAuthInterceptor)
+            .addInterceptors(websocketAuthInterceptor)
             .withSockJS();
     }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(webSocketLoggingInterceptor);
-        registration.interceptors(webSocketAuthInterceptor);
-        registration.interceptors(websocketSessionInterceptor);
+        registration.interceptors(stompLoggingInterceptor);
+        registration.interceptors(stompAuthInterceptor);
+        registration.interceptors(stompSessionInterceptor);
     }
 }

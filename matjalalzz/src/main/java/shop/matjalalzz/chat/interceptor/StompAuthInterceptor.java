@@ -14,7 +14,7 @@ import shop.matjalalzz.global.security.PrincipalUser;
 
 @Component
 @RequiredArgsConstructor
-public class WebSocketAuthInterceptor implements ChannelInterceptor {
+public class StompAuthInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {

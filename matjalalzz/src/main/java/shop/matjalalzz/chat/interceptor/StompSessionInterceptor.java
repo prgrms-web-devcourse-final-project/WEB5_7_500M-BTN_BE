@@ -9,7 +9,7 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class WebsocketSessionInterceptor implements ChannelInterceptor {
+public class StompSessionInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
