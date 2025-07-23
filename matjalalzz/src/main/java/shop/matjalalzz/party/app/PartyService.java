@@ -222,13 +222,13 @@ public class PartyService {
             throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_D_DAY);
         }
 
+        // todo: 이런 부분도 퍼사드 패턴 적용해서 책임 분리 필요
         // 예약금 환불
         int fee = party.getShop().getReservationFee();
         partyUserRepository.refundReservationFee(party.getId(), fee);
 
         // 예약 취소
         if(reservation != null) {
-            // todo: 사장한테 예약 취소 알림 기능 필요
             reservation.changeStatus(ReservationStatus.CANCELLED);
         }
 
