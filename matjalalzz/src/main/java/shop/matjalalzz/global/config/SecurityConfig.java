@@ -90,6 +90,7 @@ public class SecurityConfig {
 
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}/comments").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reviews").permitAll()
+                    .requestMatchers("/ws/**").permitAll()
 
                     .requestMatchers("/users/delete", "/users/logout").authenticated()
 

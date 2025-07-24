@@ -20,6 +20,8 @@ public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
 
     List<PartyUser> findAllByPartyId(Long partyId);
 
+    boolean existsByUserIdAndPartyId(Long userId, Long partyId);
+
     @Query("""
         select u
         from User u
