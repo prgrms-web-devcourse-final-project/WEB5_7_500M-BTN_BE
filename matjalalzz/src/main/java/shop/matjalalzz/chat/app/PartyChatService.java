@@ -3,6 +3,7 @@ package shop.matjalalzz.chat.app;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.dao.ChatMessageRepository;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.chat.entity.ChatMessage;
@@ -64,6 +65,18 @@ public class PartyChatService {
             .build();
         ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
         messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
+        chatMessageRepository.save(chatMessage);
+    }
+
+    @Transactional
+    public void join(Party party, User user) {
+        ChatMessage chatMessage = ChatMessage.builder()
+            .sender(user)
+            .party(party)
+            .type(MessageType.JOIN)
+            .build();
+
+        messagingTemplate.convertAndSend("/topic/party/" + party.getId(), chatMessage);
         chatMessageRepository.save(chatMessage);
     }
 

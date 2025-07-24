@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record ChatLoadRequest(
     Long partyId,
-    Long lastMessageId
+    Long cursor
 ) {
 
 }

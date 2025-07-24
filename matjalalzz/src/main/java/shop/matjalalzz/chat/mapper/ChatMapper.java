@@ -2,7 +2,6 @@ package shop.matjalalzz.chat.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import shop.matjalalzz.chat.dto.ChatJoinRequest;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.chat.entity.ChatMessage;
@@ -32,15 +31,6 @@ public class ChatMapper {
             .userNickname(chatMessage.getSender().getNickname())
             .partyId(chatMessage.getParty().getId())
             .userProfile(chatMessage.getSender().getProfileKey())
-            .build();
-    }
-
-    public static ChatMessage fromChatJoinRequest(ChatJoinRequest request, User sender,
-        Party party) {
-        return ChatMessage.builder()
-            .type(MessageType.JOIN)
-            .sender(sender)
-            .party(party)
             .build();
     }
 

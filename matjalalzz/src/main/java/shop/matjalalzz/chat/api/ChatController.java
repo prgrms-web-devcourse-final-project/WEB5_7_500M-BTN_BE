@@ -10,10 +10,10 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import shop.matjalalzz.chat.app.ChatService;
-import shop.matjalalzz.chat.dto.ChatJoinRequest;
 import shop.matjalalzz.chat.dto.ChatLoadRequest;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
+import shop.matjalalzz.chat.dto.ChatRestoreRequest;
 import shop.matjalalzz.chat.dto.StompPrincipal;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
@@ -36,14 +36,17 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/party/" + message.partyId(), messageResponse);
     }
 
-    @MessageMapping("/chat.join")
-    public void addUser(@Payload ChatJoinRequest request,
-        StompPrincipal user) {
-        log.trace("Adding user: {} Into {}", user.getId(), request.partyId());
+    @MessageMapping("/chat.restore")
+    public void restoreChat(@Payload ChatRestoreRequest chatRestoreRequest,
+        StompHeaderAccessor accessor, StompPrincipal user) {
+        log.trace("Loading chat history for request: " + chatRestoreRequest);
 
-        ChatMessageResponse messageResponse = chatService.join(request, user.getId());
+        List<ChatMessageResponse> chatMessageRequests = chatService.restoreMessages(
+            chatRestoreRequest,
+            user.getId());
 
-        messagingTemplate.convertAndSend("/topic/party/" + request.partyId(), messageResponse);
+        messagingTemplate.convertAndSend("/queue/load-" + accessor.getSessionId(),
+            chatMessageRequests);
     }
 
     @MessageMapping("/chat.load")
