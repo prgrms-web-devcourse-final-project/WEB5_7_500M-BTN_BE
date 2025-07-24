@@ -18,6 +18,7 @@ public class UserMapper {
             .phoneNumber(signUpRequest.phoneNumber())
             .age(signUpRequest.age())
             .name(signUpRequest.name())
+            .role(Role.USER)
             .gender(signUpRequest.gender())
             .build();
     }
