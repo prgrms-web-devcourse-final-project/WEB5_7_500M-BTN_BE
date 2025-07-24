@@ -39,7 +39,7 @@ public class ChatController {
     @MessageMapping("/chat.restore")
     public void restoreChat(@Payload ChatRestoreRequest chatRestoreRequest,
         StompHeaderAccessor accessor, StompPrincipal user) {
-        log.trace("Loading chat history for request: " + chatRestoreRequest);
+        log.trace("Restoring chat history for request: " + chatRestoreRequest);
 
         List<ChatMessageResponse> chatMessageRequests = chatService.restoreMessages(
             chatRestoreRequest,

@@ -8,8 +8,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +25,11 @@ import shop.matjalalzz.user.entity.User;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Table(
+    indexes = {
+        @Index(name = "idx_chatMessage_load", columnList = "party_id, chat_message_id"),
+    }
+)
 public class ChatMessage {
 
     @Id
@@ -39,7 +46,7 @@ public class ChatMessage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "party_id")
     private Party party;
-    
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     MessageType type;
