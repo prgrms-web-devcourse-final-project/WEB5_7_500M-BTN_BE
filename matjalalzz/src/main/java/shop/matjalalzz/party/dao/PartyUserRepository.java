@@ -11,7 +11,12 @@ import shop.matjalalzz.user.entity.User;
 
 public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
 
-    Optional<PartyUser> findByUserIdAndPartyId(Long userId, Long partyId);
+    @Query(value = """
+        select pu.* from party_user pu
+        where pu.user_id = :userId and pu.party_id = :partyId
+        """, nativeQuery = true)
+    Optional<PartyUser> findByUserIdAndPartyId(@Param("userId") Long userId,
+        @Param("partyId") Long partyId);
 
     List<PartyUser> findAllByPartyId(Long partyId);
 
@@ -27,10 +32,11 @@ public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
     @Modifying
     @Query("""
         update User u
-        set u.point = u.point + :refundAmount
+        set u.point = u.point + :refundAmount, u.version = u.version + 1
         where u.id = (
             select pu.user.id from PartyUser pu where pu.party.id = :partyId and pu.isHost = true
         )
         """)
-    void refundReservationFee(@Param("partyId") Long partyId, @Param("refundAmount") int refundAmount);
+    void refundReservationFee(@Param("partyId") Long partyId,
+        @Param("refundAmount") int refundAmount);
 }

@@ -89,7 +89,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Modifying
     @Query("""
         update User u
-        set u.point = u.point + :reservationFee
+        set u.point = u.point + :reservationFee, u.version = u.version + 1
         where u.id = (select s.user.id from Shop s where s.id = :shopId)
         """)
     void settleReservationFee(
