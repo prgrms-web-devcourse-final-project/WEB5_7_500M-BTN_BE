@@ -31,6 +31,7 @@ public class ChatMapper {
             .userId(chatMessage.getSender().getId())
             .userNickname(chatMessage.getSender().getNickname())
             .partyId(chatMessage.getParty().getId())
+            .userProfile(chatMessage.getSender().getProfileKey())
             .build();
     }
 

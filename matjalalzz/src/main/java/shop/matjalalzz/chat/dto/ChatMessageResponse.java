@@ -10,6 +10,7 @@ public record ChatMessageResponse(
     String message,
     Long userId,
     String userNickname,
+    String userProfile,
     Long partyId) {
 
 }
