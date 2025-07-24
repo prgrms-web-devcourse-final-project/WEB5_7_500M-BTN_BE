@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -52,6 +55,10 @@ public class PartyService {
     private final UserService userService;
     private final ImageRepository imageRepository;
     private final ReservationRepository reservationRepository;
+
+    private final String MAX_ATTEMPTS = "${custom.retry.max-attempts}";
+    private final String MAX_DELAY = "${custom.retry.max-delay}";
+    private final String MULTIPLIER = "${custom.retry.multiplier}";
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -120,6 +127,13 @@ public class PartyService {
         return PartyMapper.toMyPartyPageResponse(nextCursor, parties);
     }
 
+    @Retryable(
+        retryFor = DataAccessException.class,
+        maxAttemptsExpression = MAX_ATTEMPTS,
+        backoff = @Backoff(
+            delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
+        )
+    )
     @Transactional
     public void joinParty(Long partyId, long userId) {
         Party party = findById(partyId);
@@ -127,11 +141,19 @@ public class PartyService {
 
         validateJoinParty(party, user);
 
-        HandlePartyUserJoin(party, user);
+        PartyUser partyUser = PartyUser.createUser(party, user);
+        party.getPartyUsers().add(partyUser);
+        party.increaseCurrentCount();
 
         // todo: 채팅방 참여 로직 추가
     }
 
+    @Retryable(
+        retryFor = DataAccessException.class,
+        backoff = @Backoff(
+            delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
+        )
+    )
     @Transactional
     public void quitParty(Long partyId, long userId) {
         Party party = findByIdWithReservationAndPartyUsers(partyId);
@@ -172,6 +194,12 @@ public class PartyService {
         // todo: 파티 탈퇴 시, 채팅 메시지는 어떻게 할 지 상의 필요
     }
 
+    @Retryable(
+        retryFor = DataAccessException.class,
+        backoff = @Backoff(
+            delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
+        )
+    )
     @Transactional
     public KickoutResponse kickout(Long partyId, long userId, long kickoutUserId) {
         // 본인 강퇴 불가
@@ -207,6 +235,12 @@ public class PartyService {
         return new KickoutResponse(false);
     }
 
+    @Retryable(
+        retryFor = DataAccessException.class,
+        backoff = @Backoff(
+            delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
+        )
+    )
     @Transactional
     public void breakParty(Party party) {
         // 삭제됐거나 종료된 상태의 파티는 삭제 불가
@@ -235,6 +269,12 @@ public class PartyService {
         party.deleteParty();
     }
 
+    @Retryable(
+        retryFor = DataAccessException.class,
+        backoff = @Backoff(
+            delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
+        )
+    )
     @Transactional
     public void deleteParty(Long partyId, long userId) {
         Party party = findByIdWithPartyUsers(partyId);
@@ -273,6 +313,12 @@ public class PartyService {
         party.complete();
     }
 
+    @Retryable(
+        retryFor = DataAccessException.class,
+        backoff = @Backoff(
+            delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
+        )
+    )
     @Transactional
     public void payReservationFee(Long partyId, long userId) {
         User user = userService.getUserById(userId);
@@ -350,6 +396,13 @@ public class PartyService {
         if (userAge < party.getMinAge() || userAge > party.getMaxAge()) {
             throw new BusinessException(ErrorCode.NOT_MATCH_AGE);
         }
+
+        // 6. 중복 참여, 이전에 참여 이력 존재 확인
+        Optional<PartyUser> existingPartyUser = partyUserRepository.findByUserIdAndPartyId(
+            user.getId(), party.getId());
+        if(existingPartyUser.isPresent()) {
+            throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
+        }
     }
 
     private void validateCreateParty(PartyCreateRequest request) {
@@ -362,25 +415,6 @@ public class PartyService {
         if (request.minCount() > request.maxCount()) {
             throw new BusinessException(ErrorCode.INVALID_COUNT_CONDITION);
         }
-    }
-
-    //이미 파티에 참여중인 유저인지 검증
-    private void HandlePartyUserJoin(Party party, User user) {
-        Optional<PartyUser> existingPartyUser = partyUserRepository.findByUserIdAndPartyId(
-            user.getId(), party.getId());
-
-        if (existingPartyUser.isPresent()) {
-            PartyUser partyUser = existingPartyUser.get();
-            if (!partyUser.isDeleted()) {
-                throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
-            }
-            partyUser.recover(); //파티 탈퇴한 사람이 다시 파티 참여한 경우
-        } else {
-            PartyUser partyUser = PartyUser.createUser(party, user);
-            party.getPartyUsers().add(partyUser);
-        }
-
-        party.increaseCurrentCount();
     }
 
     private Party findByIdWithReservationAndPartyUsers(Long partyId) {
