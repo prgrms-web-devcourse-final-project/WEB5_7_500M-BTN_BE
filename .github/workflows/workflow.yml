@@ -55,8 +55,12 @@ jobs:
       AWS_ACCESS_KEY_ID:    ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_S3_PRESIGN_EXP:    ${{ secrets.AWS_S3_PRESIGN_EXP }}
-      JPA_DIALECT:    ${{ secrets.JPA_DIALECT }}
-
+      JPA_DIALECT:    	    ${{ secrets.JPA_DIALECT }}
+      MAX_DELAY: 	        ${{ secrets.MAX_DELAY }}
+      MAX_ATTEMPTS: 	    ${{ secrets.MAX_ATTEMPTS }}
+      MULTIPLIER: 	        ${{ secrets.MULTIPLIER }}
+      DISCORD_BOT_TOKEN:    ${{ secrets.DISCORD_BOT_TOKEN }}
+      DISCORD_CHANNEL_ID:   ${{ secrets.DISCORD_CHANNEL_ID }}
 
     steps:
       - name: 저장소 코드 Clone
@@ -96,7 +100,12 @@ jobs:
           AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
           AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
           AWS_S3_PRESIGN_EXP=${AWS_S3_PRESIGN_EXP}
-          JPA_DIALECT=${JPA_DIALECT}
+          JPA_DIALECT=${JPA_DIALECT}          
+          MAX_DELAY=${MAX_DELAY}
+          MAX_ATTEMPTS=${MAX_ATTEMPTS}
+          MULTIPLIER=${MULTIPLIER}
+          DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+          DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
           EOF
 
       - name: 도커 hub 로그인
