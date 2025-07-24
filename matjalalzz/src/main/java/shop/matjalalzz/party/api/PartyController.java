@@ -3,6 +3,7 @@ package shop.matjalalzz.party.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.dto.KickoutResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
+import shop.matjalalzz.party.dto.PartyMemberResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
 import shop.matjalalzz.party.dto.PartySearchParam;
 
@@ -44,11 +46,19 @@ public class PartyController {
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
-    @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 게시글 상세 정보를 조회합니다.(Completed)")
+    @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 상세 정보를 조회합니다.(Completed)")
     @GetMapping("/{partyId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyDetailResponse> getPartyDetail(@PathVariable Long partyId) {
         PartyDetailResponse response = partyService.getPartyDetail(partyId);
+        return BaseResponse.ok(response, BaseStatus.OK);
+    }
+
+    @Operation(summary = "파티원 목록 조회", description = "맛집 탐험 파티원 목록을 조회합니다.(Completed)")
+    @GetMapping("/{partyId}/members")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<List<PartyMemberResponse>> getPartyMembers(@PathVariable Long partyId) {
+        List<PartyMemberResponse> response = partyService.getPartyMembers(partyId);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 

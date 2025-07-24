@@ -28,6 +28,7 @@ import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
+import shop.matjalalzz.party.dto.PartyMemberResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
 import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
@@ -85,14 +86,14 @@ public class PartyService {
     public PartyDetailResponse getPartyDetail(Long partyId) {
         Party party = findById(partyId);
 
-        // party host인 유저의 id 찾기
-        Long hostId = party.getPartyUsers().stream()
-            .filter(PartyUser::isHost)
-            .map(pu -> pu.getUser().getId())
-            .findFirst()
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+        List<PartyMemberResponse> members = partyUserRepository.findAllByPartyIdToDto(partyId, BASE_URL);
 
-        return PartyMapper.toDetailResponse(party, hostId, getShopThumbnail(party));
+        return PartyMapper.toDetailResponse(party, getShopThumbnail(party), members);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PartyMemberResponse> getPartyMembers(Long partyId) {
+        return partyUserRepository.findAllByPartyIdToDto(partyId, BASE_URL);
     }
 
     @Transactional(readOnly = true)

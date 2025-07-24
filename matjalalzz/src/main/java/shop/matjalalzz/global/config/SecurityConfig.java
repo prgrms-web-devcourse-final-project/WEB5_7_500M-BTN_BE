@@ -76,7 +76,8 @@ public class SecurityConfig {
                     .requestMatchers("/users/login", "/users/signup", "/users/reissue-token",
                         "swagger-ui.html", "users/authorization-info", "/v3/api-docs/**",
                         "/swagger-ui/**", "/error", "/oauth2/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/parties/{partyId}", "/parties").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/parties/{partyId}", "/parties",
+                        "/parties/{partyId}/members").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     .requestMatchers("/shops/presigned-urls").hasAnyRole("ADMIN", "OWNER", "USER")
                     .requestMatchers(HttpMethod.GET, "/reservations").hasRole("OWNER")
