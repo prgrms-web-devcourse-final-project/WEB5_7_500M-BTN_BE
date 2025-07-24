@@ -1,6 +1,7 @@
 package shop.matjalalzz.reservation.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
@@ -58,6 +61,7 @@ class ReservationCreateReservationTest {
             // given
             User user = userRepository.save(TestUtil.createUser());
             Shop shop = shopRepository.save(TestUtil.createShop(user));
+            user.increasePoint(10000);
             CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "20:00",
                 2, 10000);
 
@@ -73,12 +77,31 @@ class ReservationCreateReservationTest {
         }
 
         @Test
+        @DisplayName("예약 생성 실패 (보유 포인트 부족)")
+        void createReservationWithoutParty_Fail() {
+            // given
+            User user = userRepository.save(TestUtil.createUser());
+            Shop shop = shopRepository.save(TestUtil.createShop(user));
+            user.increasePoint(1000);
+            CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "20:00",
+                2, 10000);
+
+            // when & then
+            assertThatThrownBy(
+                () -> reservationService.createReservation(user.getId(), shop.getId(), request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.LACK_OF_BALANCE);
+        }
+
+        @Test
         @DisplayName("동일한 시간에 두 명이 각각 예약을 생성")
         void duplicateReservationTime() {
             // given
             User owner = userRepository.save(TestUtil.createUser());
             User user1 = userRepository.save(TestUtil.createUser());
             User user2 = userRepository.save(TestUtil.createUser());
+            user1.increasePoint(10000);
+            user2.increasePoint(10000);
 
             Shop shop = shopRepository.save(TestUtil.createShop(owner));
 
