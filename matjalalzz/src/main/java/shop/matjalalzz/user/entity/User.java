@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -61,6 +62,9 @@ public class User extends BaseEntity {
 
     @Size(max = 255)
     private String profileKey;
+
+    @Version
+    private long version;
 
     @Builder
     public User(String email, String oauthId, Role role, String password, String nickname, String phoneNumber,

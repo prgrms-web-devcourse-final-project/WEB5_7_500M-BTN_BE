@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -49,6 +50,9 @@ public class Reservation extends BaseEntity {
     @Column(nullable = false, length = 20)
     @Builder.Default
     private ReservationStatus status = ReservationStatus.PENDING;
+
+    @Version
+    private int version;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
