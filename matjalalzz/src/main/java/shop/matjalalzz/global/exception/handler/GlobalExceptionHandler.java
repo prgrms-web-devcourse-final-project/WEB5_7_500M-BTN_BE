@@ -2,6 +2,7 @@ package shop.matjalalzz.global.exception.handler;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
@@ -79,7 +80,7 @@ public class GlobalExceptionHandler {
             .build());
     }
 
-    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ErrorResponse> handleOptimisticLockException(
         ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
         ErrorCode code = ErrorCode.LOCK_FAILURE;
