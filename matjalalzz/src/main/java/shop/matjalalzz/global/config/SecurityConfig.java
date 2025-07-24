@@ -16,7 +16,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import shop.matjalalzz.global.security.filter.TokenAuthenticationFilter;
+import shop.matjalalzz.global.security.handler.CustomAccessDeniedHandler;
 import shop.matjalalzz.global.security.handler.CustomAuthenticationEntryPoint;
+import shop.matjalalzz.global.security.handler.OAuth2FailureHandler;
 import shop.matjalalzz.global.security.handler.OAuth2SuccessHandler;
 import shop.matjalalzz.global.security.oauth2.app.OAuth2UserService;
 
@@ -27,8 +29,10 @@ public class SecurityConfig {
 
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2failureHandler;
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
     private final CustomAuthenticationEntryPoint entryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Value("${custom.cors.allowed-origin}")
     private String allowedOrigin;
@@ -57,12 +61,13 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable) // 기본 인증 로그인 비활성
             .formLogin(AbstractHttpConfigurer::disable) // 기본 로그인 폼 비활성
             .logout(AbstractHttpConfigurer::disable) // 기본 로그아웃 비활성
-            .addFilterAfter(tokenAuthenticationFilter,
+            .addFilterBefore(tokenAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class)
             .oauth2Login(oauth -> {
                 oauth.userInfoEndpoint(userInfo ->
                         userInfo.userService(oAuth2UserService))
-                    .successHandler(oAuth2SuccessHandler);
+                    .successHandler(oAuth2SuccessHandler)
+                    .failureHandler(oAuth2failureHandler);
             })
             // 임시로 Admin만 권한 검사
             .authorizeHttpRequests(
@@ -87,13 +92,14 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reviews").permitAll()
                     .requestMatchers("/ws/**").permitAll()
 
-                    //.anyRequest().permitAll(); //전부 다 허용하는 테스트용
+                    .requestMatchers("/users/delete", "/users/logout").authenticated()
 
                     .anyRequest().hasAnyRole("USER", "ADMIN", "OWNER")
                 //나머지 요청은 USER 또는 ADMiN 권한을 가져야 접근 가능
             )
             .exceptionHandling(handler ->
-                handler.authenticationEntryPoint(entryPoint))
+                handler.authenticationEntryPoint(entryPoint)
+                    .accessDeniedHandler(accessDeniedHandler))
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .build();

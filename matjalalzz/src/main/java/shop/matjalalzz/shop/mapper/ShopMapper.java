@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
+import shop.matjalalzz.shop.dto.PendingShop;
+import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
@@ -62,6 +65,8 @@ public class ShopMapper {
         return ShopDetailResponse.builder()
             .shopId(shop.getId())
             .shopName(shop.getShopName())
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
             .category(shop.getCategory())
             .description(shop.getDescription())
             .roadAddress(shop.getRoadAddress())
@@ -73,6 +78,7 @@ public class ShopMapper {
             .reviewCount(reviewCount)
             .images(imageListUrl)
             .detailAddress(shop.getDetailAddress())
+            .approve(shop.getApprove())
             .build();
     }
 
@@ -85,6 +91,8 @@ public class ShopMapper {
             .shopId(shop.getId())
             .shopName(shop.getShopName())
             .category(shop.getCategory())
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
             .description(shop.getDescription())
             .roadAddress(shop.getRoadAddress())
             .tel(shop.getTel())
@@ -96,6 +104,7 @@ public class ShopMapper {
             .images(imageListUrl)
             .detailAddress(shop.getDetailAddress())
             .businessCode(shop.getBusinessCode())
+            .approve(shop.getApprove())
             .build();
     }
 
@@ -130,9 +139,12 @@ public class ShopMapper {
             .shopId(shop.getId())
             .name(shop.getShopName())
             .category(shop.getCategory())
-            .address(shop.getRoadAddress() + shop.getDetailAddress())
+            .address(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
             .rating(shop.getRating())
             .thumbnailUrl(thumbnailUrl)
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
             .build();
     }
 
@@ -144,9 +156,56 @@ public class ShopMapper {
             .roadAddress(shop.getRoadAddress())
             .detailAddress(shop.getDetailAddress())
             .thumbnailUrl(thumbnailUrl)
+            .approve(shop.getApprove())
             .rating(shop.getRating()).build();
 
     }
+
+    public static ShopAdminDetailResponse shopToShopAdminDetailResponse (Shop shop, List<String> images, User user) {
+        return ShopAdminDetailResponse.builder()
+            .userId(user.getId())
+            .name(user.getName())
+            .nickName(user.getName())
+            .shopId(shop.getId())
+            .shopName(shop.getShopName())
+            .latitude(shop.getLatitude())
+            .longitude(shop.getLongitude())
+            .category(shop.getCategory())
+            .description(shop.getDescription())
+            .roadAddress(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
+            .tel(shop.getTel())
+            .openTime(shop.getOpenTime())
+            .closeTime(shop.getCloseTime())
+            .rating(shop.getRating())
+            .reservationFee(shop.getReservationFee())
+            .images(images)
+            .businessCode(shop.getBusinessCode())
+            .approve(shop.getApprove())
+            .build();
+
+
+    }
+
+    public static GetAllPendingShopListResponse getAllPendingShopResponse(List<Shop> shopList) {
+        List<PendingShop> pendingShopList = shopList.stream().map(ShopMapper::shopToPendingShop).toList();
+        return new GetAllPendingShopListResponse(pendingShopList);
+    }
+
+
+    public static PendingShop shopToPendingShop(Shop shop) {
+        return PendingShop.builder()
+            .shopId(shop.getId())
+            .shopName(shop.getShopName())
+            .userId(shop.getUser().getId())
+            .userName(shop.getUser().getName())
+            .tel(shop.getTel())
+            .address(shop.getRoadAddress())
+            .detailAddress(shop.getDetailAddress())
+            .approve(shop.getApprove())
+            .build();
+    }
+
 
 
 }
