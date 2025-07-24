@@ -17,7 +17,7 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: matjalalzz
       - name: 빌드
-        run: ./gradlew clean build --no-build-cache -x test
+        run: ./gradlew clean build -x test
         working-directory: matjalalzz
   deploy:
     needs: build-and-test
@@ -33,10 +33,31 @@ jobs:
       JWT_REDIRECT_BASE:   ${{ secrets.JWT_REDIRECT_BASE }}
       JWT_EXP_ACCESS:      ${{ secrets.JWT_EXP_ACCESS }}
       JWT_EXP_REFRESH:     ${{ secrets.JWT_EXP_REFRESH }}
-      JWT_ORIGIN_KEY:      ${{ secrets.JWT_ORIGIN_KEY }}
-      JWT_APP_KEY:         ${{ secrets.JWT_APP_KEY }}
       TOSS_SECRET_KEY:     ${{ secrets.TOSS_SECRET_KEY }}
       TOSS_CLIENT_KEY:     ${{ secrets.TOSS_CLIENT_KEY }}
+      GOOGLE_CLIENT_ID:     ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_PW:     ${{ secrets.GOOGLE_CLIENT_PW }}
+      KAKAO_CLIENT_ID:      ${{ secrets.KAKAO_CLIENT_ID }}
+      NAVER_CLIENT_ID:      ${{ secrets.NAVER_CLIENT_ID }}
+      NAVER_CLIENT_PW:      ${{ secrets.NAVER_CLIENT_PW }}
+      ACCESS_TOKEN_TTL:     ${{ secrets.ACCESS_TOKEN_TTL }}
+      REFRESH_TOKEN_TTL:    ${{ secrets.REFRESH_TOKEN_TTL }}
+      JWT_SECRET:           ${{ secrets.JWT_SECRET }}
+      FRONT_BASE_URL:       ${{ secrets.FRONT_BASE_URL }}
+      BACK_BASE_URL:        ${{ secrets.BACK_BASE_URL }}
+      AWS_BASE_URL:         ${{ secrets.AWS_BASE_URL }}
+      DDL_AUTO:             ${{ secrets.DDL_AUTO }}
+      AWS_ACCESS_KEY:       ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_KEY:       ${{ secrets.AWS_SECRET_KEY }}
+      AWS_REGION:           ${{ secrets.AWS_REGION }}
+      AWS_S3_BUCKET:        ${{ secrets.AWS_S3_BUCKET }}
+      AWS_S3_PATH:          ${{ secrets.AWS_S3_PATH }}
+      AWS_ACCESS_KEY_ID:    ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_PRESIGN_EXP:    ${{ secrets.AWS_S3_PRESIGN_EXP }}
+      JPA_DIALECT:    ${{ secrets.JPA_DIALECT }}
+
+
     steps:
       - name: 저장소 코드 Clone
         uses: actions/checkout@v4
@@ -53,28 +74,58 @@ jobs:
           JWT_REDIRECT_BASE=${JWT_REDIRECT_BASE}
           JWT_EXP_ACCESS=${JWT_EXP_ACCESS}
           JWT_EXP_REFRESH=${JWT_EXP_REFRESH}
-          JWT_ORIGIN_KEY=${JWT_ORIGIN_KEY}
-          JWT_APP_KEY=${JWT_APP_KEY}
           TOSS_SECRET_KEY=${TOSS_SECRET_KEY}
           TOSS_CLIENT_KEY=${TOSS_CLIENT_KEY}
+          GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+          GOOGLE_CLIENT_PW=${GOOGLE_CLIENT_PW}
+          KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+          NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+          NAVER_CLIENT_PW=${NAVER_CLIENT_PW}
+          ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL}
+          REFRESH_TOKEN_TTL=${REFRESH_TOKEN_TTL}
+          JWT_SECRET=${JWT_SECRET}
+          FRONT_BASE_URL=${FRONT_BASE_URL}
+          BACK_BASE_URL=${BACK_BASE_URL}
+          AWS_BASE_URL=${AWS_BASE_URL}
+          DDL_AUTO=${DDL_AUTO}
+          AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+          AWS_SECRET_KEY=${AWS_SECRET_KEY}
+          AWS_REGION=${AWS_REGION}
+          AWS_S3_BUCKET=${AWS_S3_BUCKET}
+          AWS_S3_PATH=${AWS_S3_PATH}
+          AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+          AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+          AWS_S3_PRESIGN_EXP=${AWS_S3_PRESIGN_EXP}
+          JPA_DIALECT=${JPA_DIALECT}
           EOF
-      - name: 서버로 코드 전송
-        uses: appleboy/scp-action@v0.1.7
+
+      - name: 도커 hub 로그인
+        uses: docker/login-action@v2
         with:
-          host:     ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+
+      - name: 도커 hub에 이미지 빌드 후 push
+        run: |
+          ls -al
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-main ./matjalalzz
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-main
+        
+        
+        # 계속 수정 해야함 귀찮아서 일단 패스
+
+        with:
+          host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          port:     ${{ secrets.SSH_PORT }}
-          source:   "."
-          target:   "~/matjalalzz"
-      - name: 서버에서 배포 시작 (Docker Compose)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host:     ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          port:     ${{ secrets.SSH_PORT }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/matjalalzz/matjalalzz
-            docker compose down
-            docker compose up --build -d
+            docker pull ${{ secrets.DOCKER_USERNAME }}/spring-main
+
+
+      - name: aws 접속
+        uses: login-action@v2
+
+
