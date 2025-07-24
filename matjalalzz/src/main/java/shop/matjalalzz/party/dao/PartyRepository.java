@@ -19,16 +19,12 @@ public interface PartyRepository extends JpaRepository<Party, Long>,
     @Query("""
         select new shop.matjalalzz.party.dto.MyPartyResponse(
                 p.id, p.title, s.shopName, p.metAt, p.deadline, p.status, p.maxCount, p.minCount,
-                p.currentCount, p.genderCondition, p.minAge, p.maxAge, p.description
+                p.currentCount, p.genderCondition, p.minAge, p.maxAge, p.description, pu.isHost
         )
         from Party p
             join p.shop  s
-        where (:cursor is null or p.id < :cursor)
-            and exists (
-                select 1 from PartyUser pu
-                where pu.party = p
-                    and pu.user.id = :userId
-            )
+            join p.partyUsers pu on pu.user.id = :userId
+        where :cursor is null or p.id < :cursor
         order by p.id desc
         """)
     Slice<MyPartyResponse> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
