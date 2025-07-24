@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,8 +26,8 @@ import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
 import shop.matjalalzz.tosspay.app.PaymentService;
 
 @RestController
+@RequestMapping("/payment")
 @RequiredArgsConstructor
-@Validated
 @Tag(name = "토스 결제 API", description = """
         TOSS_SECRET_KEY=test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
         TOSS_CLIENT_KEY=test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
@@ -57,7 +59,7 @@ public class PaymentController {
     }
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("payment/confirm")
+    @PostMapping("/confirm")
     @Operation(summary = "결제 승인 api ", description = """
         결제 성공 시 (WidgetSuccess로 이동할 때) 이 api를 호출해서 최종 결제 승인 및 저장을 실행합니다.
         이 api 에서 에러가 발생할 시 fail path로 리다이렉트합니다.
@@ -74,7 +76,7 @@ public class PaymentController {
         return BaseResponse.ok(response, BaseStatus.CREATED);
     }
 
-    @GetMapping("/payment")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "결제 내역 조회 api", description = "결제 내역을 스크롤 방식으로 조회합니다. 사용자의 마이페이지 란에서 조회 가능합니다. (Completed)")
     public BaseResponse<PaymentScrollResponse> getPaymentHistories(

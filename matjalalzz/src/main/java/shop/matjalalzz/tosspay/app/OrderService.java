@@ -23,11 +23,6 @@ public class OrderService {
     @Transactional
     public void saveOrder(OrderSaveRequest request, long userId) {
         User user = userService.getUserById(userId);
-
-        if (request.amount() <= 0) {
-            throw new BusinessException(ErrorCode.ZERO_AMOUNT_PAYMENT_NOT_ALLOWED);
-        }
-
         orderRepository.save(new Order(request.orderId(), request.amount(), user));
     }
 
