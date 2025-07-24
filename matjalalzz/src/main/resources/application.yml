@@ -84,6 +84,7 @@ custom:
   retry:
     max-delay: ${MAX_DELAY}
     max-attempts: ${MAX_ATTEMPTS}
+    multiplier: ${MULTIPLIER}
 aws:
   credentials:
     AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}

@@ -47,6 +47,7 @@ services:
       JPA_DIALECT: ${JPA_DIALECT}
       MAX_DELAY: ${MAX_DELAY}
       MAX_ATTEMPTS: ${MAX_ATTEMPTS}
+      MULTIPLIER: ${MULTIPLIER}
 
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
