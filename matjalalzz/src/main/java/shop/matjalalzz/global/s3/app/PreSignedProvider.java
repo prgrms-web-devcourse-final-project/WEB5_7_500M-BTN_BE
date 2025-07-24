@@ -50,7 +50,7 @@ public class PreSignedProvider {
             items.add(preSignedUrlResponse);
 
             String s3Key = preSignedUrlResponse.key();
-            Image imageValue = ImageMapper.UrlResponseToImage(s3Key, i, shopId);
+            Image imageValue = ImageMapper.UrlResponseToShopImage(s3Key, i, shopId);
             imageRepository.save(imageValue);
 
         }
@@ -74,6 +74,26 @@ public class PreSignedProvider {
 
         return new PreSignedUrlListResponse(items, reviewId);
     }
+
+    @Transactional
+    public PreSignedUrlListResponse createInquiryUploadUrls(int count, long inquiryId) {
+        List<PreSignedUrlResponse> items = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            PreSignedUrlResponse preSignedUrlResponse = buildItem(ImageType.INQUIRY_IMG, inquiryId,
+                "img_inquiry_" + i);
+            items.add(preSignedUrlResponse);
+            String s3Key = preSignedUrlResponse.key();
+            Image imageValue = ImageMapper.UrlResponseToInquiryImage(s3Key, i, inquiryId);
+            imageRepository.save(imageValue);
+
+        }
+
+        return new PreSignedUrlListResponse(items, inquiryId);
+    }
+
+
+
 
     public PreSignedUrlResponse createProfileUploadUrls(long userId) {
         return buildItem(ImageType.PROFILE_IMG, userId, "img_" + UUID.randomUUID());

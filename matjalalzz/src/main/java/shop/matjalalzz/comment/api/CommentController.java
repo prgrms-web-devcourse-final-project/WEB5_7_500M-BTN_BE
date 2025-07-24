@@ -31,19 +31,15 @@ public class CommentController {
     @Operation(summary = "댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.(Completed)")
     @GetMapping("/parties/{partyId}/comments")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<List<CommentResponse>> getComments(
-        @PathVariable Long partyId) {
-        return BaseResponse.ok(commentService.findCommentsByParty(partyId),
-            BaseStatus.OK);
+    public BaseResponse<List<CommentResponse>> getComments(@PathVariable Long partyId) {
+        return BaseResponse.ok(commentService.findCommentsByParty(partyId), BaseStatus.OK);
     }
 
     @Operation(summary = "댓글 작성", description = "특정 모임에 댓글을 작성합니다.(Completed)")
     @PostMapping("/parties/{partyId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createComment(
-        @PathVariable Long partyId,
-        @Valid @RequestBody CommentCreateRequest request,
-        @AuthenticationPrincipal PrincipalUser principal) {
+        @PathVariable Long partyId, @Valid @RequestBody CommentCreateRequest request, @AuthenticationPrincipal PrincipalUser principal) {
         commentService.createComment(request, partyId, principal.getId());
         return BaseResponse.ok(BaseStatus.CREATED);
     }
@@ -56,5 +52,26 @@ public class CommentController {
         @AuthenticationPrincipal PrincipalUser principal) {
         commentService.deleteComment(commentId, principal.getId());
     }
+
+
+
+    @Operation(summary = "고객센터 댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.(Completed)")
+    @GetMapping("/inquiry/{inquiryId}/comments")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<List<CommentResponse>> getInquiryComments(@PathVariable Long inquiryId, @AuthenticationPrincipal PrincipalUser principal) {
+        return BaseResponse.ok(commentService.findCommentsByInquiry(inquiryId, principal.getId()), BaseStatus.OK);
+    }
+
+
+    @Operation(summary = "고객센터 댓글 작성", description = "특정 모임에 댓글을 작성합니다.(Completed)")
+    @PostMapping("/inquiry/{inquiryId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BaseResponse<Void> createInquiryComment(
+        @PathVariable Long inquiryId, @Valid @RequestBody CommentCreateRequest request, @AuthenticationPrincipal PrincipalUser principal) {
+        commentService.createInquiryComment(request, inquiryId, principal.getId());
+        return BaseResponse.ok(BaseStatus.CREATED);
+    }
+
+
 
 }

@@ -100,7 +100,14 @@ public enum ErrorCode {
      * image
      */
     // 여러 이미지 저장 시 하나의 이미지라도 저장에 실패하면 안됨
-    IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, "이미지 저장에 실패하였습니다.");
+    IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, "이미지 저장에 실패하였습니다."),
+
+
+    /**
+     * image
+     */
+    NOT_FIND_INQUIRY(HttpStatus.NOT_FOUND, "문의 정보가 존재하지 않습니다.");
+
 
     private final HttpStatus status;
     private final String message;

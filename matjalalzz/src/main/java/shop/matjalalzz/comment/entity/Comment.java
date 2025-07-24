@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.inquiry.entity.Inquiry;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.user.entity.User;
 
@@ -30,7 +31,8 @@ import shop.matjalalzz.user.entity.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
     indexes = {
-        @Index(name = "idx_comment_party", columnList = "party_id")
+        @Index(name = "idx_comment_party", columnList = "party_id"),
+        @Index(name = "idx_comment_inquiry", columnList = "inquiry_id")
     }
 )
 @SQLRestriction("deleted = false")
@@ -51,9 +53,14 @@ public class Comment extends BaseEntity {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> children;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "party_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "party_id")
     private Party party;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inquiry_id")
+    private Inquiry inquiry;
+
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)

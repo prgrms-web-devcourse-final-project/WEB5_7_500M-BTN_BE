@@ -100,3 +100,8 @@ logging:
   root: INFO
 server:
   port: ${SERVER_PORT}
+
+discord:
+  bot:
+    token: ${DISCORD_BOT_TOKEN}
+    channel: ${DISCORD_CHANNEL_ID}
