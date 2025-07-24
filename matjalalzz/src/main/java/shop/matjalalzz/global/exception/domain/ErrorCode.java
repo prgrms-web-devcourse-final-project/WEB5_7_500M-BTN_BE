@@ -19,6 +19,8 @@ public enum ErrorCode {
     // 401
     AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요한 요청입니다. 로그인 해주세요."),
 
+    // 409
+    LOCK_FAILURE(HttpStatus.CONFLICT, "다른 사용자가 먼저 데이터를 수정했습니다. 다시 시도해 주세요."),
 
     // 500
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "예기치 못한 오류가 발생했습니다."),
@@ -73,7 +75,7 @@ public enum ErrorCode {
      * party
      */
     INVALID_DEADLINE(HttpStatus.BAD_REQUEST, "파티 마감일자는 모임일자보다 이전이어야 합니다."),
-    ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "이미 파티에 참여 중입니다."),
+    ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "한 번 참여한 파티에는 참여할 수 없습니다."),
     ALREADY_PAID_USER(HttpStatus.BAD_REQUEST, "이미 예약금을 지불했습니다."),
     NOT_JOIN_PARTY(HttpStatus.BAD_REQUEST, "파티에 참여 중이 아닙니다."),
     HOST_CANNOT_QUIT_PARTY(HttpStatus.BAD_REQUEST, "호스트는 파티에 탈퇴할 수 없습니다."),
