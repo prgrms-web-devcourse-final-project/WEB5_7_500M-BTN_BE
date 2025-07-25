@@ -1,9 +1,12 @@
 package shop.matjalalzz.chat.api;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -21,6 +24,7 @@ import shop.matjalalzz.chat.dto.ChatMessagePageResponse;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.chat.dto.StompPrincipal;
+import shop.matjalalzz.chat.entity.MessageType;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -35,6 +39,7 @@ public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatService chatService;
+    private final MessageChannel clientOutboundChannel;
 
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload ChatMessageRequest message,
@@ -87,6 +92,16 @@ public class ChatController {
             .path("/ws/chat")
             .build();
 
-        messagingTemplate.convertAndSend("/queue/error-" + accessor.getSessionId(), response);
+        ChatMessageResponse message = ChatMessageResponse.builder()
+            .sendAt(LocalDateTime.now())
+            .type(MessageType.ERROR)
+            .message(response.toString())
+            .build();
+
+        //유저 전체 세션이 아닌 메세지를 보낸 개별세션에 전송
+        Message<?> message1 = messagingTemplate.getMessageConverter()
+            .toMessage(message, accessor.getMessageHeaders());
+
+        clientOutboundChannel.send(message1);
     }
 }
