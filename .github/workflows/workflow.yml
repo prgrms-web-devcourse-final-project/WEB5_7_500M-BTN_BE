@@ -58,6 +58,10 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_S3_PRESIGN_EXP: ${{ secrets.AWS_S3_PRESIGN_EXP }}
       JPA_DIALECT: ${{ secrets.JPA_DIALECT }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DISCORD_CHANNEL_ID: ${{ DISCORD_CHANNEL_ID }}
+      REDIS_TIMEOUT: ${{ REDIS_TIMEOUT }}
+      DISCORD_BOT_TOKEN: ${{ DISCORD_BOT_TOKEN }}
 
 
     steps:
@@ -99,6 +103,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
           AWS_S3_PRESIGN_EXP=${AWS_S3_PRESIGN_EXP}
           JPA_DIALECT=${JPA_DIALECT}
+          DOCKER_USERNAME=${DOCKER_USERNAME}
+          DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
+          REDIS_TIMEOUT=${REDIS_TIMEOUT}
+          DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
           EOF
 
       - name: 도커 hub 로그인
@@ -124,7 +132,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PASSWORD }}
           source: "matjalalzz/docker-compose.yml"
-          target: "/home/ubuntu/"
+          target: "/home/ubuntu/docker-compose.yml"
 
       - name: .env 파일 전송
         uses: appleboy/scp-action@v0.1.4
@@ -133,7 +141,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PASSWORD }}
           source: "matjalalzz/.env"
-          target: "/home/ubuntu/"
+          target: "/home/ubuntu/.env"
 
 
       - name: EC2 접속
