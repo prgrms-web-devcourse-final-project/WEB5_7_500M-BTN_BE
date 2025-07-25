@@ -16,6 +16,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.image.dao.ImageRepository;
@@ -54,6 +55,7 @@ public class PartyService {
     private final PartySchedulerService partySchedulerService;
     private final ShopService shopService;
     private final UserService userService;
+    private final PartyChatService partyChatService;
     private final ImageRepository imageRepository;
     private final ReservationRepository reservationRepository;
 
@@ -70,16 +72,16 @@ public class PartyService {
         validateCreateParty(request);
 
         Shop shop = shopService.shopFind(request.shopId());
-
         Party party = PartyMapper.toEntity(request, shop);
 
-        PartyUser host = PartyUser.createHost(party, userService.getUserById(userId));
+        User user = userService.getUserById(userId);
+        PartyUser host = PartyUser.createHost(party, user);
         party.getPartyUsers().add(host);
 
         partyRepository.save(party);
         partySchedulerService.scheduleDeadlineJob(party);
 
-        // todo: 채팅방 생성
+        partyChatService.join(party, user);
     }
 
     @Transactional(readOnly = true)
@@ -146,7 +148,7 @@ public class PartyService {
         party.getPartyUsers().add(partyUser);
         party.increaseCurrentCount();
 
-        // todo: 채팅방 참여 로직 추가
+        partyChatService.join(party, user);
     }
 
     @Retryable(
@@ -158,7 +160,7 @@ public class PartyService {
     @Transactional
     public void quitParty(Long partyId, long userId) {
         Party party = findByIdWithReservationAndPartyUsers(partyId);
-        userService.getUserById(userId); //검증용
+        User user = userService.getUserById(userId); //검증용
         PartyUser partyUser = findPartyUser(userId, party);
 
         // 호스트인 경우 파티 탈퇴 불가능
@@ -176,9 +178,11 @@ public class PartyService {
         // 파티 나갔을 때, 최소 인원보다 적을 시 파티 제거
         if(party.getMinCount() > party.getCurrentCount() - 1) {
             breakParty(party);
+            // todo: 파티 해체 메시지 추가
             return;
         }
 
+        // 포인트 반환 필요 없음 (승인 대기 중일 떄만 탈퇴 가능하기 때문)
         if (partyUser.isPaymentCompleted()) {
             int fee = party.getTotalReservationFee() / party.getCurrentCount();
             party.decreaseTotalReservationFee(fee);
@@ -192,6 +196,7 @@ public class PartyService {
         partyUser.delete();
         party.decreaseCurrentCount();
 
+        partyChatService.leaveParty(user, party);
         // todo: 파티 탈퇴 시, 채팅 메시지는 어떻게 할 지 상의 필요
     }
 
@@ -227,10 +232,12 @@ public class PartyService {
         if (party.getStatus() == PartyStatus.COMPLETED
             && party.getMinCount() > party.getCurrentCount() - 1) {
             breakParty(party);
+            // todo: 파티 해체 메시지 추가
             return new KickoutResponse(true);
         }
 
         partyUser.delete();
+        partyChatService.kickUser(partyUser.getUser(), party);
         // todo: 파티 유저 탈퇴시 채팅 메시지 처리 방식 상의
 
         return new KickoutResponse(false);
@@ -287,6 +294,8 @@ public class PartyService {
         }
 
         breakParty(party);
+
+        // todo: 파티 해체 메시지 추가
     }
 
     @Transactional
@@ -312,6 +321,12 @@ public class PartyService {
         }
 
         party.complete();
+
+
+        // todo: 파티장이 한 번만 메시지 보냄
+        party.getPartyUsers().forEach(pu -> {
+            partyChatService.noticePaymentRequest(pu.getUser(), party);
+        });
     }
 
     @Retryable(
@@ -348,6 +363,8 @@ public class PartyService {
         party.increaseTotalReservationFee(reservationFee);
         partyUser.completePayment();
 
+        partyChatService.noticePaymentComplete(user, party);
+
         // 모두 결제 했으면, 예약 자동 생성
         /*
         todo: ReservationService 에서 PartyService 를 의존성 주입받고 있어서,
@@ -359,6 +376,7 @@ public class PartyService {
             User host = findPartyHost(partyId);
             Reservation reservation = ReservationMapper.toEntity(party, host);
             reservationRepository.save(reservation);
+            // todo: 예약 생성이 됐는지도 채팅 알림이 필요할까?
         }
     }
 

@@ -29,6 +29,7 @@ public class PartyChatService {
             .userNickname(user.getNickname())
             .userId(user.getId())
             .build();
+
         messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/notice",
             kickMessage);
     }
