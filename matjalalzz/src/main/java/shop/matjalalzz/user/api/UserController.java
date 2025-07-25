@@ -2,13 +2,13 @@ package shop.matjalalzz.user.api;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +55,7 @@ public class UserController {
     @DeleteMapping("/delete")
     public void deleteUser(
         @AuthenticationPrincipal PrincipalUser userInfo,
+        @Parameter(hidden = true)
         @CookieValue(name = "refreshToken") String refreshToken,
         HttpServletResponse response) {
         userService.deleteUser(userInfo.getId(), refreshToken, response);
