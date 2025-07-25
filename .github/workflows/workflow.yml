@@ -59,9 +59,9 @@ jobs:
       AWS_S3_PRESIGN_EXP: ${{ secrets.AWS_S3_PRESIGN_EXP }}
       JPA_DIALECT: ${{ secrets.JPA_DIALECT }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DISCORD_CHANNEL_ID: ${{ DISCORD_CHANNEL_ID }}
-      REDIS_TIMEOUT: ${{ REDIS_TIMEOUT }}
-      DISCORD_BOT_TOKEN: ${{ DISCORD_BOT_TOKEN }}
+      DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+      REDIS_TIMEOUT: ${{ secrets.REDIS_TIMEOUT }}
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
 
 
     steps:
