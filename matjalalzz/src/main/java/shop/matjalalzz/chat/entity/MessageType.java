@@ -6,5 +6,6 @@ public enum MessageType {
     LEAVE,
     KICK,
     REQUEST_PAYMENT,
-    COMPLETE_PAYMENT
+    COMPLETE_PAYMENT,
+    PARTY_DELETED
 }
