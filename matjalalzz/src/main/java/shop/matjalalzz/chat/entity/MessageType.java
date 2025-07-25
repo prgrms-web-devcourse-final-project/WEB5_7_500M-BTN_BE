@@ -5,6 +5,9 @@ public enum MessageType {
     JOIN,
     LEAVE,
     KICK,
-    REQUEST_PAYMENT,
-    COMPLETE_PAYMENT
+    ERROR,
+    PAYMENT_REQUEST,
+    PAYMENT_COMPLETE,
+    PARTY_DELETED,
+    RESERVATION_COMPLETE
 }

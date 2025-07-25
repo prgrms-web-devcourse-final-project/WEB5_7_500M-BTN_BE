@@ -3,6 +3,7 @@ package shop.matjalalzz.global.security.handler;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Component;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
-
-import java.io.IOException;
 
 @Slf4j
 @Component
@@ -30,7 +29,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+        Authentication authentication) throws IOException {
         PrincipalUser userInfo = (PrincipalUser) authentication.getPrincipal();
 
         LoginTokenResponseDto dto = tokenService.oauthLogin(userInfo.getUsername());
@@ -38,10 +37,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         response.setHeader("Authorization", "Bearer " + dto.accessToken());
         Cookie cookie = new Cookie("refreshToken", dto.refreshToken());
         cookie.setHttpOnly(true);
-        //cookie.setSecure(true); // HTTPS 환경
-        cookie.setSecure(false); // HTTP 환경
+        cookie.setSecure(true); // HTTPS 환경
+        //cookie.setSecure(false); // HTTP 환경
         cookie.setPath("/");
-        cookie.setMaxAge(refreshTokenValidityTime); // 7일
+        cookie.setMaxAge(refreshTokenValidityTime);
         response.addCookie(cookie);
         response.sendRedirect(redirectSuccess);
     }

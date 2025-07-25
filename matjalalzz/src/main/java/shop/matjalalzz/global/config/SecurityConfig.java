@@ -45,16 +45,24 @@ public class SecurityConfig {
                 request -> {
                     CorsConfiguration configuration = new CorsConfiguration();
 
-                    configuration.setAllowedOrigins(List.of(allowedOrigin));
-                    configuration.setAllowedOriginPatterns(List.of("*"));
-                    configuration.setAllowedMethods(
-                        List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-                    configuration.setAllowCredentials(true);
-                    configuration.setAllowedHeaders(List.of("*"));
-                    configuration.setMaxAge(3600L);
+//                    configuration.setAllowedOrigins(List.of(allowedOrigin));
+//                    configuration.setAllowedOriginPatterns(List.of("*"));
+//                    configuration.setAllowedMethods(
+//                        List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+//                    configuration.setAllowCredentials(true);
+//                    configuration.setAllowedHeaders(List.of("*"));
+//                    configuration.setMaxAge(3600L);
+//                    configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+//                    return configuration;
 
+                    configuration.addAllowedHeader("*");
+                    configuration.addAllowedMethod("*");
+                    configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
+                    configuration.setAllowCredentials(true);
                     configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
+                    configuration.setMaxAge(3600L);
                     return configuration;
+
                 }
             ))
             .csrf(AbstractHttpConfigurer::disable) // csrf 비활성
