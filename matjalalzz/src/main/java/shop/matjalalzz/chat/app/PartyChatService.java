@@ -19,6 +19,7 @@ public class PartyChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatSubscriptionService subscriptionService;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatSubscriptionService chatSubscriptionService;
 
 
     public void kickUser(User kickedUser, Party party) {
@@ -35,7 +36,7 @@ public class PartyChatService {
     }
 
     public void leaveParty(User leftUser, Party party) {
-        subscriptionService.leaveParty(leftUser, party);
+        subscriptionService.unsubscribeParty(leftUser, party);
 
         ChatMessage chatMessage = ChatMessage.builder()
             .sender(leftUser)
@@ -51,7 +52,7 @@ public class PartyChatService {
         ChatMessage chatMessage = ChatMessage.builder()
             .party(party)
             .sender(host)
-            .type(MessageType.REQUEST_PAYMENT)
+            .type(MessageType.PAYMENT_REQUEST)
             .build();
         ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
         messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
@@ -60,7 +61,7 @@ public class PartyChatService {
 
     public void noticePaymentComplete(User payer, Party party) {
         ChatMessage chatMessage = ChatMessage.builder()
-            .type(MessageType.COMPLETE_PAYMENT)
+            .type(MessageType.PAYMENT_COMPLETE)
             .party(party)
             .sender(payer)
             .build();
@@ -69,9 +70,31 @@ public class PartyChatService {
         chatMessageRepository.save(chatMessage);
     }
 
-    //TODO: 파티 폭파 메세지
+    public void noticeReservationComplete(User host, Party party) {
+        ChatMessage chatMessage = ChatMessage.builder()
+            .type(MessageType.RESERVATION_COMPLETE)
+            .party(party)
+            .sender(host)
+            .build();
+        ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
+        messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
+        chatMessageRepository.save(chatMessage);
+    }
 
-    //TODO: 예약 성공 메세지
+    public void noticePartyDeleted(User host, Party party) {
+        ChatMessage chatMessage = ChatMessage.builder()
+            .type(MessageType.PARTY_DELETED)
+            .party(party)
+            .sender(host)
+            .build();
+        ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
+        messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
+        chatMessageRepository.save(chatMessage);
+
+        party.getPartyUsers().forEach(pu -> {
+            chatSubscriptionService.unsubscribeParty(pu.getUser(), party);
+        });
+    }
 
     @Transactional
     public void join(User joinedUser, Party party) {
