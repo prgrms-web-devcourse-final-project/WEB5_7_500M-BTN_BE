@@ -2,6 +2,8 @@ package shop.matjalalzz.chat.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Slice;
+import shop.matjalalzz.chat.dto.ChatMessagePageResponse;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.chat.entity.ChatMessage;
@@ -34,4 +36,11 @@ public class ChatMapper {
             .build();
     }
 
+    public static ChatMessagePageResponse toChatMessagePageResponse(
+        Slice<ChatMessage> chatMessages, Long nextCursor) {
+        return ChatMessagePageResponse.builder()
+            .nextCursor(nextCursor)
+            .content(chatMessages.stream()
+                .map(ChatMapper::toChatMessageResponse).toList()).build();
+    }
 }

@@ -3,13 +3,13 @@ package shop.matjalalzz.chat.app;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.dao.ChatMessageRepository;
-import shop.matjalalzz.chat.dto.ChatLoadRequest;
+import shop.matjalalzz.chat.dto.ChatMessagePageResponse;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
-import shop.matjalalzz.chat.dto.ChatRestoreRequest;
 import shop.matjalalzz.chat.entity.ChatMessage;
 import shop.matjalalzz.chat.mapper.ChatMapper;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -43,24 +43,28 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> loadMessages(ChatLoadRequest request, Long userId) {
-        if (!partyService.isInParty(request.partyId(), userId)) {
+    public ChatMessagePageResponse loadMessages(Long partyId, Long cursor, Long userId) {
+        if (!partyService.isInParty(partyId, userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
-        return chatMessageRepository.findByPartyIdAndCursor(
-                request.partyId(), request.cursor(), PageRequest.of(0, 20))
-            .stream()
-            .map(ChatMapper::toChatMessageResponse)
-            .toList();
+        Slice<ChatMessage> chatMessages = chatMessageRepository.findByPartyIdAndCursor(
+            partyId, cursor, PageRequest.of(0, 20));
+        Long nextCursor = null;
+
+        if (chatMessages.hasNext()) {
+            nextCursor = chatMessages.getContent().getLast().getId();
+        }
+
+        return ChatMapper.toChatMessagePageResponse(chatMessages, nextCursor);
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> restoreMessages(ChatRestoreRequest request, Long userId) {
-        if (!partyService.isInParty(request.partyId(), userId)) {
+    public List<ChatMessageResponse> restoreMessages(Long partyId, Long cursor, Long userId) {
+        if (!partyService.isInParty(partyId, userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
         return chatMessageRepository.findAllByIdGreaterThanAndPartyIdOrderById(
-                request.partyId(), request.lastMessageId())
+                cursor, partyId)
             .stream()
             .map(ChatMapper::toChatMessageResponse)
             .toList();
