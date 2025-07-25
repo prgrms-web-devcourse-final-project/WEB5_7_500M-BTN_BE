@@ -1,6 +1,5 @@
 package shop.matjalalzz.global.security.handler;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
+import shop.matjalalzz.global.util.CookieUtils;
 
 @Slf4j
 @Component
@@ -35,13 +35,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         LoginTokenResponseDto dto = tokenService.oauthLogin(userInfo.getUsername());
 
         response.setHeader("Authorization", "Bearer " + dto.accessToken());
-        Cookie cookie = new Cookie("refreshToken", dto.refreshToken());
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // HTTPS 환경
-        //cookie.setSecure(false); // HTTP 환경
-        cookie.setPath("/");
-        cookie.setMaxAge(refreshTokenValidityTime);
-        response.addCookie(cookie);
+        CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
         response.sendRedirect(redirectSuccess);
     }
 }
