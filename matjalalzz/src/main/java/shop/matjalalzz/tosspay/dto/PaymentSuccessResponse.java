@@ -1,11 +1,12 @@
 package shop.matjalalzz.tosspay.dto;
 
-import lombok.Builder;
-
 /**
- * @param orderId  제품 id
- * @param amount 가격 */
+ * @param orderId     주문 번호
+ * @param totalAmount 결제 금액
+ */
+public record PaymentSuccessResponse(
+    String orderId,
+    int totalAmount
+) {
 
-@Builder
-public record PaymentSuccessResponse(String orderId, long amount) {
 }
