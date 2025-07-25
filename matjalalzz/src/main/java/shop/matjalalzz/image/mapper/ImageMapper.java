@@ -45,7 +45,7 @@ public class ImageMapper {
     }
 
 
-    public static Image UrlResponseToImage(String s3Key, int i, long shopId) {
+    public static Image UrlResponseToShopImage(String s3Key, int i, long shopId) {
         return Image.builder()
             .s3Key(s3Key)
             .imageIndex(i)
@@ -60,5 +60,14 @@ public class ImageMapper {
             .reviewId(reviewId)
             .build();
     }
+
+    public static Image UrlResponseToInquiryImage(String s3Key, int i, long inquiryId) {
+        return Image.builder()
+            .s3Key(s3Key)
+            .imageIndex(i)
+            .inquiryId(inquiryId)
+            .build();
+    }
+
 
 }

@@ -27,6 +27,7 @@ import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.entity.enums.Role;
 import shop.matjalalzz.user.mapper.UserMapper;
 
 @Slf4j
@@ -76,8 +77,8 @@ public class UserService {
         response.setHeader("Authorization", "Bearer " + accessToken);
         Cookie cookie = new Cookie("refreshToken", refreshToken.getRefreshToken());
         cookie.setHttpOnly(true);
-        //cookie.setSecure(true); // HTTPS 환경
-        cookie.setSecure(false); // HTTP 환경
+        cookie.setSecure(true); // HTTPS 환경
+        //cookie.setSecure(false); // HTTP 환경
         cookie.setPath("/");
         cookie.setMaxAge(refreshTokenValiditySeconds); // 7일
         response.addCookie(cookie);
@@ -89,7 +90,9 @@ public class UserService {
             throw new BusinessException(EMAIL_ALREADY_EXISTS);  //409
         }
 
-        User user = UserMapper.toUser(dto, passwordEncoder);
+        String encodedPassword = passwordEncoder.encode(dto.password());
+
+        User user = UserMapper.toUser(dto, encodedPassword, Role.USER);
 
         userRepository.save(user);
     }
@@ -122,8 +125,8 @@ public class UserService {
         Cookie cookie = new Cookie("refreshToken", null); // 이름 동일, 값은 null
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        //cookie.setSecure(true); // HTTPS 환경
-        cookie.setSecure(false); // HTTP 환경
+        cookie.setSecure(true); // HTTPS 환경
+        //cookie.setSecure(false); // HTTP 환경
         cookie.setMaxAge(0); // 즉시 만료
         //cookie.setDomain("your-domain.com"); // 필요 시 설정
         response.addCookie(cookie);
@@ -142,7 +145,7 @@ public class UserService {
     public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
         User user = findUserByIdOrThrow(userId);
 
-        if(!request.profileKey().equals(user.getProfileKey())) {
+        if (!request.profileKey().equals(user.getProfileKey())) {
             preSignedProvider.deleteObject(user.getProfileKey());
         }
 

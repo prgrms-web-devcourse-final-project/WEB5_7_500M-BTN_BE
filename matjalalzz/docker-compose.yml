@@ -1,13 +1,7 @@
-version: '3.8'
-
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_USERNAME}/spring-main:latest
     container_name: 500m_btn_be
-    env_file:
-      - src/main/resources/.env
     environment:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
@@ -33,8 +27,6 @@ services:
       JWT_REDIRECT_BASE: ${JWT_REDIRECT_BASE}
       JWT_EXP_ACCESS: ${JWT_EXP_ACCESS}
       JWT_EXP_REFRESH: ${JWT_EXP_REFRESH}
-      JWT_ORIGIN_KEY: ${JWT_ORIGIN_KEY}
-      JWT_APP_KEY: ${JWT_APP_KEY}
       AWS_BASE_URL: ${AWS_BASE_URL}
       AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
       AWS_SECRET_KEY: ${AWS_SECRET_KEY}
@@ -46,6 +38,8 @@ services:
       AWS_S3_PRESIGN_EXP: ${AWS_S3_PRESIGN_EXP}
       JPA_DIALECT: ${JPA_DIALECT}
 
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      DISCORD_CHANNEL_ID: ${DISCORD_CHANNEL_ID}
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
-    restart: always
+    restart: unless-stopped
