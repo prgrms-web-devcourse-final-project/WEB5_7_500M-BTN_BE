@@ -55,9 +55,7 @@ public class ChatMessage {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     MessageType type;
-
-
-    //TODO: 응답에 시간 포함
+    
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime sendAt;

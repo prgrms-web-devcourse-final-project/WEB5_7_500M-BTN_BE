@@ -33,6 +33,7 @@ public class ChatMapper {
             .userNickname(chatMessage.getSender().getNickname())
             .partyId(chatMessage.getParty().getId())
             .userProfile(chatMessage.getSender().getProfileKey())
+            .sendAt(chatMessage.getSendAt())
             .build();
     }
 
