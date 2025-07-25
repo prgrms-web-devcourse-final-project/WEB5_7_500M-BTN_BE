@@ -59,12 +59,12 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public List<ChatMessageResponse> restoreMessages(Long partyId, Long cursor, Long userId) {
+    public List<ChatMessageResponse> restoreMessages(Long partyId, Long userId) {
         if (!partyService.isInParty(partyId, userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
-        return chatMessageRepository.findAllByIdGreaterThanAndPartyIdOrderById(
-                cursor, partyId)
+        return chatMessageRepository.findAllByPartyIdOrderById(partyId,
+                PageRequest.of(0, 30))
             .stream()
             .map(ChatMapper::toChatMessageResponse)
             .toList();

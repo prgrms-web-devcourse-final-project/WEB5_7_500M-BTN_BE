@@ -55,10 +55,9 @@ public class ChatController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<List<ChatMessageResponse>> restoreChat(
         @PathVariable Long partyId,
-        @RequestParam Long cursor,
         @AuthenticationPrincipal PrincipalUser user) {
 
-        List<ChatMessageResponse> chatMessages = chatService.restoreMessages(partyId, cursor,
+        List<ChatMessageResponse> chatMessages = chatService.restoreMessages(partyId,
             user.getId());
 
         return BaseResponse.ok(chatMessages, BaseStatus.OK);
