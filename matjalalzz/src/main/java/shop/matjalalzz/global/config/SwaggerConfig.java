@@ -30,7 +30,7 @@ public class SwaggerConfig {
 
         List<Server> servers = List.of(
             new Server().url(backendUrl),
-            new Server().url("http://localhost:" + backendPort)
+            new Server().url("https://localhost:" + backendPort)
         );
 
         // SecuritySecheme명
@@ -45,7 +45,6 @@ public class SwaggerConfig {
                 .scheme("bearer")
                 .in(SecurityScheme.In.HEADER)
                 .bearerFormat("Authorization")); // 토큰 형식을 지정하는 임의의 문자(Optional)
-
 
         return new OpenAPI()
             .info(info)

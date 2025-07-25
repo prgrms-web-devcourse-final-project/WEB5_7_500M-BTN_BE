@@ -1,13 +1,7 @@
-version: '3.8'
-
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_USERNAME}/spring-main:latest
     container_name: 500m_btn_be
-    env_file:
-      - src/main/resources/.env
     environment:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
@@ -48,7 +42,6 @@ services:
       MULTIPLIER: ${MULTIPLIER}
       DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
       DISCORD_CHANNEL_ID: ${DISCORD_CHANNEL_ID}
-
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
-    restart: always
+    restart: unless-stopped

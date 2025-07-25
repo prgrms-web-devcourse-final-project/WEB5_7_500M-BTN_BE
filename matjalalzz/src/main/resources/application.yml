@@ -77,8 +77,8 @@ custom:
     backend-origin: ${BACK_BASE_URL}
   jwt:
     token-validity-time: # 초 단위
-      access: ${ACCESS_TOKEN_TTL} # 10분
-      refresh: ${REFRESH_TOKEN_TTL} # 7일
+      access: ${ACCESS_TOKEN_TTL}
+      refresh: ${REFRESH_TOKEN_TTL}
     secret: ${JWT_SECRET}
     redirect-login-success: ${custom.cors.allowed-origin}/auth/callback
   retry:

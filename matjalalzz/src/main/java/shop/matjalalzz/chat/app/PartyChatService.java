@@ -19,26 +19,28 @@ public class PartyChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatSubscriptionService subscriptionService;
     private final ChatMessageRepository chatMessageRepository;
+    private final ChatSubscriptionService chatSubscriptionService;
 
-    public void kickUser(User user, Party party) {
-        subscriptionService.leaveParty(user, party);
+
+    public void kickUser(User kickedUser, Party party) {
+        leaveParty(kickedUser, party);
 
         ChatMessageResponse kickMessage = ChatMessageResponse.builder()
             .type(MessageType.KICK)
             .partyId(party.getId())
-            .userNickname(user.getNickname())
-            .userId(user.getId())
+            .userNickname(kickedUser.getNickname())
+            .userId(kickedUser.getId())
             .build();
 
-        messagingTemplate.convertAndSendToUser(user.getId().toString(), "/queue/notice",
+        messagingTemplate.convertAndSendToUser(kickedUser.getId().toString(), "/queue",
             kickMessage);
     }
 
-    public void leaveParty(User user, Party party) {
-        subscriptionService.leaveParty(user, party);
+    public void leaveParty(User leftUser, Party party) {
+        subscriptionService.unsubscribeParty(leftUser, party);
 
         ChatMessage chatMessage = ChatMessage.builder()
-            .sender(user)
+            .sender(leftUser)
             .party(party)
             .type(MessageType.LEAVE)
             .build();
@@ -47,32 +49,58 @@ public class PartyChatService {
         chatMessageRepository.save(chatMessage);
     }
 
-    public void noticePaymentRequest(User user, Party party) {
+    public void noticePaymentRequest(User host, Party party) {
         ChatMessage chatMessage = ChatMessage.builder()
             .party(party)
-            .sender(user)
-            .type(MessageType.REQUEST_PAYMENT)
+            .sender(host)
+            .type(MessageType.PAYMENT_REQUEST)
             .build();
         ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
         messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
         chatMessageRepository.save(chatMessage);
     }
 
-    public void noticePaymentComplete(User user, Party party) {
+    public void noticePaymentComplete(User payer, Party party) {
         ChatMessage chatMessage = ChatMessage.builder()
-            .type(MessageType.COMPLETE_PAYMENT)
+            .type(MessageType.PAYMENT_COMPLETE)
             .party(party)
-            .sender(user)
+            .sender(payer)
             .build();
         ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
         messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
         chatMessageRepository.save(chatMessage);
+    }
+
+    public void noticeReservationComplete(User host, Party party) {
+        ChatMessage chatMessage = ChatMessage.builder()
+            .type(MessageType.RESERVATION_COMPLETE)
+            .party(party)
+            .sender(host)
+            .build();
+        ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
+        messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
+        chatMessageRepository.save(chatMessage);
+    }
+
+    public void noticePartyDeleted(User host, Party party) {
+        ChatMessage chatMessage = ChatMessage.builder()
+            .type(MessageType.PARTY_DELETED)
+            .party(party)
+            .sender(host)
+            .build();
+        ChatMessageResponse noticeMessage = ChatMapper.toChatMessageResponse(chatMessage);
+        messagingTemplate.convertAndSend("/topic/party/" + party.getId(), noticeMessage);
+        chatMessageRepository.save(chatMessage);
+
+        party.getPartyUsers().forEach(pu -> {
+            chatSubscriptionService.unsubscribeParty(pu.getUser(), party);
+        });
     }
 
     @Transactional
-    public void join(Party party, User user) {
+    public void join(User joinedUser, Party party) {
         ChatMessage chatMessage = ChatMessage.builder()
-            .sender(user)
+            .sender(joinedUser)
             .party(party)
             .type(MessageType.JOIN)
             .build();
