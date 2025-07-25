@@ -22,7 +22,6 @@ import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.party.app.PartyService;
-import shop.matjalalzz.party.dto.KickoutResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyMemberResponse;
@@ -108,11 +107,11 @@ public class PartyController {
     @Operation(summary = "파티 강퇴", description = "맛집 탐험 파티에서 파티원을 강제 퇴장시킵니다.(Completed)")
     @PostMapping("/{partyId}/kick/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<KickoutResponse> quitParty(@PathVariable Long partyId,
+    public BaseResponse<Void> quitParty(@PathVariable Long partyId,
         @PathVariable Long userId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        KickoutResponse response = partyService.kickout(partyId, userInfo.getId(), userId);
-        return BaseResponse.ok(response, BaseStatus.OK);
+        partyService.kickout(partyId, userInfo.getId(), userId);
+        return BaseResponse.ok(BaseStatus.OK);
     }
 
     @Operation(summary = "파티 삭제", description = "맛집 탐험 파티 게시글을 삭제합니다.(Completed)")

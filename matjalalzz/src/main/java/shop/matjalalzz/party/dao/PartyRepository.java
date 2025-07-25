@@ -43,14 +43,6 @@ public interface PartyRepository extends JpaRepository<Party, Long>,
     @Query("""
         select p
         from Party p
-            join fetch p.reservation
-        where p.id = :partyId
-        """)
-    Optional<Party> findPartyByIdWithReservation(@Param("partyId") Long partyId);
-
-    @Query("""
-        select p
-        from Party p
             join fetch p.partyUsers
         where p.id = :partyId
         """)
