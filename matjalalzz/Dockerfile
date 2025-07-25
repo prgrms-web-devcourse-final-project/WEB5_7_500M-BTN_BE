@@ -7,6 +7,10 @@ RUN gradle clean build -x test
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
+ENV TZ=Asia/Seoul
+
+EXPOSE 8700
+
 COPY --from=build /app/build/libs/*.jar 500m_btn_be_1-0.0-SNAPSHOT.jar
 
 ENTRYPOINT ["java", "-jar", "500m_btn_be_1-0.0-SNAPSHOT.jar"]
