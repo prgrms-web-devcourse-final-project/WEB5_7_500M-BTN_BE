@@ -16,8 +16,12 @@ public record ShopPageResponse(
         String name,
         FoodCategory category,
         String address,
+        String detailAddress,
         double rating,
-        String thumbnailUrl
+        String thumbnailUrl,
+        double latitude, //위도
+        double longitude //경도
+
     ) {
 
     }

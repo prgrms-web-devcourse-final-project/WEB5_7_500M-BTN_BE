@@ -23,13 +23,17 @@ import lombok.NoArgsConstructor;
 @Table(
     indexes = {
         @Index(name = "image_idx", columnList = "shop_id"),
-        @Index(name = "image_idx", columnList = "review_id")
+        @Index(name = "image_idx", columnList = "review_id"),
+        @Index(name = "image_idx", columnList = "inquiry_id")
     },
     uniqueConstraints = {
         @UniqueConstraint(name = "unique_shop_image_index", columnNames = {"shop_id",
             "image_index"}),
         @UniqueConstraint(name = "unique_review_image_index", columnNames = {"review_id",
             "image_index"}),
+        @UniqueConstraint(name = "unique_inquiry_image_index", columnNames = {"inquiry_id",
+            "image_index"}),
+
     }
 )
 public class Image {
@@ -53,6 +57,10 @@ public class Image {
 
     @Column(name = "review_id", nullable = true)
     private Long reviewId;
+
+
+    @Column(name = "inquiry_id", nullable = true)
+    private Long inquiryId;
 
 
 }
