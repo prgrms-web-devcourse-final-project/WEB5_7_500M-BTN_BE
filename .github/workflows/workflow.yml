@@ -123,8 +123,6 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-main:latest ./matjalalzz
           docker push ${{ secrets.DOCKER_USERNAME }}/spring-main:latest
 
-
-        # 계속 수정 해야함 귀찮아서 일단 패스
       - name: 도커 컴포즈 파일 전송
         uses: appleboy/scp-action@v0.1.4
         with:
@@ -132,7 +130,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PASSWORD }}
           source: "matjalalzz/docker-compose.yml"
-          target: "/home/ubuntu/docker-compose.yml"
+          target: "/home/ubuntu/"
 
       - name: .env 파일 전송
         uses: appleboy/scp-action@v0.1.4
@@ -141,7 +139,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PASSWORD }}
           source: "matjalalzz/.env"
-          target: "/home/ubuntu/.env"
+          target: "/home/ubuntu/"
 
 
       - name: EC2 접속
@@ -152,6 +150,8 @@ jobs:
           key: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            echo "move directory"
+            cd matjalalzz
             
             echo "compose down"
             docker compose down || true
@@ -167,6 +167,3 @@ jobs:
             
             echo "prune"
             docker image prune -f
-
-
-
