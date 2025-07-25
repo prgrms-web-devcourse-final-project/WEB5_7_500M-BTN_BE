@@ -55,6 +55,7 @@ public enum ErrorCode {
     SHOP_NOT_FOUND(HttpStatus.NOT_FOUND, "음식점을 찾을 수 없습니다."),
     PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "파티를 찾을 수 없습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문 정보를 찾을 수 없습니다."),
 
     // 409 Conflict
     DUPLICATE_DATA(HttpStatus.CONFLICT, "데이터가 중복 되었습니다."),
@@ -68,6 +69,10 @@ public enum ErrorCode {
 
     //400,
     ZERO_AMOUNT_PAYMENT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "0원 결제는 허용되지 않습니다."),
+    INVALID_PAYMENT_REQUEST(HttpStatus.BAD_REQUEST, "결제가 취소되었거나, 실패했습니다."),
+    INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "결제 금액이 올바르지 않습니다."),
+    NOT_MATCH_ORDER(HttpStatus.BAD_REQUEST, "주문 정보가 일치하지 않습니다."),
+    INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "이미 주문이 완료되었거나 취소된 건입니다."),
 
     /**
      * party
