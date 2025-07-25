@@ -12,8 +12,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
@@ -39,6 +41,8 @@ class PartyServiceOptimisticLockTest {
     ShopRepository shopRepository;   // 테스트용
     @Autowired
     UserRepository userRepository;
+    @MockBean
+    PartyChatService partyChatService;
 
     @Test
     @DisplayName("임시 낙관적 락 테스트")
@@ -92,9 +96,8 @@ class PartyServiceOptimisticLockTest {
 
         /* ── THEN : 버전·인원 검증 ───────────────────────── */
         Party reloaded = partyRepository.findById(party.getId()).orElseThrow();
-        assertEquals(maxCount, reloaded.getCurrentCount());           // 호스트 + 15
-        assertEquals(maxCount - 1,      reloaded.getVersion(),                // version 15 증가
-            "version 값이 참가자 수만큼 증가해야 한다");
+        assertEquals(maxCount, reloaded.getCurrentCount());
+        assertEquals(maxCount - 1, reloaded.getVersion(), "version 값이 참가자 수만큼 증가해야 한다");
     }
 
     /* --------- 헬퍼 메서드 ---------- */
