@@ -27,7 +27,7 @@ public class ChatSubscriptionService {
         this.messageChannel = messageChannel;
     }
 
-    public void leaveParty(User user, Party party) {
+    public void unsubscribeParty(User user, Party party) {
         SimpUser simpUser = userRegistry.getUser(user.getId().toString());
         if (simpUser != null) {
             String destination = "/topic/party/" + party.getId();
