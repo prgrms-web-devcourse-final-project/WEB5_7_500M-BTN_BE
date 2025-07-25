@@ -117,6 +117,24 @@ jobs:
 
 
         # 계속 수정 해야함 귀찮아서 일단 패스
+      - name: 도커 컴포즈 파일 전송
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PASSWORD }}
+          source: "matjalalzz/docker-compose.yml"
+          target: "/home/ubuntu/"
+
+      - name: .env 파일 전송
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PASSWORD }}
+          source: "matjalalzz/.env"
+          target: "/home/ubuntu/"
+
 
       - name: EC2 접속
         uses: appleboy/ssh-action@v0.1.5
