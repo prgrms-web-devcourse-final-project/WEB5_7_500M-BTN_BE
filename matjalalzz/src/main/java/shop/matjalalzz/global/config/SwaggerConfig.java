@@ -30,7 +30,7 @@ public class SwaggerConfig {
 
         List<Server> servers = List.of(
             new Server().url(backendUrl),
-            new Server().url("https://matjalalzz.shop/:" + backendPort)
+            new Server().url("https://localhost:" + backendPort)
         );
 
         // SecuritySecheme명
