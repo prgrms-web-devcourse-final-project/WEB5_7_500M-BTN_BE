@@ -7,11 +7,11 @@ import org.springframework.http.ResponseCookie;
 public class CookieUtils {
 
     public static void setRefreshTokenCookie(HttpServletResponse response, String refreshToken,
-        int tokenTTL) {
+        int tokenTTL, boolean isSecure) {
 
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
             .httpOnly(true)
-            .secure(true)
+            .secure(isSecure)
             .path("/users")
             .maxAge(tokenTTL)
             .sameSite("None")

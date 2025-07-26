@@ -40,7 +40,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             .build()
             .toUriString();
 
-        CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
+        boolean isSecure = redirectSuccess.startsWith("https");
+        CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime, isSecure);
         response.sendRedirect(target);
     }
 }
