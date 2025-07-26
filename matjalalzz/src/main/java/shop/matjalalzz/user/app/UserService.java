@@ -73,12 +73,10 @@ public class UserService {
             refreshToken.updateRefreshToken(reissueRefreshToken);
         }
 
-        boolean isSecure = baseUrl.startsWith("https");
-
         // http only 쿠키 방식으로 refresh Token을 클라이언트에게 줌
         response.setHeader("Authorization", "Bearer " + accessToken);
         CookieUtils.setRefreshTokenCookie(response, refreshToken.getRefreshToken(),
-            refreshTokenValiditySeconds, isSecure);
+            refreshTokenValiditySeconds);
     }
 
     @Transactional
