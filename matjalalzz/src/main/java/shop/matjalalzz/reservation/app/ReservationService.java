@@ -140,6 +140,7 @@ public class ReservationService {
     @Transactional
     public void confirmReservation(Long reservationId, Long ownerId) {
         Reservation reservation = validateOwnerPermissionAndPending(reservationId, ownerId);
+
         reservation.changeStatus(ReservationStatus.CONFIRMED);
     }
 
@@ -173,8 +174,9 @@ public class ReservationService {
             throw new BusinessException(ALREADY_PROCESSED);
         }
 
-        // 예약일로부터 하루도 안남았으면, 취소 불가
-        if (reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1))) {
+        // 예약이 승인됐고, 예약일로부터 하루도 안남았으면, 취소 불가
+        if (status == ReservationStatus.CONFIRMED &&
+            reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1))) {
             throw new BusinessException(ErrorCode.CANNOT_CANCEL_D_DAY);
         }
 
