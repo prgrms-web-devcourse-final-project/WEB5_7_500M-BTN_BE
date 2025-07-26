@@ -13,6 +13,7 @@ import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
+import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
 
@@ -74,16 +75,7 @@ public class TokenService {
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         refreshTokenRepository.delete(token);
-
-        // 쿠키 삭제 처리
-        Cookie cookie = new Cookie("refreshToken", null); // 이름 동일, 값은 null
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        //cookie.setSecure(true); // HTTPS 환경
-        cookie.setSecure(false); // HTTP 환경
-        cookie.setMaxAge(0); // 즉시 만료
-        //cookie.setDomain("your-domain.com"); // 필요 시 설정
-        response.addCookie(cookie);
+        CookieUtils.deleteRefreshTokenCookie(response);
     }
 
 }
