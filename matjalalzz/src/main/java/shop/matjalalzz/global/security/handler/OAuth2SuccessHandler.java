@@ -40,7 +40,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             .build()
             .toUriString();
 
-        response.sendRedirect(target);
         CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
+        response.sendRedirect(target);
     }
 }
