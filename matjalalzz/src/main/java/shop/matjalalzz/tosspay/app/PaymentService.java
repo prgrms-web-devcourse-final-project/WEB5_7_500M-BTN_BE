@@ -59,7 +59,7 @@ public class PaymentService {
 
         // 4. 결제 성공 처리 및 저장
         savePayment(tossResponse, user, order);
-        user.updatePoint(tossResponse.totalAmount()); //사용자의 포인트 올려줌
+        user.increasePoint(tossResponse.totalAmount()); //사용자의 포인트 올려줌
         order.updateStatus(OrderStatus.DONE); //주문 완료 처리
 
         return new PaymentSuccessResponse(tossResponse.orderId(), tossResponse.totalAmount());

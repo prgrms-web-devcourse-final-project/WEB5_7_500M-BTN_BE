@@ -81,6 +81,10 @@ custom:
       refresh: ${REFRESH_TOKEN_TTL}
     secret: ${JWT_SECRET}
     redirect-login-success: ${custom.cors.allowed-origin}/auth/callback
+  retry:
+    max-delay: ${MAX_DELAY}
+    max-attempts: ${MAX_ATTEMPTS}
+    multiplier: ${MULTIPLIER}
 aws:
   credentials:
     AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}

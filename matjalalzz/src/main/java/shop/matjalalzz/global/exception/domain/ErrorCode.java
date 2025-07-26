@@ -19,6 +19,8 @@ public enum ErrorCode {
     // 401
     AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요한 요청입니다. 로그인 해주세요."),
 
+    // 409
+    LOCK_FAILURE(HttpStatus.CONFLICT, "다른 사용자가 먼저 데이터를 수정했습니다. 다시 시도해 주세요."),
 
     // 500
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "예기치 못한 오류가 발생했습니다."),
@@ -78,10 +80,12 @@ public enum ErrorCode {
      * party
      */
     INVALID_DEADLINE(HttpStatus.BAD_REQUEST, "파티 마감일자는 모임일자보다 이전이어야 합니다."),
-    ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "이미 파티에 참여 중입니다."),
+    ALREADY_PARTY_USER(HttpStatus.BAD_REQUEST, "한 번 참여한 파티에는 참여할 수 없습니다."),
+    ALREADY_PAID_USER(HttpStatus.BAD_REQUEST, "이미 예약금을 지불했습니다."),
     NOT_JOIN_PARTY(HttpStatus.BAD_REQUEST, "파티에 참여 중이 아닙니다."),
     HOST_CANNOT_QUIT_PARTY(HttpStatus.BAD_REQUEST, "호스트는 파티에 탈퇴할 수 없습니다."),
     FORBIDDEN_ACCESS_DELETE_PARTY(HttpStatus.FORBIDDEN, "호스트만 파티를 삭제할 수 있습니다."),
+    FORBIDDEN_ACCESS_KICK_OUT_PARTY_USER(HttpStatus.FORBIDDEN, "호스트만 회원을 강제 퇴장 시킬 수 있습니다."),
     CANNOT_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "호스트만 파티 상태 변경이 가능합니다."),
     INVALID_AGE_CONDITION(HttpStatus.BAD_REQUEST, "최대 나이는 최소 나이보다 많아야 합니다."),
     INVALID_COUNT_CONDITION(HttpStatus.BAD_REQUEST, "최대 인원은 최소 인원보다 많아야 합니다."),
@@ -91,8 +95,19 @@ public enum ErrorCode {
     NOT_MATCH_GENDER(HttpStatus.BAD_REQUEST, "요청자의 성별이 파티 조건과 맞지 않습니다."),
     NOT_MATCH_AGE(HttpStatus.BAD_REQUEST, "요청자의 나이가 파티 조건에 맞지 않습니다."),
     ALREADY_COMPLETE_PARTY(HttpStatus.BAD_REQUEST, "이미 모집 완료되었거나 종료된 파티입니다."),
-    CANNOT_DELETE_PARTY_STATUS(HttpStatus.BAD_REQUEST, "모집 완료되거나 종료된 파티는 삭제할 수 없습니다."),
-    CANNOT_QUIT_PARTY_STATUS(HttpStatus.BAD_REQUEST, "모집 완료되거나 종료된 파티는 탈퇴할 수 없습니다."),
+    CANNOT_DELETE_PARTY_TERMINATED(HttpStatus.BAD_REQUEST, "이미 종료된 파티는 삭제할 수 없습니다."),
+    CANNOT_DELETE_PARTY_D_DAY(HttpStatus.BAD_REQUEST, "예약일로부터 24시간 이내인 경우에는 파티를 삭제할 수 없습니다."),
+    CANNOT_QUIT_PARTY_STATUS(HttpStatus.BAD_REQUEST, "예약이 완료됐거나 종료된 파티는 탈퇴할 수 없습니다."),
+    CANNOT_KICK_OUT_SELF(HttpStatus.BAD_REQUEST, "본인을 강제 퇴장 시킬 수 없습니다."),
+    CANNOT_KICK_OUT_PAYMENT_COMPLETE(HttpStatus.BAD_REQUEST, "예약 결제 완료된 회원은 강제 퇴장 시킬 수 없습니다."),
+    CANNOT_CHANGE_PARTY_STATUS_MIN_COUNT(HttpStatus.BAD_REQUEST, "최소 인원을 충족시키지 못해 모집 완료가 불가합니다."),
+    LACK_OF_BALANCE(HttpStatus.BAD_REQUEST, "잔액이 부족해 예약할 수 없습니다."),
+    CANNOT_PAY_FEE_RECRUITING(HttpStatus.BAD_REQUEST, "파티원을 모집 중일 때는 예약금을 지불할 수 없습니다."),
+
+    /**
+     * reservation
+     */
+    CANNOT_CANCEL_D_DAY(HttpStatus.BAD_REQUEST, "예약일로부터 24시간 이내인 경우에는 예약을 취소할 수 없습니다."),
 
     /**
      * shop

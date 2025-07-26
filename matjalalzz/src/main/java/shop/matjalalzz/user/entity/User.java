@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -62,6 +63,9 @@ public class User extends BaseEntity {
     @Size(max = 255)
     private String profileKey;
 
+    @Version
+    private long version;
+
     @Builder
     public User(String email, String oauthId, Role role, String password, String nickname, String phoneNumber,
         String name, Integer age, Gender gender, String profileKey) {
@@ -78,8 +82,12 @@ public class User extends BaseEntity {
     }
 
     // point 변경 메서드
-    public void updatePoint(int point) {
+    public void increasePoint(int point) {
         this.point += point;
+    }
+
+    public void decreasePoint(int point) {
+        this.point -= point;
     }
 
     // 권한 변경 메서드

@@ -1,6 +1,7 @@
 package shop.matjalalzz.reservation.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,6 +14,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import shop.matjalalzz.global.exception.BusinessException;
+import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
@@ -53,18 +56,18 @@ class ReservationCreateReservationTest {
     class CreateReservationTest {
 
         @Test
-        @DisplayName("party가 있는 경우 예약 생성 성공")
-        void createReservationWithParty() {
+        @DisplayName("예약 생성 성공")
+        void createReservationWithoutParty() {
             // given
             User user = userRepository.save(TestUtil.createUser());
             Shop shop = shopRepository.save(TestUtil.createShop(user));
-            Party party = partyRepository.save(TestUtil.createParty(shop));
-            CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "19:00",
+            user.increasePoint(10000);
+            CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "20:00",
                 2, 10000);
 
             // when
             CreateReservationResponse response = reservationService.createReservation(
-                user.getId(), shop.getId(), party.getId(), request
+                user.getId(), shop.getId(), request
             );
 
             // then
@@ -74,23 +77,20 @@ class ReservationCreateReservationTest {
         }
 
         @Test
-        @DisplayName("party가 없는 경우 예약 생성 성공")
-        void createReservationWithoutParty() {
+        @DisplayName("예약 생성 실패 (보유 포인트 부족)")
+        void createReservationWithoutParty_Fail() {
             // given
             User user = userRepository.save(TestUtil.createUser());
             Shop shop = shopRepository.save(TestUtil.createShop(user));
+            user.increasePoint(1000);
             CreateReservationRequest request = new CreateReservationRequest("2025-07-15", "20:00",
                 2, 10000);
 
-            // when
-            CreateReservationResponse response = reservationService.createReservation(
-                user.getId(), shop.getId(), null, request
-            );
-
-            // then
-            assertThat(response).isNotNull();
-            assertThat(response.shopName()).isEqualTo(shop.getShopName());
-            assertThat(response.status()).isEqualTo(ReservationStatus.PENDING);
+            // when & then
+            assertThatThrownBy(
+                () -> reservationService.createReservation(user.getId(), shop.getId(), request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.LACK_OF_BALANCE);
         }
 
         @Test
@@ -100,6 +100,8 @@ class ReservationCreateReservationTest {
             User owner = userRepository.save(TestUtil.createUser());
             User user1 = userRepository.save(TestUtil.createUser());
             User user2 = userRepository.save(TestUtil.createUser());
+            user1.increasePoint(10000);
+            user2.increasePoint(10000);
 
             Shop shop = shopRepository.save(TestUtil.createShop(owner));
 
@@ -111,8 +113,8 @@ class ReservationCreateReservationTest {
             CreateReservationRequest request = new CreateReservationRequest(date, time, 2, 10000);
 
             // when
-            reservationService.createReservation(user1.getId(), shop.getId(), null, request);
-            reservationService.createReservation(user2.getId(), shop.getId(), null, request);
+            reservationService.createReservation(user1.getId(), shop.getId(), request);
+            reservationService.createReservation(user2.getId(), shop.getId(), request);
 
             // then
             List<Reservation> all = reservationRepository.findAll();

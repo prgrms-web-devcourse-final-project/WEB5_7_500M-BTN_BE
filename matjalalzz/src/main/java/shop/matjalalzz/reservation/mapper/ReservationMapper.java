@@ -21,7 +21,7 @@ import shop.matjalalzz.user.entity.User;
 public class ReservationMapper {
 
     public static Reservation toEntity(CreateReservationRequest request, LocalDateTime reservedAt,
-        Shop shop, User user, Party party) {
+        Shop shop, User user) {
         return Reservation.builder()
             .headCount(request.headCount())
             .reservationFee(request.reservationFee())
@@ -29,6 +29,17 @@ public class ReservationMapper {
             .status(ReservationStatus.PENDING)
             .shop(shop)
             .user(user)
+            .build();
+    }
+
+    public static Reservation toEntity(Party party, User host) {
+        return Reservation.builder()
+            .headCount(party.getCurrentCount())
+            .reservationFee(party.getTotalReservationFee())
+            .reservedAt(party.getMetAt())
+            .status(ReservationStatus.PENDING)
+            .shop(party.getShop())
+            .user(host)
             .party(party)
             .build();
     }
@@ -59,8 +70,8 @@ public class ReservationMapper {
                 .reservationId(res.getId())
                 .shopName(
                     res.getShop().getShopName())                      // ← N+1 가능성 있음, fetch join 필요
-                    .reservedAt(res.getReservedAt())
-                    .headCount(res.getHeadCount())
+                .reservedAt(res.getReservedAt())
+                .headCount(res.getHeadCount())
                 .phoneNumber(
                     res.getUser().getPhoneNumber())           // ← N+1 가능성 있음, fetch join 필요
                 .status(res.getStatus())

@@ -17,7 +17,6 @@ import shop.matjalalzz.user.entity.User;
 public class PartyChatService {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final ChatSubscriptionService subscriptionService;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatSubscriptionService chatSubscriptionService;
 
@@ -37,7 +36,7 @@ public class PartyChatService {
     }
 
     public void leaveParty(User leftUser, Party party) {
-        subscriptionService.unsubscribeParty(leftUser, party);
+        chatSubscriptionService.unsubscribeParty(leftUser, party);
 
         ChatMessage chatMessage = ChatMessage.builder()
             .sender(leftUser)

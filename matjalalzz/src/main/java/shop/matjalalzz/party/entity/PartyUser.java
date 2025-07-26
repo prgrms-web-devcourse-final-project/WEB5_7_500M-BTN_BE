@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +32,11 @@ public class PartyUser extends BaseEntity {
 
     private boolean isHost;
 
+    private boolean paymentCompleted;
+
+    @Version
+    private int version;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "party_id", nullable = false)
     private Party party;
@@ -44,6 +50,7 @@ public class PartyUser extends BaseEntity {
         this.isHost = isHost;
         this.party = party;
         this.user = user;
+        this.paymentCompleted = false;
     }
 
     public static PartyUser createHost(Party party, User user) {
@@ -60,5 +67,9 @@ public class PartyUser extends BaseEntity {
             .user(user)
             .isHost(false)
             .build();
+    }
+
+    public void completePayment(){
+        this.paymentCompleted = true;
     }
 }

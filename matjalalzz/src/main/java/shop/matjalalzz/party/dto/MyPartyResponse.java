@@ -46,6 +46,10 @@ public record MyPartyResponse(
     int maxAge,
 
     @Schema(description = "설명", example = "신전떡볶이 강남점은 뭔가 맛이 다르다는데, 가보실 분 구합니다!")
-    String description
+    String description,
+
+    @Schema(description = "호스트 여부 (본인이 이 파티의 파티장인지 확인)", example = "true")
+    boolean isHost
 ) {
+
 }

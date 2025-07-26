@@ -10,8 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Version;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -51,6 +51,9 @@ public class Reservation extends BaseEntity {
     @Builder.Default
     private ReservationStatus status = ReservationStatus.PENDING;
 
+    @Version
+    private int version;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -59,7 +62,7 @@ public class Reservation extends BaseEntity {
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "party_id")
     private Party party;
 
@@ -67,4 +70,11 @@ public class Reservation extends BaseEntity {
         this.status = status;
     }
 
+    public void decreaseHeadCount() {
+        this.headCount--;
+    }
+
+    public void decreaseReservationFee(int reservationFee) {
+        this.reservationFee -= reservationFee;
+    }
 }
