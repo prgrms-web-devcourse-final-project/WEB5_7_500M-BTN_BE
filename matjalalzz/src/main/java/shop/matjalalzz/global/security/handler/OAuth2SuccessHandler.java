@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
@@ -34,8 +35,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         LoginTokenResponseDto dto = tokenService.oauthLogin(userInfo.getUsername());
 
-        response.setHeader("Authorization", "Bearer " + dto.accessToken());
+        String target = UriComponentsBuilder.fromUriString(redirectSuccess)
+            .queryParam("accessToken", dto.accessToken())
+            .build()
+            .toUriString();
+
+        response.sendRedirect(target);
         CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
-        response.sendRedirect(redirectSuccess);
     }
 }
