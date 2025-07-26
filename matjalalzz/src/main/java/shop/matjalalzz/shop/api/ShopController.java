@@ -23,7 +23,6 @@ import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.dto.ApproveRequest;
 import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopsList;
-import shop.matjalalzz.shop.dto.PendingShop;
 import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
@@ -44,14 +43,15 @@ public class ShopController {
     @Operation(summary = "관리자가 pending 상태인 식당들 리스트를 가져옴", description = "관리자는 등록을 원하는 식당 리스트를 볼 수 있습니다. (Completed)")
     @GetMapping("/admin/shops")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<GetAllPendingShopListResponse> getPendingShop (){
+    public BaseResponse<GetAllPendingShopListResponse> getPendingShop() {
         return BaseResponse.ok(shopService.adminGetAllPendingShop(), BaseStatus.OK);
     }
 
     @Operation(summary = "관리자가 식당 등록에 대한 요청을 승인 또는 거절 ", description = "APPROVED(승인) 또는 REJECTED(거절) (Completed)")
     @PostMapping("/admin/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
-    public void getPendingShop (@PathVariable Long shopId, @RequestBody @Valid ApproveRequest approveRequest) {
+    public void getPendingShop(@PathVariable Long shopId,
+        @RequestBody @Valid ApproveRequest approveRequest) {
         shopService.approve(shopId, approveRequest);
     }
 
@@ -64,16 +64,19 @@ public class ShopController {
     }
 
     @Operation(summary = "식당 생성", description = """
-    사용자는 새로운 식당을 생성합니다.(Completed)
-    
-    사진 전송 시 헤더에
-    Cache-Control 값이 no-cache,no-store,must-revalidate 되어 있어야 합니다
-    
-    """)
+        사용자는 새로운 식당을 생성합니다.(Completed)
+        
+        사진 전송 시 헤더에
+        Cache-Control 값이 no-cache,no-store,must-revalidate 되어 있어야 합니다
+        
+        """)
     @PostMapping("/shops/presigned-urls")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<PreSignedUrlListResponse> createShop(@RequestBody @Valid ShopCreateRequest request, @AuthenticationPrincipal PrincipalUser principal) {
-        PreSignedUrlListResponse preSignedUrlListResponse = shopService.newShop(principal.getId(), request);
+    public BaseResponse<PreSignedUrlListResponse> createShop(
+        @RequestBody @Valid ShopCreateRequest request,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        PreSignedUrlListResponse preSignedUrlListResponse = shopService.newShop(principal.getId(),
+            request);
         return BaseResponse.ok(preSignedUrlListResponse, BaseStatus.CREATED);
     }
 
@@ -90,7 +93,8 @@ public class ShopController {
     @Operation(summary = "사장이 가진 식당들 조회", description = "사장 한명이 가진 식당들 리스트들을 조회합니다. 승인 여부 상태와 상관없이 조회 (Completed)")
     @GetMapping("/owner/shops")
     @ResponseStatus(HttpStatus.OK)
-    public BaseResponse<OwnerShopsList> getOwnerShops(@AuthenticationPrincipal PrincipalUser principal) {
+    public BaseResponse<OwnerShopsList> getOwnerShops(
+        @AuthenticationPrincipal PrincipalUser principal) {
         OwnerShopsList response = shopService.getOwnerShopList(principal.getId());
         return BaseResponse.ok(response, BaseStatus.OK);
     }

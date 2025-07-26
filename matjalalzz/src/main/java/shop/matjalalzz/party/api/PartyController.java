@@ -3,6 +3,7 @@ package shop.matjalalzz.party.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
+import shop.matjalalzz.party.dto.PartyMemberResponse;
 import shop.matjalalzz.party.dto.PartyScrollResponse;
 import shop.matjalalzz.party.dto.PartySearchParam;
 
@@ -43,7 +45,7 @@ public class PartyController {
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
-    @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 게시글 상세 정보를 조회합니다.(Completed)")
+    @Operation(summary = "파티 상세 조회", description = "맛집 탐험 파티 상세 정보를 조회합니다.(Completed)")
     @GetMapping("/{partyId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyDetailResponse> getPartyDetail(@PathVariable Long partyId) {
@@ -51,11 +53,19 @@ public class PartyController {
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
+    @Operation(summary = "파티원 목록 조회", description = "맛집 탐험 파티원 목록을 조회합니다.(Completed)")
+    @GetMapping("/{partyId}/members")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<List<PartyMemberResponse>> getPartyMembers(@PathVariable Long partyId) {
+        List<PartyMemberResponse> response = partyService.getPartyMembers(partyId);
+        return BaseResponse.ok(response, BaseStatus.OK);
+    }
+
     @Operation(summary = "파티 목록 조회", description = """
         파티 상태, 위치, 음식 카테고리로 필터링한 파티 게시글 목록을 조회합니다. (Completed)
-                
+        
         예시 /parties?status=RECRUITING&minAge=10&categories=CHICKEN&categories=JAPANESE
-                
+        
         | 필드 명     | 자료형    | 필수 여부  | 설명                                            | 기본값                   |
         |------------|---------|-----------|-------------------------------------------------|------------------------|
         | status     | string  | Optional  | 파티 상태                                        | 전체                    |
@@ -94,6 +104,16 @@ public class PartyController {
         partyService.quitParty(partyId, userInfo.getId());
     }
 
+    @Operation(summary = "파티 강퇴", description = "맛집 탐험 파티에서 파티원을 강제 퇴장시킵니다.(Completed)")
+    @PostMapping("/{partyId}/kick/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<Void> quitParty(@PathVariable Long partyId,
+        @PathVariable Long userId,
+        @AuthenticationPrincipal PrincipalUser userInfo) {
+        partyService.kickout(partyId, userInfo.getId(), userId);
+        return BaseResponse.ok(BaseStatus.OK);
+    }
+
     @Operation(summary = "파티 삭제", description = "맛집 탐험 파티 게시글을 삭제합니다.(Completed)")
     @DeleteMapping("/{partyId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -111,5 +131,12 @@ public class PartyController {
         return BaseResponse.ok(BaseStatus.OK);
     }
 
+    @Operation(summary = "파티 예약금 지불", description = "맛집 탐험 파티의 예약을 위한 예약금을 지불합니다.(Completed)")
+    @PostMapping("/{partyId}/pay")
+    @ResponseStatus(HttpStatus.OK)
+    public void payPartyFee(@PathVariable Long partyId,
+        @AuthenticationPrincipal PrincipalUser userInfo) {
+        partyService.payReservationFee(partyId, userInfo.getId());
+    }
 }
 

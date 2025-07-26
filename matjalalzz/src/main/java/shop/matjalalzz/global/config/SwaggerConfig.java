@@ -1,11 +1,12 @@
 package shop.matjalalzz.global.config;
 
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.security.SecurityScheme.In;
+import io.swagger.v3.oas.models.security.SecurityScheme.Type;
 import io.swagger.v3.oas.models.servers.Server;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,18 +34,27 @@ public class SwaggerConfig {
             new Server().url("https://localhost:" + backendPort)
         );
 
-        // SecuritySecheme명
-        String jwtSchemeName = "JwtAuth";
+        String accessScheme = "accessToken";
+        String refreshScheme = "refreshToken";
+
         // API 요청헤더에 인증정보 포함
-        SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwtSchemeName);
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+            .addList(accessScheme)
+            .addList(refreshScheme);
+
         // SecuritySchemes 등록
         Components components = new Components()
-            .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
-                .name(jwtSchemeName)
-                .type(SecurityScheme.Type.HTTP) // HTTP 방식
+            .addSecuritySchemes(accessScheme, new SecurityScheme()
+                .name(accessScheme)
+                .type(Type.HTTP) // HTTP 방식
                 .scheme("bearer")
-                .in(SecurityScheme.In.HEADER)
-                .bearerFormat("Authorization")); // 토큰 형식을 지정하는 임의의 문자(Optional)
+                .in(In.HEADER)
+                .bearerFormat("Authorization"))
+            .addSecuritySchemes(refreshScheme, new SecurityScheme()
+                .name(refreshScheme)
+                .type(Type.APIKEY)
+                .in(In.COOKIE)
+            );
 
         return new OpenAPI()
             .info(info)

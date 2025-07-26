@@ -5,7 +5,6 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.EMAIL_ALREADY_EX
 import static shop.matjalalzz.global.exception.domain.ErrorCode.INVALID_REFRESH_TOKEN;
 import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +19,7 @@ import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
+import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
@@ -75,13 +75,8 @@ public class UserService {
 
         // http only 쿠키 방식으로 refresh Token을 클라이언트에게 줌
         response.setHeader("Authorization", "Bearer " + accessToken);
-        Cookie cookie = new Cookie("refreshToken", refreshToken.getRefreshToken());
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // HTTPS 환경
-        //cookie.setSecure(false); // HTTP 환경
-        cookie.setPath("/");
-        cookie.setMaxAge(refreshTokenValiditySeconds); // 7일
-        response.addCookie(cookie);
+        CookieUtils.setRefreshTokenCookie(response, refreshToken.getRefreshToken(),
+            refreshTokenValiditySeconds);
     }
 
     @Transactional
@@ -120,16 +115,7 @@ public class UserService {
         refreshTokenRepository.delete(foundRefreshToken);
 
         userRepository.delete(tokenUser);
-
-        // 쿠키 삭제 처리
-        Cookie cookie = new Cookie("refreshToken", null); // 이름 동일, 값은 null
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // HTTPS 환경
-        //cookie.setSecure(false); // HTTP 환경
-        cookie.setMaxAge(0); // 즉시 만료
-        //cookie.setDomain("your-domain.com"); // 필요 시 설정
-        response.addCookie(cookie);
+        CookieUtils.deleteRefreshTokenCookie(response);
     }
 
     @Transactional(readOnly = true)

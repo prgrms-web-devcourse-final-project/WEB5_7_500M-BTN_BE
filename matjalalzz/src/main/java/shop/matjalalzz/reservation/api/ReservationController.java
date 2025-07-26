@@ -56,10 +56,8 @@ public class ReservationController {
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
 
-
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
             userInfo.getId(), cursor, size);
-
 
         return BaseResponse.ok(response, BaseStatus.OK);
     }
@@ -85,13 +83,12 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<CreateReservationResponse> createReservation(
         @PathVariable Long shopId,
-        @RequestParam(required = false) Long partyId, // party 여부 확인 및 party가 있는 경우 id 받아오는 용
         @Valid @RequestBody CreateReservationRequest request,
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
 
         CreateReservationResponse response = reservationService.createReservation(userInfo.getId(),
-            shopId, partyId, request);
+            shopId, request);
 
         return BaseResponse.ok(response, BaseStatus.CREATED);
 
@@ -116,17 +113,34 @@ public class ReservationController {
 
     @Operation(
         summary = "예약 거절",
-        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Completed)",
+        description = "reservationId에 해당하는 예약을 REFUSED 상태로 변경한다. (Completed)",
         responses = {
             @ApiResponse(responseCode = "200", description = "예약 거절 성공"),
         }
     )
-    @PatchMapping("/reservations/{reservationId}/cancel")
+    @PatchMapping("/reservations/{reservationId}/refuse")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> refuseReservation(
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
         reservationService.refuseReservation(reservationId, principal.getId());
+
+        return BaseResponse.ok(BaseStatus.OK);
+    }
+
+    @Operation(
+        summary = "예약 취소",
+        description = "reservationId에 해당하는 예약을 CANCELLED 상태로 변경한다. (Completed)",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "예약 취소 성공"),
+        }
+    )
+    @PatchMapping("/reservations/{reservationId}/cancel")
+    @ResponseStatus(HttpStatus.OK)
+    public BaseResponse<Void> cancelReservation(
+        @PathVariable Long reservationId,
+        @AuthenticationPrincipal PrincipalUser principal) {
+        reservationService.cancelReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }

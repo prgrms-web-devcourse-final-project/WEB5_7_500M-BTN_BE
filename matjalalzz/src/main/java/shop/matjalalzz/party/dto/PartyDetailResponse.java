@@ -1,6 +1,7 @@
 package shop.matjalalzz.party.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Builder;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
@@ -20,12 +21,12 @@ public record PartyDetailResponse(
     LocalDateTime metAt,
     LocalDateTime deadline,
     LocalDateTime createdAt,
-    Long hostId,
     Long shopId,
     String shopName,
     String shopRoadAddress,
     String shopDetailAddress,
-    String shopImage
+    String shopImage,
+    List<PartyMemberResponse> members
 ) {
 
 }

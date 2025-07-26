@@ -1,6 +1,7 @@
 package shop.matjalalzz.global.security.jwt.api;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ public class TokenController {
     @PostMapping("/reissue-token")
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<AccessTokenResponseDto> refreshToken(
+        @Parameter(hidden = true)
         @CookieValue(name = "refreshToken") String refreshToken) {
         return BaseResponse.ok(tokenService.refreshAccessToken(refreshToken), BaseStatus.OK);
     }
@@ -44,6 +46,7 @@ public class TokenController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> logout(
+        @Parameter(hidden = true)
         @CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
         tokenService.logout(refreshToken, response);
 

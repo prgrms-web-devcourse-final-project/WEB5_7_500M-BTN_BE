@@ -58,11 +58,13 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_S3_PRESIGN_EXP: ${{ secrets.AWS_S3_PRESIGN_EXP }}
       JPA_DIALECT: ${{ secrets.JPA_DIALECT }}
+      MAX_DELAY: ${{ secrets.MAX_DELAY }}
+      MAX_ATTEMPTS: ${{ secrets.MAX_ATTEMPTS }}
+      MULTIPLIER: ${{ secrets.MULTIPLIER }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
       REDIS_TIMEOUT: ${{ secrets.REDIS_TIMEOUT }}
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-
 
     steps:
       - name: 저장소 코드 Clone
@@ -101,12 +103,16 @@ jobs:
           AWS_S3_PATH=${AWS_S3_PATH}
           AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
           AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-          AWS_S3_PRESIGN_EXP=${AWS_S3_PRESIGN_EXP}
+          AWS_S3_PRESIGN_EXP=${AWS_S3_PRESIGN_EXP}     
+          MAX_DELAY=${MAX_DELAY}
+          MAX_ATTEMPTS=${MAX_ATTEMPTS}
+          MULTIPLIER=${MULTIPLIER}
           JPA_DIALECT=${JPA_DIALECT}
           DOCKER_USERNAME=${DOCKER_USERNAME}
           DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
           REDIS_TIMEOUT=${REDIS_TIMEOUT}
           DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+
           EOF
 
       - name: 도커 hub 로그인

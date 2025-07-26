@@ -1,5 +1,6 @@
 package shop.matjalalzz.party.mapper;
 
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -8,6 +9,7 @@ import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
+import shop.matjalalzz.party.dto.PartyMemberResponse;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.shop.entity.Shop;
 
@@ -30,8 +32,8 @@ public class PartyMapper {
             .build();
     }
 
-    public static PartyDetailResponse toDetailResponse(Party party, Long hostId,
-        String shopImage) {
+    public static PartyDetailResponse toDetailResponse(Party party, String shopImage,
+        List<PartyMemberResponse> members) {
         return PartyDetailResponse.builder()
             .partyId(party.getId())
             .title(party.getTitle())
@@ -46,12 +48,12 @@ public class PartyMapper {
             .metAt(party.getMetAt())
             .deadline(party.getDeadline())
             .createdAt(party.getCreatedAt())
-            .hostId(hostId)
             .shopId(party.getId())
             .shopName(party.getShop().getShopName())
             .shopRoadAddress(party.getShop().getRoadAddress())
             .shopDetailAddress(party.getShop().getDetailAddress())
             .shopImage(shopImage)
+            .members(members)
             .build();
     }
 
