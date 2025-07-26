@@ -100,6 +100,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}/comments").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reviews").permitAll()
                     .requestMatchers("/ws/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/users/set-cookie").permitAll()
 
                     .requestMatchers("/users/delete", "/users/logout").authenticated()
 
