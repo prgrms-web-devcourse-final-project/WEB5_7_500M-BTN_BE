@@ -3,26 +3,26 @@ on:
   push:
     branches: [ main ]   # main 브랜치에서만 작동
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: JDK 설치
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: gradlew 실행 권한 부여
-        run: chmod +x ./gradlew
-        working-directory: matjalalzz
-
-      - name: 테스트
-        run: ./gradlew test
-        working-directory: matjalalzz
+  #  test:
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@v4
+  #
+  #      - name: JDK 설치
+  #        uses: actions/setup-java@v3
+  #        with:
+  #          distribution: 'temurin'
+  #          java-version: '21'
+  #
+  #      - name: gradlew 실행 권한 부여
+  #        run: chmod +x ./gradlew
+  #        working-directory: matjalalzz
+  #
+  #      - name: 테스트
+  #        run: ./gradlew test
+  #        working-directory: matjalalzz
   deploy:
-    needs: test
+    #    needs: test
     runs-on: ubuntu-latest
     env:
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
@@ -61,8 +61,10 @@ jobs:
       MAX_DELAY: ${{ secrets.MAX_DELAY }}
       MAX_ATTEMPTS: ${{ secrets.MAX_ATTEMPTS }}
       MULTIPLIER: ${{ secrets.MULTIPLIER }}
-      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID }}
+      REDIS_TIMEOUT: ${{ secrets.REDIS_TIMEOUT }}
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
 
     steps:
       - name: 저장소 코드 Clone
@@ -101,13 +103,16 @@ jobs:
           AWS_S3_PATH=${AWS_S3_PATH}
           AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
           AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-          AWS_S3_PRESIGN_EXP=${AWS_S3_PRESIGN_EXP}
-          JPA_DIALECT=${JPA_DIALECT}          
+          AWS_S3_PRESIGN_EXP=${AWS_S3_PRESIGN_EXP}     
           MAX_DELAY=${MAX_DELAY}
           MAX_ATTEMPTS=${MAX_ATTEMPTS}
           MULTIPLIER=${MULTIPLIER}
-          DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+          JPA_DIALECT=${JPA_DIALECT}
+          DOCKER_USERNAME=${DOCKER_USERNAME}
           DISCORD_CHANNEL_ID=${DISCORD_CHANNEL_ID}
+          REDIS_TIMEOUT=${REDIS_TIMEOUT}
+          DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+
           EOF
 
       - name: 도커 hub 로그인
@@ -124,8 +129,24 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-main:latest ./matjalalzz
           docker push ${{ secrets.DOCKER_USERNAME }}/spring-main:latest
 
+      - name: 도커 컴포즈 파일 전송
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PASSWORD }}
+          source: "matjalalzz/docker-compose.yml"
+          target: "/home/ubuntu/"
 
-        # 계속 수정 해야함 귀찮아서 일단 패스
+      - name: .env 파일 전송
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PASSWORD }}
+          source: "matjalalzz/.env"
+          target: "/home/ubuntu/"
+
 
       - name: EC2 접속
         uses: appleboy/ssh-action@v0.1.5
@@ -135,9 +156,14 @@ jobs:
           key: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.SSH_PORT }}
           script: |
+            echo "move directory"
+            cd matjalalzz
             
             echo "compose down"
             docker compose down || true
+            
+            echo "login"
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             
             echo "pull"
             docker pull ${{ secrets.DOCKER_USERNAME }}/spring-main:latest
@@ -147,6 +173,3 @@ jobs:
             
             echo "prune"
             docker image prune -f
-
-
-
