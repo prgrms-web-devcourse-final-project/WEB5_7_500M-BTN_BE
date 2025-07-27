@@ -35,7 +35,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         LoginTokenResponseDto dto = tokenService.oauthLogin(userInfo.getUsername());
 
-        CookieUtils.deleteRefreshTokenCookie(response);
         CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
 
         super.clearAuthenticationAttributes(request);
