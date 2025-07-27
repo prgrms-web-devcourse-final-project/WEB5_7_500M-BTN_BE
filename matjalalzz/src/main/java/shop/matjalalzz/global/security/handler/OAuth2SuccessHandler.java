@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import shop.matjalalzz.global.security.PrincipalUser;
@@ -18,7 +18,7 @@ import shop.matjalalzz.global.util.CookieUtils;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final TokenService tokenService;
 
@@ -35,12 +35,16 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         LoginTokenResponseDto dto = tokenService.oauthLogin(userInfo.getUsername());
 
+        CookieUtils.deleteRefreshTokenCookie(response);
+        CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
+
+        super.clearAuthenticationAttributes(request);
+
         String target = UriComponentsBuilder.fromUriString(redirectSuccess)
             .queryParam("accessToken", dto.accessToken())
             .build()
             .toUriString();
 
-        CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
-        response.sendRedirect(target);
+        getRedirectStrategy().sendRedirect(request, response, target);
     }
 }
