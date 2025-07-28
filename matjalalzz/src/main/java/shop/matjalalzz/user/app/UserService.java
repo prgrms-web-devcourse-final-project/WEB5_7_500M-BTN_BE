@@ -115,6 +115,7 @@ public class UserService {
         refreshTokenRepository.delete(foundRefreshToken);
 
         userRepository.delete(tokenUser);
+
         CookieUtils.deleteRefreshTokenCookie(response);
     }
 

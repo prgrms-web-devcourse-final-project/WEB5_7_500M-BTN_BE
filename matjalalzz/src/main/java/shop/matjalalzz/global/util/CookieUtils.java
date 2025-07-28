@@ -12,7 +12,7 @@ public class CookieUtils {
         ResponseCookie responseCookie = ResponseCookie.from("refreshToken", refreshToken)
             .httpOnly(true)
             .secure(true)
-            .path("/users")
+            .path("/")
             .maxAge(tokenTTL)
             .sameSite("None")
             .build();
@@ -25,7 +25,7 @@ public class CookieUtils {
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
             .httpOnly(true)
             .secure(true)
-            .path("/users")
+            .path("/")
             .sameSite("None")
             .maxAge(0)
             .build();
