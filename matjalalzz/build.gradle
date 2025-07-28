@@ -65,6 +65,9 @@ dependencies {
     implementation "software.amazon.awssdk:s3"                    // S3 클라이언트
 
 
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+
+
     implementation('net.dv8tion:JDA:5.0.0-beta.20') {
         exclude module: 'opus-java'
         exclude module: 'tink'}

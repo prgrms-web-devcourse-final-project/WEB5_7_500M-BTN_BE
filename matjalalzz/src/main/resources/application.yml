@@ -14,10 +14,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: ${DDL_AUTO}   # create-drop, create, none, validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
     generate-ddl: true
     defer-datasource-initialization: true
     database-platform: ${JPA_DIALECT}

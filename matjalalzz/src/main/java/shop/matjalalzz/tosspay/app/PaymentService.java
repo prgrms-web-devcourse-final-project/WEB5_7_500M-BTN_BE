@@ -62,6 +62,8 @@ public class PaymentService {
         user.increasePoint(tossResponse.totalAmount()); //사용자의 포인트 올려줌
         order.updateStatus(OrderStatus.DONE); //주문 완료 처리
 
+        log.info("결제 처리 - userId={}, orderId={}",userId, order.getId());
+
         return new PaymentSuccessResponse(tossResponse.orderId(), tossResponse.totalAmount());
 
     }
