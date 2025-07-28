@@ -31,7 +31,7 @@ public class SwaggerConfig {
 
         List<Server> servers = List.of(
             new Server().url(backendUrl),
-            new Server().url("https://localhost:" + backendPort)
+            new Server().url("http://localhost:" + backendPort)
         );
 
         String accessScheme = "accessToken";
