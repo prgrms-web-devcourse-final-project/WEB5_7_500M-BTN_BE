@@ -1,4 +1,6 @@
 spring:
+  server:
+    forward-headers-strategy: framework
   config:
     import: optional:file:.env[.yml]
 
