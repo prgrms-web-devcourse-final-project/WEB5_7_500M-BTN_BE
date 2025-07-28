@@ -27,7 +27,6 @@ import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class InquiryService {
 
@@ -60,7 +59,6 @@ public class InquiryService {
                 int answerCount = commentRepository.findAllByInquiryId(inquiry.getId()).size();
                 return InquiryMapper.fromInquiryItem(inquiry, answerCount);
             }).toList();
-        log.info("문의글 전체 조회 완료");
 
         return new InquiryAllGetResponse(inquiryItems, nextCursor);
 
