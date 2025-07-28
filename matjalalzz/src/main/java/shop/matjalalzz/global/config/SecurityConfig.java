@@ -57,7 +57,8 @@ public class SecurityConfig {
 
                     configuration.addAllowedHeader("*");
                     configuration.addAllowedMethod("*");
-                    configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
+//                    configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
+                    configuration.setAllowedOrigins(List.of(allowedOrigin));
                     configuration.setAllowCredentials(true);
                     configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
                     configuration.setMaxAge(3600L);
