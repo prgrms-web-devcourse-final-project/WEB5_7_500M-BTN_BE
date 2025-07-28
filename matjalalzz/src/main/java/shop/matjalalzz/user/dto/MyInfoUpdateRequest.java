@@ -28,6 +28,7 @@ public record MyInfoUpdateRequest(
     @Schema(example = "profile/1/img_1")
     @NotBlank
     String profileKey
+
 ) {
 
 }
