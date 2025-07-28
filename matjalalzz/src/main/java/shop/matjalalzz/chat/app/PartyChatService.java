@@ -104,7 +104,8 @@ public class PartyChatService {
             .type(MessageType.JOIN)
             .build();
 
-        messagingTemplate.convertAndSend("/topic/party/" + party.getId(), chatMessage);
+        ChatMessageResponse response = ChatMapper.toChatMessageResponse(chatMessage);
+        messagingTemplate.convertAndSend("/topic/party/" + party.getId(), response);
         chatMessageRepository.save(chatMessage);
     }
 

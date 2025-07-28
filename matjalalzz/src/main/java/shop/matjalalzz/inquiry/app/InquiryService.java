@@ -1,8 +1,9 @@
 package shop.matjalalzz.inquiry.app;
 
 import java.util.List;
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class InquiryService {
     private final PreSignedProvider preSignedProvider;
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
+
+    @Value("${aws.credentials.AWS_BASE_URL}")
+    private String BASE_URL;
 
     @Transactional
     public PreSignedUrlListResponse newInquiry(long userId, InquiryCreateRequest request) {
@@ -77,7 +81,8 @@ public class InquiryService {
         }
 
         List<String> imagesUrl = imageRepository.findByInquiryImage(inquiry.getId());
-        return InquiryMapper.fromInquiry(inquiry, imagesUrl);
+        List<String> imagesPathUrl = imagesUrl.stream().map(path-> BASE_URL  + path ).toList();
+        return InquiryMapper.fromInquiry(inquiry, imagesPathUrl);
 
 
     }

@@ -70,10 +70,10 @@ public class PartyService {
 
         validateCreateParty(request);
 
+        User user = userService.getUserById(userId);
         Shop shop = shopService.shopFind(request.shopId());
         Party party = PartyMapper.toEntity(request, shop);
 
-        User user = userService.getUserById(userId);
         PartyUser host = PartyUser.createHost(party, user);
         party.getPartyUsers().add(host);
 
@@ -87,7 +87,8 @@ public class PartyService {
     public PartyDetailResponse getPartyDetail(Long partyId) {
         Party party = findById(partyId);
 
-        List<PartyMemberResponse> members = partyUserRepository.findAllByPartyIdToDto(partyId, BASE_URL);
+        List<PartyMemberResponse> members = partyUserRepository.findAllByPartyIdToDto(partyId,
+            BASE_URL);
 
         return PartyMapper.toDetailResponse(party, getShopThumbnail(party), members);
     }
@@ -177,7 +178,7 @@ public class PartyService {
         User host = findPartyHost(party);
 
         // 파티 나갔을 때, 최소 인원보다 적을 시 파티 제거
-        if(party.getMinCount() > party.getCurrentCount() - 1) {
+        if (party.getMinCount() > party.getCurrentCount() - 1) {
             breakParty(party);
             return;
         }
@@ -246,14 +247,14 @@ public class PartyService {
     @Transactional
     public void breakParty(Party party) {
         // 삭제됐거나 종료된 상태의 파티는 삭제 불가
-        if(party.isDeleted() || party.getStatus() == PartyStatus.TERMINATED) {
+        if (party.isDeleted() || party.getStatus() == PartyStatus.TERMINATED) {
             throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_TERMINATED);
         }
 
         Reservation reservation = party.getReservation();
 
         // 예약일 하루 전이라면 파티 삭제 불가
-        if(reservation != null && reservation.getStatus() == ReservationStatus.CONFIRMED
+        if (reservation != null && reservation.getStatus() == ReservationStatus.CONFIRMED
             && reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1))) {
             throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_D_DAY);
         }
@@ -264,7 +265,7 @@ public class PartyService {
         partyUserRepository.refundReservationFee(party.getId(), fee);
 
         // 예약 취소
-        if(reservation != null) {
+        if (reservation != null) {
             reservation.changeStatus(ReservationStatus.CANCELLED);
         }
 
@@ -331,7 +332,7 @@ public class PartyService {
         Party party = findByIdWithPartyUsers(partyId);
 
         // 파티 모집 중일 때는 예약금 지불 불가
-        if(party.getStatus() == PartyStatus.RECRUITING) {
+        if (party.getStatus() == PartyStatus.RECRUITING) {
             throw new BusinessException(ErrorCode.CANNOT_PAY_FEE_RECRUITING);
         }
 
@@ -409,7 +410,7 @@ public class PartyService {
         // 6. 중복 참여, 이전에 참여 이력 존재 확인
         Optional<PartyUser> existingPartyUser = partyUserRepository.findByUserIdAndPartyId(
             user.getId(), party.getId());
-        if(existingPartyUser.isPresent()) {
+        if (existingPartyUser.isPresent()) {
             throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
         }
     }

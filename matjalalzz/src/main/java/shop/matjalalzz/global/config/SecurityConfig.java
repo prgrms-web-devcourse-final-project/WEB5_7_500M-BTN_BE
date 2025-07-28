@@ -43,6 +43,7 @@ public class SecurityConfig {
         return http
             .cors(cors -> cors.configurationSource(
                 request -> {
+                    List<String> allowedOriginList = List.of(allowedOrigin.split(","));
                     CorsConfiguration configuration = new CorsConfiguration();
 
 //                    configuration.setAllowedOrigins(List.of(allowedOrigin));
@@ -57,7 +58,8 @@ public class SecurityConfig {
 
                     configuration.addAllowedHeader("*");
                     configuration.addAllowedMethod("*");
-                    configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
+//                    configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
+                    configuration.setAllowedOrigins(allowedOriginList);
                     configuration.setAllowCredentials(true);
                     configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
                     configuration.setMaxAge(3600L);

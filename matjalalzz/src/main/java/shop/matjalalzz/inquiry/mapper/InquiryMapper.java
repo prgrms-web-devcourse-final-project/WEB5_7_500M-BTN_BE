@@ -14,7 +14,6 @@ import shop.matjalalzz.user.entity.User;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InquiryMapper {
-
     public static Inquiry toInquiry(InquiryCreateRequest inquiryCreateRequest, User user) {
         return Inquiry.builder()
             .title(inquiryCreateRequest.title())
