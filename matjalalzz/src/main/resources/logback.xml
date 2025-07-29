@@ -2,7 +2,7 @@
 <configuration>
 
   <!-- 로그 경로 -->
-  <property name="LOG_PATH" value="./logs" />
+  <property name="LOG_PATH" value="/app/logs"/>
   <property name="INFO_PATH" value="${LOG_PATH}/info" />
   <property name="ERROR_PATH" value="${LOG_PATH}/error" />
 
