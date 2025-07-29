@@ -1,27 +1,23 @@
 package shop.matjalalzz.global.security.jwt.api;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
 
@@ -32,9 +28,6 @@ import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
 public class TokenController {
 
     private final TokenService tokenService;
-
-    @Value("${custom.jwt.redirect-login-success}")
-    private String redirectSuccess;
 
     @Operation(
         summary = "액세스 토큰 재발급",
@@ -55,24 +48,10 @@ public class TokenController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> logout(
-        @Parameter(hidden = true)
-        @CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
-        tokenService.logout(refreshToken, response);
+        @AuthenticationPrincipal PrincipalUser userInfo, HttpServletResponse response) {
+        tokenService.logout(userInfo.getId(), response);
 
         return BaseResponse.ok(BaseStatus.OK);
-    }
-
-    @Hidden
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/set-cookie")
-    public ResponseEntity<Void> setCookieAndRedirect(
-        @RequestParam("accessToken") String accessToken,
-        HttpServletResponse response) {
-
-        tokenService.setCookie(accessToken, response);
-        HttpHeaders h = new HttpHeaders();
-        h.setLocation(URI.create(redirectSuccess + "?accessToken=" + accessToken));
-        return new ResponseEntity<>(h, HttpStatus.FOUND);
     }
 
     @Operation(

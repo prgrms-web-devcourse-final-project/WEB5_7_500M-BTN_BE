@@ -5,6 +5,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -41,6 +42,7 @@ import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShopService {
@@ -59,14 +61,14 @@ public class ShopService {
 
     // 관리자가 등록을 원하는 상점들 리스트를 전부 가져옴
     @Transactional(readOnly = true)
-    public GetAllPendingShopListResponse adminGetAllPendingShop(){
+    public GetAllPendingShopListResponse adminGetAllPendingShop() {
         List<Shop> shopList = shopRepository.findByApprove(Approve.PENDING);
         return ShopMapper.getAllPendingShopResponse(shopList);
 
     }
 
     @Transactional
-    public void approve(long shopId, ApproveRequest approveRequest ) {
+    public void approve(long shopId, ApproveRequest approveRequest) {
         Approve approve = approveRequest.approve();
 
         Shop shop = shopFind(shopId);
@@ -79,7 +81,6 @@ public class ShopService {
         }
 
     }
-
 
 
     // 관리자가 상점에 대한 상세 정보를 보는 용도 (상점에 상태와 관계 없이 다 가져옴)
@@ -103,7 +104,8 @@ public class ShopService {
         Shop newShop = ShopMapper.createToShop(shopCreateRequest, user);
 
         // 점주가 한명이며 한명이 식당 여러개 등록이 가능해도 식당 주소는 다 달라야 하며 or 사업자 등록번호가 이미 있으면 에러
-        shopRepository.findByBusinessCodeOrRoadAddressAndDetailAddress(newShop.getBusinessCode(), newShop.getRoadAddress(), newShop.getDetailAddress())
+        shopRepository.findByBusinessCodeOrRoadAddressAndDetailAddress(newShop.getBusinessCode(),
+                newShop.getRoadAddress(), newShop.getDetailAddress())
             .ifPresent(shop -> {
                 throw new BusinessException(ErrorCode.DUPLICATE_SHOP);
             });
@@ -111,7 +113,8 @@ public class ShopService {
         shopRepository.save(newShop);
 
         // 프리사이드 url 링크 반환
-        return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(), newShop.getId());
+        return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(),
+            newShop.getId());
 
     }
 
@@ -119,9 +122,11 @@ public class ShopService {
     public ShopDetailResponse getShop(Long shopId) {
 
         // 등록 된 상태인 식당들만 가져와서 보여줌
-        Shop shop = shopRepository.findByIdAndApprove(shopId, Approve.APPROVED).orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
+        Shop shop = shopRepository.findByIdAndApprove(shopId, Approve.APPROVED)
+            .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
-        List<String> imageUrllList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
+        List<String> imageUrllList = Optional.ofNullable(
+                imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -135,21 +140,22 @@ public class ShopService {
 
     // 사장 한명이 가진 식당 리스트들 조회
     @Transactional(readOnly = true)
-    public OwnerShopsList getOwnerShopList (Long userId){
+    public OwnerShopsList getOwnerShopList(Long userId) {
 
         // 승인 된 자신의 식당들 리스트를 가져옴
         List<Shop> shopList = shopRepository.findByUserId(userId);
 
         List<OwnerShopItem> shops = shopList.stream().map(shop ->
             {
-                String image = BASE_URL + imageRepository.findByShopId(shop.getId()).stream().findFirst().get().getS3Key();
+                String image =
+                    BASE_URL + imageRepository.findByShopId(shop.getId()).stream().findFirst().get()
+                        .getS3Key();
                 return ShopMapper.shopToOwnerShopItem(shop, image);
             }
         ).toList();
 
         return new OwnerShopsList(shops);
     }
-
 
 
     @Transactional(readOnly = true)
@@ -160,7 +166,8 @@ public class ShopService {
         Shop shop = ownerShopFind(shopId, userId);
 
         //사진 리스트로 가져왔을 때 없어도 에러는 반환 X
-        List<String> imageUrlList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
+        List<String> imageUrlList = Optional.ofNullable(
+                imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -175,7 +182,8 @@ public class ShopService {
 
     // shop 수정
     @Transactional
-    public PreSignedUrlListResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
+    public PreSignedUrlListResponse editShop(Long shopId, long userId,
+        ShopUpdateRequest updateRequest) {
 
         User user = userFind(userId);
 
@@ -195,38 +203,45 @@ public class ShopService {
             imageRepository.deleteAll(imagesDB);
         }
 
-
         //새롭게 프리사이드 URL 발급
         return preSignedProvider.createShopUploadUrls(updateRequest.imageCount(), getShop.getId());
     }
 
     public Shop shopFind(Long shopId) {
-        return shopRepository.findById(shopId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
-    }
-    public User userFind(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-    }
-    // 승인 된 식당만 조회, 수정 가능
-    public Shop ownerShopFind(Long shopId, Long userId) {
-        return shopRepository.findByIdAndUserId(shopId, userId ).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
+        return shopRepository.findById(shopId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
     }
 
+    public User userFind(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    // 승인 된 식당만 조회, 수정 가능
+    public Shop ownerShopFind(Long shopId, Long userId) {
+        return shopRepository.findByIdAndUserId(shopId, userId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_SHOP));
+    }
 
 
     @Transactional(readOnly = true)
-    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Long cursor, int size) {
+    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Long cursor,
+        int size) {
+        log.info("상점 목록 조회");
         double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 좌표값은 종로
         double longitude = param.longitude() != null ? param.longitude() : 126.9794;
         double radius = param.radius() != null ? param.radius() : 3000.0;  // 3km
-        List<FoodCategory> foodCategories = (param.category() != null && !param.category().isEmpty()) ? param.category()
-            : List.of(FoodCategory.values());
-
+        List<FoodCategory> foodCategories =
+            (param.category() != null && !param.category().isEmpty()) ? param.category()
+                : List.of(FoodCategory.values());
 
         switch (sort) {
             case "rating" -> {
-                Double ratingCursor = cursor != null ? cursor.doubleValue() : 5.0; //별점이 높은 순으로 가져오니 max
+                Double ratingCursor =
+                    cursor != null ? cursor.doubleValue() : 5.0; //별점이 높은 순으로 가져오니 max
                 Slice<Shop> shopSlice = shopRepository.findByRatingCursorAndApprove(
-                    latitude, longitude, radius, foodCategories, ratingCursor, Approve.APPROVED ,PageRequest.of(0, size)
+                    latitude, longitude, radius, foodCategories, ratingCursor, Approve.APPROVED,
+                    PageRequest.of(0, size)
                 );
 
                 Long nextCursor = null;
@@ -242,13 +257,15 @@ public class ShopService {
 
             case "distance" -> {
                 Slice<Shop> shopSlice = shopRepository.findByDistanceAndApprove(
-                    latitude, longitude, radius, Approve.APPROVED, foodCategories, cursor, PageRequest.of(0, size)
+                    latitude, longitude, radius, Approve.APPROVED, foodCategories, cursor,
+                    PageRequest.of(0, size)
                 );
 
                 Long nextCursor = null;
                 if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
                     Shop last = shopSlice.getContent().getLast();
-                    double lastDistance = calculateDistanceInMeters(latitude, longitude, last.getLatitude(), last.getLongitude());
+                    double lastDistance = calculateDistanceInMeters(latitude, longitude,
+                        last.getLatitude(), last.getLongitude());
                     if (lastDistance < radius) {        //계산 돌려본 결과 좌표값이 radius 값보다 크면 null
                         nextCursor = (long) lastDistance;
                     }
@@ -263,7 +280,6 @@ public class ShopService {
             default -> throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA);
         }
     }
-
 
 
     @Transactional(readOnly = true)
@@ -288,7 +304,7 @@ public class ShopService {
         }
 
         Slice<Shop> result = shopRepository.findCursorListByRating(
-            ratingCursor, query,Approve.APPROVED ,PageRequest.of(0, size));
+            ratingCursor, query, Approve.APPROVED, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
@@ -317,7 +333,7 @@ public class ShopService {
         }
 
         Slice<Shop> result = shopRepository.findCursorListByCreatedAt(
-            timeCursor, query,Approve.APPROVED ,PageRequest.of(0, size));
+            timeCursor, query, Approve.APPROVED, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getCreatedAt());

@@ -35,7 +35,8 @@ public class TokenService {
         User found = userRepository.findByEmail(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        String accessToken = tokenProvider.issueAccessToken(found.getId(), found.getRole(), found.getEmail());
+        String accessToken = tokenProvider.issueAccessToken(found.getId(), found.getRole(),
+            found.getEmail());
 
         RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
             .orElseGet(() -> refreshTokenRepository.save(
@@ -64,21 +65,15 @@ public class TokenService {
         User user = token.getUser();
 
         // 새로운 액세스 토큰 발급
-        String newAccessToken = tokenProvider.issueAccessToken(user.getId(), user.getRole(), user.getEmail());
+        String newAccessToken = tokenProvider.issueAccessToken(user.getId(), user.getRole(),
+            user.getEmail());
         return new AccessTokenResponseDto(newAccessToken);
     }
 
     @Transactional
-    public void logout(String refreshToken, HttpServletResponse response) {
-        if (!tokenProvider.validate(refreshToken)) {
-            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
-        }
+    public void logout(long userId, HttpServletResponse response) {
+        refreshTokenRepository.findById(userId).ifPresent(refreshTokenRepository::delete);
 
-        Long userId = tokenProvider.parseRefreshToken(refreshToken);
-        RefreshToken token = refreshTokenRepository.findByUserIdWithUser(userId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
-
-        refreshTokenRepository.delete(token);
         CookieUtils.deleteRefreshTokenCookie(response);
     }
 
