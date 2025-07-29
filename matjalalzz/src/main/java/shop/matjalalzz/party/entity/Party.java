@@ -120,15 +120,10 @@ public class Party extends BaseEntity {
 
     public void increaseCurrentCount() {
         this.currentCount += 1;
-
-        if (this.currentCount >= maxCount) {
-            this.status = PartyStatus.COMPLETED;
-        }
     }
 
     public void decreaseCurrentCount() {
         this.currentCount -= 1;
-        this.status = PartyStatus.RECRUITING;
     }
 
     public boolean isRecruiting() {

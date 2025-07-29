@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
+import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
 
@@ -55,9 +56,8 @@ public class TokenController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> logout(
-        @Parameter(hidden = true)
-        @CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response) {
-        tokenService.logout(refreshToken, response);
+        @AuthenticationPrincipal PrincipalUser userInfo, HttpServletResponse response) {
+        tokenService.logout(userInfo.getId(), response);
 
         return BaseResponse.ok(BaseStatus.OK);
     }
