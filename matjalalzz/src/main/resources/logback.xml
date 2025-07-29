@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- 로그 경로 -->
+  <property name="LOG_PATH" value="/app/logs"/>
+  <property name="INFO_PATH" value="${LOG_PATH}/info" />
+  <property name="ERROR_PATH" value="${LOG_PATH}/error" />
+
+  <!-- =============== 콘솔 =============== -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- =============== INFO 전용 JSON 로그 파일 =============== -->
+  <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${INFO_PATH}/application-info.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${INFO_PATH}/application-info-%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>7</maxHistory> <!--  7일간 보관 -->
+    </rollingPolicy>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>INFO</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+    <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+      <providers>
+        <timestamp/>
+        <logLevel/>
+        <threadName/>
+        <loggerName/>
+        <message/>
+        <arguments/>
+        <stackTrace/>
+          <mdc>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+          </mdc>
+      </providers>
+    </encoder>
+  </appender>
+
+  <!-- =============== ERROR 전용 JSON 로그 파일 =============== -->
+  <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${ERROR_PATH}/application-error.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${ERROR_PATH}/application-error-%d{yyyy-MM-dd}.log</fileNamePattern>
+      <maxHistory>7</maxHistory> <!-- 7일간 보관  -->
+    </rollingPolicy>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>ERROR</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
+    <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+      <providers>
+        <timestamp/>
+        <logLevel/>
+        <threadName/>
+        <loggerName/>
+        <message/>
+        <arguments/>
+        <stackTrace/>
+        <mdc>
+          <includeMdcKeyName>traceId</includeMdcKeyName>
+        </mdc>
+      </providers>
+    </encoder>
+  </appender>
+
+  <!-- =============== 루트 로거 =============== -->
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="INFO_FILE"/>
+    <appender-ref ref="ERROR_FILE"/>
+  </root>
+
+</configuration>

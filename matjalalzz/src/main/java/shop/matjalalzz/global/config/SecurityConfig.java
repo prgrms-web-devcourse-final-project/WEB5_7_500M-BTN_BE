@@ -43,6 +43,7 @@ public class SecurityConfig {
         return http
             .cors(cors -> cors.configurationSource(
                 request -> {
+                    List<String> allowedOriginList = List.of(allowedOrigin.split(","));
                     CorsConfiguration configuration = new CorsConfiguration();
 
 //                    configuration.setAllowedOrigins(List.of(allowedOrigin));
@@ -58,7 +59,7 @@ public class SecurityConfig {
                     configuration.addAllowedHeader("*");
                     configuration.addAllowedMethod("*");
 //                    configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
-                    configuration.setAllowedOrigins(List.of(allowedOrigin));
+                    configuration.setAllowedOrigins(allowedOriginList);
                     configuration.setAllowCredentials(true);
                     configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
                     configuration.setMaxAge(3600L);
@@ -101,6 +102,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/parties/{partyId}/comments").permitAll()
                     .requestMatchers(HttpMethod.GET, "/shops/{shopId}/reviews").permitAll()
                     .requestMatchers("/ws/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/users/set-cookie").permitAll()
 
                     .requestMatchers("/users/delete", "/users/logout").authenticated()
 
