@@ -8,6 +8,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.USER_NOT_FOUND;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -132,7 +133,9 @@ public class UserService {
     public void updateMyInfo(Long userId, MyInfoUpdateRequest request) {
         User user = findUserByIdOrThrow(userId);
 
-        if (!request.profileKey().equals(user.getProfileKey())) {
+        String key = StringUtils.removeStart(request.profileKey(), baseUrl);
+
+        if (!key.equals(user.getProfileKey())) {
             preSignedProvider.deleteObject(user.getProfileKey());
         }
 

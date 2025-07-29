@@ -159,8 +159,8 @@ public class PartyService {
     )
     @Transactional
     public void quitParty(Long partyId, long userId) {
-        Party party = findByIdWithReservationAndPartyUsers(partyId);
-        User user = userService.getUserById(userId); //검증용
+        Party party = findByIdWithPartyUsers(partyId);
+        User user = userService.getUserById(userId);
         PartyUser partyUser = findPartyUser(userId, party);
 
         // 호스트인 경우 파티 탈퇴 불가능
@@ -175,10 +175,9 @@ public class PartyService {
             throw new BusinessException(ErrorCode.CANNOT_QUIT_PARTY_STATUS);
         }
 
-        User host = findPartyHost(party);
-
-        // 파티 나갔을 때, 최소 인원보다 적을 시 파티 제거
-        if (party.getMinCount() > party.getCurrentCount() - 1) {
+        // 파티 모집완료 상태에서 나갔을 때, 최소 인원보다 적을 시 파티 제거
+        if (party.getStatus() == PartyStatus.COMPLETED
+            && party.getMinCount() > party.getCurrentCount() - 1) {
             breakParty(party);
             return;
         }
@@ -186,6 +185,7 @@ public class PartyService {
         if (partyUser.isPaymentCompleted()) {
             int fee = party.getShop().getReservationFee();
             party.decreaseTotalReservationFee(fee);
+            user.increasePoint(fee);
 
             if (reservation != null) {
                 reservation.decreaseHeadCount();
@@ -206,24 +206,24 @@ public class PartyService {
         )
     )
     @Transactional
-    public void kickout(Long partyId, long userId, long kickoutUserId) {
+    public void kickout(Long partyId, long hostUserId, long kickoutUserId) {
         // 본인 강퇴 불가
-        if (userId == kickoutUserId) {
+        if (hostUserId == kickoutUserId) {
             throw new BusinessException(ErrorCode.CANNOT_KICK_OUT_SELF);
         }
 
         Party party = findById(partyId);
-        PartyUser partyUser = findPartyUser(userId, party);
+        PartyUser host = findPartyUser(hostUserId, party);
 
         // 파티장만 강퇴 가능
-        if (!partyUser.isHost()) {
+        if (!host.isHost()) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS_KICK_OUT_PARTY_USER);
         }
 
-        PartyUser kickoutPartyUser = findPartyUser(kickoutUserId, party);
+        PartyUser kickoutUser = findPartyUser(kickoutUserId, party);
 
         // 예약금 결제 완료한 팀원은 강퇴 불가
-        if (kickoutPartyUser.isPaymentCompleted()) {
+        if (kickoutUser.isPaymentCompleted()) {
             throw new BusinessException(ErrorCode.CANNOT_KICK_OUT_PAYMENT_COMPLETE);
         }
 
@@ -234,8 +234,8 @@ public class PartyService {
             return;
         }
 
-        partyUser.delete();
-        partyChatService.kickUser(partyUser.getUser(), party);
+        kickoutUser.delete();
+        partyChatService.kickUser(kickoutUser.getUser(), party);
     }
 
     @Retryable(
@@ -429,7 +429,7 @@ public class PartyService {
 
     private Party findByIdWithReservationAndPartyUsers(Long partyId) {
         return partyRepository.findPartyByIdWithReservationAndPartyUsers(partyId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private Party findByIdWithPartyUsers(Long partyId) {
