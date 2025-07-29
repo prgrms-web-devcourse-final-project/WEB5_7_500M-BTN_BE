@@ -62,19 +62,6 @@ public class TokenController {
         return BaseResponse.ok(BaseStatus.OK);
     }
 
-    @Hidden
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/set-cookie")
-    public ResponseEntity<Void> setCookieAndRedirect(
-        @RequestParam("accessToken") String accessToken,
-        HttpServletResponse response) {
-
-        tokenService.setCookie(accessToken, response);
-        HttpHeaders h = new HttpHeaders();
-        h.setLocation(URI.create(redirectSuccess + "?accessToken=" + accessToken));
-        return new ResponseEntity<>(h, HttpStatus.FOUND);
-    }
-
     @Operation(
         summary = "OAuth2 로그인 진입점 URL 안내",
         description = "프론트는 이 URL로 리디렉션하여 OAuth2 로그인을 시작합니다. 예: /oauth2/authorization/google"

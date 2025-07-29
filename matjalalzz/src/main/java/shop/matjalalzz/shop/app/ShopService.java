@@ -120,6 +120,7 @@ public class ShopService {
 
     @Transactional(readOnly = true)
     public ShopDetailResponse getShop(Long shopId) {
+        log.info("상점 상세 조회 shopId = {}", shopId);
 
         // 등록 된 상태인 식당들만 가져와서 보여줌
         Shop shop = shopRepository.findByIdAndApprove(shopId, Approve.APPROVED)

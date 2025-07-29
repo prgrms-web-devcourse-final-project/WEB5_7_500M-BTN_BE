@@ -86,6 +86,8 @@ public class UserService {
             throw new BusinessException(EMAIL_ALREADY_EXISTS);  //409
         }
 
+        log.info("회원가입 성공");
+
         String encodedPassword = passwordEncoder.encode(dto.password());
 
         User user = UserMapper.toUser(dto, encodedPassword, Role.USER);
@@ -96,6 +98,8 @@ public class UserService {
     @Transactional
     public void oauthSignup(long userId, OAuthSignUpRequest request) {
         User user = findUserByIdOrThrow(userId);
+
+        log.info("회원가입 성공");
 
         user.oauthSignup(request);
     }

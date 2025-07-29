@@ -31,6 +31,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
         Authentication authentication) throws IOException {
+
         PrincipalUser userInfo = (PrincipalUser) authentication.getPrincipal();
 
         LoginTokenResponseDto dto = tokenService.oauthLogin(userInfo.getUsername());
