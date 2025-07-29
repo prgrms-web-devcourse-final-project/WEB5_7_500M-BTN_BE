@@ -3,7 +3,7 @@ services:
     image: ${DOCKER_USERNAME}/spring-main:latest
     container_name: 500m_btn_be
     volumes:
-      - ./logs:/app/logs
+      - ./logs:./logs
     environment:
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
