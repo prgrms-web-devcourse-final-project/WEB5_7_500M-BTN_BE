@@ -427,11 +427,6 @@ public class PartyService {
         }
     }
 
-    private Party findByIdWithReservationAndPartyUsers(Long partyId) {
-        return partyRepository.findPartyByIdWithReservationAndPartyUsers(partyId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
-    }
-
     private Party findByIdWithPartyUsers(Long partyId) {
         return partyRepository.findPartyByIdWithPartyUsers(partyId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));

@@ -63,6 +63,8 @@ public class PaymentService {
         order.updateStatus(OrderStatus.DONE); //주문 완료 처리
         log.info("결제 금액 = {}", tossResponse.totalAmount());
 
+        log.info("결제 처리 - userId={}, orderId={}",userId, order.getId());
+
         return new PaymentSuccessResponse(tossResponse.orderId(), tossResponse.totalAmount());
 
     }
