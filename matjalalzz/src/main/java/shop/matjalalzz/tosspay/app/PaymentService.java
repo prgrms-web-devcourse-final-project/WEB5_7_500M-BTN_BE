@@ -65,6 +65,8 @@ public class PaymentService {
 
         log.info("결제 처리 - userId={}, orderId={}",userId, order.getId());
 
+        log.info("결제 처리 - userId={}, orderId={}",userId, order.getId());
+
         return new PaymentSuccessResponse(tossResponse.orderId(), tossResponse.totalAmount());
 
     }
