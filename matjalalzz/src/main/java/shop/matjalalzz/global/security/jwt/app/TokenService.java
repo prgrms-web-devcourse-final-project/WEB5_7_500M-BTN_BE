@@ -10,6 +10,7 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
+import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
@@ -30,11 +31,25 @@ public class TokenService {
     private int refreshTokenValidityTime;
 
     @Transactional
-    public String oauthLogin(String email) {
+    public LoginTokenResponseDto oauthLogin(String email) {
         User found = userRepository.findByEmail(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        return tokenProvider.issueAccessToken(found.getId(), found.getRole(), found.getEmail());
+        String accessToken = tokenProvider.issueAccessToken(found.getId(), found.getRole(), found.getEmail());
+
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
+            .orElseGet(() -> refreshTokenRepository.save(
+                TokenMapper.toRefreshToken(
+                    tokenProvider.issueRefreshToken(found.getId()), found
+                )
+            ));
+
+        if (!tokenProvider.validate(refreshToken.getRefreshToken())) {
+            String reissueRefreshToken = tokenProvider.issueRefreshToken(found.getId());
+            refreshToken.updateRefreshToken(reissueRefreshToken);
+        }
+
+        return TokenMapper.toLoginTokenResponseDto(accessToken, refreshToken.getRefreshToken());
     }
 
     @Transactional(readOnly = true)
