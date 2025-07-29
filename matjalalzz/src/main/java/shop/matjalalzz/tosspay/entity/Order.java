@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.user.entity.User;
 
@@ -21,6 +22,7 @@ import shop.matjalalzz.user.entity.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "orders")
+@SQLRestriction("deleted = false")
 public class Order extends BaseEntity {
 
     @Id
