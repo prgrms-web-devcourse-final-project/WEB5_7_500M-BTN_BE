@@ -76,6 +76,9 @@ public enum ErrorCode {
     NOT_MATCH_ORDER(HttpStatus.BAD_REQUEST, "주문 정보가 일치하지 않습니다."),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "이미 주문이 완료되었거나 취소된 건입니다."),
 
+    //502
+    TOSS_FEIGN_FAIL(HttpStatus.BAD_GATEWAY, "토스 서버와의 통신에 실패하였습니다."),
+
     /**
      * party
      */
@@ -121,7 +124,6 @@ public enum ErrorCode {
      */
     // 여러 이미지 저장 시 하나의 이미지라도 저장에 실패하면 안됨
     IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, "이미지 저장에 실패하였습니다."),
-
 
     /**
      * image
