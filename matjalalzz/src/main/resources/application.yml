@@ -76,6 +76,7 @@ spring:
 custom:
   cors:
     allowed-origin: ${FRONT_BASE_URL}
+    local-allowed-origin: ${LOCAL_FRONT_BASE_URL}
     backend-origin: ${BACK_BASE_URL}
   jwt:
     token-validity-time: # 초 단위
