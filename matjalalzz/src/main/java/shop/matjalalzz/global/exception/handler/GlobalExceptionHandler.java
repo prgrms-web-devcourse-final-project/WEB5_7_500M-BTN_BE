@@ -1,7 +1,9 @@
 package shop.matjalalzz.global.exception.handler;
 
 
+import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -14,6 +16,7 @@ import shop.matjalalzz.global.exception.OAuth2Exception;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.exception.dto.ErrorResponse;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -84,6 +87,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleOptimisticLockException(
         ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
         ErrorCode code = ErrorCode.LOCK_FAILURE;
+
+        String path = request.getMethod() + " " + request.getRequestURI();
+
+        return ResponseEntity.status(code.getStatus()).body(ErrorResponse.builder()
+            .status(code.getStatus().value())
+            .code(code.name())
+            .message(code.getMessage())
+            .path(path)
+            .build());
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse> handleFeignException(
+        FeignException e, HttpServletRequest request
+    ) {
+        log.error("토스 서버와의 통신에 실패하였습니다.");
+        ErrorCode code = ErrorCode.TOSS_FEIGN_FAIL;
 
         String path = request.getMethod() + " " + request.getRequestURI();
 
