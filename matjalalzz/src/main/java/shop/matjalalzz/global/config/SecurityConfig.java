@@ -83,6 +83,8 @@ public class SecurityConfig {
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     .requestMatchers("/shops/presigned-urls").hasAnyRole("ADMIN", "OWNER", "USER")
                     .requestMatchers(HttpMethod.GET,"/owner/shops").hasAnyRole("ADMIN", "OWNER", "USER")
+                    .requestMatchers(HttpMethod.GET,"/owner/shops/{shopId}").hasAnyRole("ADMIN", "OWNER", "USER")
+                    .requestMatchers(HttpMethod.PUT,"/owner/shops/{shopId}").hasAnyRole("ADMIN", "OWNER", "USER")
                     .requestMatchers(HttpMethod.GET, "/reservations").hasRole("OWNER")
                     .requestMatchers(HttpMethod.PATCH, "/reservations/{reservationId}/**")
                     .hasRole("OWNER")
