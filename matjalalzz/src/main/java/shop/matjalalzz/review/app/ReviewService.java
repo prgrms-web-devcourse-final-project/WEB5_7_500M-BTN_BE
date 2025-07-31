@@ -2,6 +2,7 @@ package shop.matjalalzz.review.app;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,9 @@ public class ReviewService {
     private final PartyService partyService;
     private final ShopService shopService;
     private final PreSignedProvider preSignedProvider;
+
+    @Value("${aws.credentials.AWS_BASE_URL}")
+    private String BASE_URL;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
@@ -82,7 +86,7 @@ public class ReviewService {
         if (comments.hasNext()) {
             nextCursor = comments.getContent().getLast().getId();
         }
-        return ReviewMapper.toReviewPageResponse(nextCursor, comments.getContent());
+        return ReviewMapper.toReviewPageResponse(nextCursor, comments.getContent(), BASE_URL);
     }
 
     @Transactional(readOnly = true)

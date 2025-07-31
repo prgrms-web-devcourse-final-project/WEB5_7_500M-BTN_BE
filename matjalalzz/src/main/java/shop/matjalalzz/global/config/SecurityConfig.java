@@ -37,29 +37,21 @@ public class SecurityConfig {
     @Value("${custom.cors.allowed-origin}")
     private String allowedOrigin;
 
+    @Value("${custom.cors.local-allowed-origin}")
+    private String localAllowedOrigin;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
             .cors(cors -> cors.configurationSource(
                 request -> {
-                    List<String> allowedOriginList = List.of(allowedOrigin.split(","));
                     CorsConfiguration configuration = new CorsConfiguration();
-
-//                    configuration.setAllowedOrigins(List.of(allowedOrigin));
-//                    configuration.setAllowedOriginPatterns(List.of("*"));
-//                    configuration.setAllowedMethods(
-//                        List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-//                    configuration.setAllowCredentials(true);
-//                    configuration.setAllowedHeaders(List.of("*"));
-//                    configuration.setMaxAge(3600L);
-//                    configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
-//                    return configuration;
 
                     configuration.addAllowedHeader("*");
                     configuration.addAllowedMethod("*");
 //                    configuration.addAllowedOriginPattern("*"); // 모든 Origin 허용
-                    configuration.setAllowedOrigins(allowedOriginList);
+                    configuration.setAllowedOrigins(List.of(allowedOrigin, localAllowedOrigin));
                     configuration.setAllowCredentials(true);
                     configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
                     configuration.setMaxAge(3600L);
@@ -90,6 +82,7 @@ public class SecurityConfig {
                         "/parties/{partyId}/members").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     .requestMatchers("/shops/presigned-urls").hasAnyRole("ADMIN", "OWNER", "USER")
+                    .requestMatchers(HttpMethod.GET,"/owner/shops").hasAnyRole("ADMIN", "OWNER", "USER")
                     .requestMatchers(HttpMethod.GET, "/reservations").hasRole("OWNER")
                     .requestMatchers(HttpMethod.PATCH, "/reservations/{reservationId}/**")
                     .hasRole("OWNER")

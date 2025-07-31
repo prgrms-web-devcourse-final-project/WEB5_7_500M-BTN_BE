@@ -4,7 +4,6 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Slice;
-import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
@@ -18,21 +17,22 @@ import shop.matjalalzz.user.entity.User;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReviewMapper {
 
-    public static ReviewResponse toReviewResponse(Review review) {
+    public static ReviewResponse toReviewResponse(Review review, String baseURL) {
         return ReviewResponse.builder()
             .reviewId(review.getId())
             .userNickname(review.getWriter().getNickname())
             .rating(review.getRating())
             .content(review.getContent())
             .createdAt(review.getCreatedAt())
-            .images(review.getImages().stream().map(Image::getS3Key).toList())
+            .images(review.getImages().stream().map(i -> baseURL + i.getS3Key()).toList())
             .build();
     }
 
-    public static ReviewPageResponse toReviewPageResponse(Long nextCursor, List<Review> reviews) {
+    public static ReviewPageResponse toReviewPageResponse(Long nextCursor, List<Review> reviews,
+        String baseURL) {
         return ReviewPageResponse.builder()
             .nextCursor(nextCursor)
-            .content(reviews.stream().map(ReviewMapper::toReviewResponse).toList())
+            .content(reviews.stream().map(r -> toReviewResponse(r, baseURL)).toList())
             .build();
     }
 
