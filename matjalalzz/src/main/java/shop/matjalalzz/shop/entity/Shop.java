@@ -119,6 +119,7 @@ public class Shop extends BaseEntity {
         this.closeTime = shopUpdateVo.closeTime();
         this.detailAddress = shopUpdateVo.detailAddress();
         this.user = user;
+        this.reservationFee = shopUpdateVo.reservationFee();
     }
 
     public void updateRating(double rating) {
