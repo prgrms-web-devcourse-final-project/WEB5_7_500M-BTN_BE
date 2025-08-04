@@ -100,6 +100,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/users/set-cookie").permitAll()
 
                     .requestMatchers("/users/delete", "/users/logout").authenticated()
+                    .requestMatchers(HttpMethod.POST, "/users/signup/oauth").hasRole("TMP")
 
                     .anyRequest().hasAnyRole("USER", "ADMIN", "OWNER")
                 //나머지 요청은 USER 또는 ADMiN 권한을 가져야 접근 가능
