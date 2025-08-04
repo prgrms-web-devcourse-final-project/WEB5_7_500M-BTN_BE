@@ -40,6 +40,9 @@ class ReservationCreateReservationTest {
     ReservationService reservationService;
 
     @Autowired
+    ReservationFacade reservationFacade;
+
+    @Autowired
     UserRepository userRepository;
 
     @Autowired
@@ -66,7 +69,7 @@ class ReservationCreateReservationTest {
                 2, 10000);
 
             // when
-            CreateReservationResponse response = reservationService.createReservation(
+            CreateReservationResponse response = reservationFacade.createReservation(
                 user.getId(), shop.getId(), request
             );
 
@@ -88,7 +91,7 @@ class ReservationCreateReservationTest {
 
             // when & then
             assertThatThrownBy(
-                () -> reservationService.createReservation(user.getId(), shop.getId(), request))
+                () -> reservationFacade.createReservation(user.getId(), shop.getId(), request))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.LACK_OF_BALANCE);
         }
@@ -113,8 +116,8 @@ class ReservationCreateReservationTest {
             CreateReservationRequest request = new CreateReservationRequest(date, time, 2, 10000);
 
             // when
-            reservationService.createReservation(user1.getId(), shop.getId(), request);
-            reservationService.createReservation(user2.getId(), shop.getId(), request);
+            reservationFacade.createReservation(user1.getId(), shop.getId(), request);
+            reservationFacade.createReservation(user2.getId(), shop.getId(), request);
 
             // then
             List<Reservation> all = reservationRepository.findAll();
