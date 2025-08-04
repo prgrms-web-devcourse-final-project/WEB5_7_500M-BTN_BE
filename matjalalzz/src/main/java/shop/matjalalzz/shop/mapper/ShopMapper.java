@@ -37,6 +37,7 @@ public class ShopMapper {
             .openTime(request.openTime())
             .closeTime(request.closeTime())
             .user(user)
+            .reservationFee(request.reservationFee())
             .build();
     }
 
@@ -56,6 +57,7 @@ public class ShopMapper {
             .businessCode(request.businessCode())
             .openTime(request.openTime())
             .closeTime(request.closeTime())
+            .reservationFee(request.reservationFee())
             .build();
     }
 

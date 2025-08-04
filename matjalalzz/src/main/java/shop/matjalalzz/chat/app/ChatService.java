@@ -63,11 +63,11 @@ public class ChatService {
         if (!partyService.isInParty(partyId, userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
-        return chatMessageRepository.findAllByPartyIdOrderById(partyId,
+        return chatMessageRepository.findAllByPartyIdOrderByIdDesc(partyId,
                 PageRequest.of(0, 30))
             .stream()
             .map(ChatMapper::toChatMessageResponse)
-            .toList();
+            .toList().reversed();
     }
 
 }

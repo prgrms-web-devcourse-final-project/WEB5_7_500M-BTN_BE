@@ -31,7 +31,7 @@ public record ShopUpdateRequest(
     @Schema(description = "음식 카테고리")
     FoodCategory category,
 
-    @Schema(description = "예약 수수료")
+    @Schema(description = "예약금")
     int reservationFee,
 
     @Schema(description = "영업 시작 시간")

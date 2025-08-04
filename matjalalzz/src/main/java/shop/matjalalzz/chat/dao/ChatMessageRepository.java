@@ -11,7 +11,7 @@ import shop.matjalalzz.chat.entity.ChatMessage;
 public interface ChatMessageRepository extends
     JpaRepository<ChatMessage, Long> {
 
-    List<ChatMessage> findAllByPartyIdOrderById(Long partyId, Pageable pageable);
+    List<ChatMessage> findAllByPartyIdOrderByIdDesc(Long partyId, Pageable pageable);
 
     @Query("SELECT c FROM ChatMessage c WHERE c.party.id = :partyId AND (c.id < :cursor OR :cursor IS NULL ) ORDER BY c.id DESC")
     Slice<ChatMessage> findByPartyIdAndCursor(@Param("partyId") Long partyId,
