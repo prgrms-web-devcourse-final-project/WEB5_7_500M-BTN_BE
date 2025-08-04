@@ -24,7 +24,6 @@ import shop.matjalalzz.user.entity.enums.Role;
 @Entity
 @Getter
 @Table(name = "`user`")
-@SQLRestriction("deleted = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
@@ -101,6 +100,7 @@ public class User extends BaseEntity {
         this.name = dto.name();
         this.age = dto.age();
         this.gender = dto.gender();
+        this.role = Role.USER;
     }
 
     public void update(MyInfoUpdateRequest dto) {
