@@ -2,8 +2,10 @@ package shop.matjalalzz.shop.app;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -259,7 +261,7 @@ public class ShopService {
                     item.distance() //마지막 거리 차이값을 cursor 용도로 쓰기 위해
                 );
             }
-        ).toList();
+        ).collect(Collectors.toCollection(ArrayList::new));
 
         boolean next = shopsItemStream.size() > size;
         ShopsItem last = null;

@@ -38,3 +38,6 @@ out/
 .env
 data.sql
 logs
+
+/build/generated/querydsl/
+**/build/generated/querydsl/
