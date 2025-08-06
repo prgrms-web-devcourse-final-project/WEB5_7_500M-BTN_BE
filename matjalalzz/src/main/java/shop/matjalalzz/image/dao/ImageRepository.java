@@ -19,6 +19,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     List<Image> findByShopId(Long id);
 
+    Optional<Image> findFirstByShopId(Long id);
+
     void deleteByS3Key(String s3Key);
 
     Optional<Image> findByShopIdAndImageIndex(Long shopId, long imageIndex);

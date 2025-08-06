@@ -82,10 +82,9 @@ public class GlobalExceptionHandler {
             .path(path)
             .build());
     }
-
-    @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<ErrorResponse> handleOptimisticLockException(
-        ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
+    //@ExceptionHandler(DataAccessException.class)
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLockException(ObjectOptimisticLockingFailureException e, HttpServletRequest request) {
         ErrorCode code = ErrorCode.LOCK_FAILURE;
 
         String path = request.getMethod() + " " + request.getRequestURI();
@@ -99,9 +98,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(FeignException.class)
-    public ResponseEntity<ErrorResponse> handleFeignException(
-        FeignException e, HttpServletRequest request
-    ) {
+    public ResponseEntity<ErrorResponse> handleFeignException(FeignException e, HttpServletRequest request) {
         log.error("토스 서버와의 통신에 실패하였습니다.");
         ErrorCode code = ErrorCode.TOSS_FEIGN_FAIL;
 

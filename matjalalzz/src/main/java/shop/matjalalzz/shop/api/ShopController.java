@@ -144,7 +144,7 @@ public class ShopController {
     public BaseResponse<ShopsResponse> getShops(
         @ParameterObject ShopLocationSearchParam param,
         @RequestParam(defaultValue = "distance") String sort, //정렬 기준(근처순, 평점순) (근처순이 기본(distance))
-        @RequestParam(required = false) Long cursor,
+        @RequestParam(required = false) Double cursor,
         @RequestParam(defaultValue = "10") int size) {
 
         ShopsResponse shops = shopService.getShops(param, sort, cursor, size);

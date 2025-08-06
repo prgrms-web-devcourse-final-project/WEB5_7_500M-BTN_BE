@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.dao.ReviewRepository;
+import shop.matjalalzz.shop.dao.ShopQueryDslRepository;
 import shop.matjalalzz.shop.dao.ShopRepository;
 import shop.matjalalzz.shop.dto.ApproveRequest;
 import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
@@ -52,9 +54,9 @@ public class ShopService {
     private final ShopRepository shopRepository;
     private final ImageRepository imageRepository;
     private final ReviewRepository reviewRepository;
-
     private final PreSignedProvider preSignedProvider;
     private final UserRepository userRepository;
+    private final ShopQueryDslRepository shopQueryDslRepository;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -126,7 +128,7 @@ public class ShopService {
             .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
         log.info("상점 상세 조회 shopId = {}, shopName = {}", shopId, shop.getShopName());
-        
+
         List<String> imageUrllList = Optional.ofNullable(
                 imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
@@ -184,7 +186,8 @@ public class ShopService {
 
     // shop 수정
     @Transactional
-    public PreSignedUrlListResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
+    public PreSignedUrlListResponse editShop(Long shopId, long userId,
+        ShopUpdateRequest updateRequest) {
 
         User user = userFind(userId);
 
@@ -226,8 +229,7 @@ public class ShopService {
 
 
     @Transactional(readOnly = true)
-    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Long cursor,
-        int size) {
+    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Double cursor, int size) {
         log.info("상점 목록 조회");
         double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 좌표값은 종로
         double longitude = param.longitude() != null ? param.longitude() : 126.9794;
@@ -236,51 +238,100 @@ public class ShopService {
             (param.category() != null && !param.category().isEmpty()) ? param.category()
                 : List.of(FoodCategory.values());
 
-        switch (sort) {
-            case "rating" -> {
-                Double ratingCursor =
-                    cursor != null ? cursor.doubleValue() : 5.0; //별점이 높은 순으로 가져오니 max
-                Slice<Shop> shopSlice = shopRepository.findByRatingCursorAndApprove(
-                    latitude, longitude, radius, foodCategories, ratingCursor, Approve.APPROVED,
-                    PageRequest.of(0, size)
+        List<ShopsItem> allShopItems = shopQueryDslRepository.findAllShops(latitude, longitude,
+            radius, foodCategories, cursor, size, sort);
+
+        //이미지만 또 따로 필요하므로 재조합을 해줘야 함
+        List<ShopsItem> shopsItemStream = allShopItems.stream().map(item -> {
+                String thumnail = imageRepository.findFirstByShopId(item.shopId()).map(
+                    Image::getS3Key).orElse(null);
+
+                return new ShopsItem(
+                    item.shopId(),
+                    item.shopName(),
+                    item.category(),
+                    item.roadAddress(),
+                    item.detailAddress(),
+                    item.latitude(),
+                    item.longitude(),
+                    item.rating(),
+                    BASE_URL + thumnail,
+                    item.distance() //마지막 거리 차이값을 cursor 용도로 쓰기 위해
                 );
-
-                Long nextCursor = null;
-                if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
-                    nextCursor = shopSlice.getContent().getLast().getRating().longValue();
-                }
-
-                return ShopsResponse.builder()
-                    .nextCursor(nextCursor)
-                    .content(toShopsItems(shopSlice))
-                    .build();
             }
+        ).toList();
 
-            case "distance" -> {
-                Slice<Shop> shopSlice = shopRepository.findByDistanceAndApprove(
-                    latitude, longitude, radius, Approve.APPROVED, foodCategories, cursor,
-                    PageRequest.of(0, size)
-                );
+        boolean next = shopsItemStream.size() > size;
+        ShopsItem last = null;
+        Double nextCursor  = null;
 
-                Long nextCursor = null;
-                if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
-                    Shop last = shopSlice.getContent().getLast();
-                    double lastDistance = calculateDistanceInMeters(latitude, longitude,
-                        last.getLatitude(), last.getLongitude());
-                    if (lastDistance < radius) {        //계산 돌려본 결과 좌표값이 radius 값보다 크면 null
-                        nextCursor = (long) lastDistance;
-                    }
-                }
-
-                return ShopsResponse.builder()
-                    .nextCursor(nextCursor)
-                    .content(toShopsItems(shopSlice))
-                    .build();
-            }
-
-            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA);
+        if (next){
+            last = shopsItemStream.remove(size);  //위에서 size+1로 가져온 값들 중 마지막 값을 가져옴
         }
+
+        if (last != null) {
+            if ("rating".equals(sort)){
+                nextCursor = last.rating();
+            }
+            else {
+                nextCursor =  last.distance();
+            }
+        }
+
+
+        return ShopsResponse.builder()
+            .nextCursor(nextCursor)
+            .content(shopsItemStream)
+            .build();
     }
+
+
+// 기본 JPA 쿼리로 속도 테스트 후 지울 예정
+
+//        switch (sort) {
+//            //별점순
+//            case "rating" -> {
+//                Double ratingCursor = cursor != null ? cursor.doubleValue() : 5.0; //별점이 높은 순으로 가져오니 max
+//                Slice<Shop> shopSlice = shopRepository.findByRatingCursorAndApprove(
+//                    latitude, longitude, radius, foodCategories, ratingCursor, Approve.APPROVED,
+//                    PageRequest.of(0, size)
+//                );
+//
+//                //Long nextCursor = null;
+//                if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
+//                    nextCursor = shopSlice.getContent().getLast().getRating().longValue();
+//                }
+//
+//                return ShopsResponse.builder()
+//                    .nextCursor(nextCursor)
+//                    .content(toShopsItems(shopSlice))
+//                    .build();
+//            }
+//
+//            // 거리순
+//            case "distance" -> {
+//                Slice<Shop> shopSlice = shopRepository.findByDistanceAndApprove(
+//                    latitude, longitude, radius, Approve.APPROVED, foodCategories, cursor, PageRequest.of(0, size)
+//                );
+//
+//                Long nextCursor = null;
+//                if (shopSlice.hasNext() && !shopSlice.isEmpty()) {
+//                    Shop last = shopSlice.getContent().getLast();
+//                    double lastDistance = calculateDistanceInMeters(latitude, longitude, last.getLatitude(), last.getLongitude());
+//                    if (lastDistance < radius) {        //계산 돌려본 결과 좌표값이 radius 값보다 크면 null
+//                        nextCursor = (long) lastDistance;
+//                    }
+//                }
+//
+//                return ShopsResponse.builder()
+//                    .nextCursor(nextCursor)
+//                    .content(toShopsItems(shopSlice))
+//                    .build();
+//            }
+//
+//            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA);
+//        }
+//    }
 
 
     @Transactional(readOnly = true)

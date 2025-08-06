@@ -22,8 +22,6 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
     Optional<Shop> findByBusinessCodeOrRoadAddressAndDetailAddress(String businessCode,
         String roadAddress, String detailAddress);
 
-    List<Shop> findByUserAndApprove(User user, Approve approve);
-
     List<Shop> findByUserId(Long id);
 
     //거리 순
