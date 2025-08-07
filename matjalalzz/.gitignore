@@ -39,7 +39,10 @@ out/
 data.sql
 logs
 
+
+**/build/
+**/build/**
 build/generated/
-/**/build/
 **/build/generated/querydsl/
 **/build/generated/querydsl/**
+
