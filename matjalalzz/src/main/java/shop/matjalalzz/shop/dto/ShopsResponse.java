@@ -5,7 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record ShopsResponse (
-    Double nextCursor,
+    Double distanceOrRating,
+    Long shopId,
     List<ShopsItem> content)
 {}
 

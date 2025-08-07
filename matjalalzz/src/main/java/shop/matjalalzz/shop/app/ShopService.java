@@ -91,12 +91,12 @@ public class ShopService {
     @Transactional(readOnly = true)
     public ShopAdminDetailResponse adminGetShop(long shopId) {
 
-        Shop ownerShop = shopFind(shopId);
-        User owner = ownerShop.getUser();
+        return ShopMapper.shopToShopAdminDetailResponse(shopQueryDslRepository.adminFindShop(shopId), BASE_URL);
 
-        List<String> images = imageRepository.findByShopImage(shopId);
-
-        return ShopMapper.shopToShopAdminDetailResponse(ownerShop, images, owner);
+//        Shop ownerShop = shopFind(shopId);
+//        User owner = ownerShop.getUser();
+//        List<String> images = imageRepository.findByShopImage(shopId);
+//          return ShopMapper.shopToShopAdminDetailResponse(ownerShop, images, owner, BASE_URL);
 
     }
 
@@ -188,8 +188,7 @@ public class ShopService {
 
     // shop 수정
     @Transactional
-    public PreSignedUrlListResponse editShop(Long shopId, long userId,
-        ShopUpdateRequest updateRequest) {
+    public PreSignedUrlListResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
 
         User user = userFind(userId);
 
@@ -231,7 +230,7 @@ public class ShopService {
 
 
     @Transactional(readOnly = true)
-    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Double cursor, int size) {
+    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Double distanceOrRating, int size, Long shopId) {
         log.info("상점 목록 조회");
         double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 좌표값은 종로
         double longitude = param.longitude() != null ? param.longitude() : 126.9794;
@@ -241,7 +240,7 @@ public class ShopService {
                 : List.of(FoodCategory.values());
 
         List<ShopsItem> allShopItems = shopQueryDslRepository.findAllShops(latitude, longitude,
-            radius, foodCategories, cursor, size, sort);
+            radius, foodCategories, distanceOrRating, size, sort, shopId);
 
         //이미지만 또 따로 필요하므로 재조합을 해줘야 함
         List<ShopsItem> shopsItemStream = allShopItems.stream().map(item -> {
@@ -265,24 +264,31 @@ public class ShopService {
 
         boolean next = shopsItemStream.size() > size;
         ShopsItem last = null;
-        Double nextCursor  = null;
+
 
         if (next){
             last = shopsItemStream.remove(size);  //위에서 size+1로 가져온 값들 중 마지막 값을 가져옴
         }
+        else {
+            distanceOrRating=null;
+            shopId=null;
+        }
 
         if (last != null) {
             if ("rating".equals(sort)){
-                nextCursor = last.rating();
+                distanceOrRating = last.rating();
+                shopId = last.shopId();
             }
             else {
-                nextCursor =  last.distance();
+                distanceOrRating =  last.distance();
+                shopId = last.shopId();
             }
         }
 
 
         return ShopsResponse.builder()
-            .nextCursor(nextCursor)
+            .distanceOrRating(distanceOrRating)
+            .shopId(shopId)
             .content(shopsItemStream)
             .build();
     }

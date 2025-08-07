@@ -1,6 +1,7 @@
 package shop.matjalalzz.shop.dao;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
@@ -9,10 +10,14 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import shop.matjalalzz.image.entity.QImage;
+import shop.matjalalzz.shop.dto.AdminFindShopInfo;
+import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopsItem;
 import shop.matjalalzz.shop.entity.Approve;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.QShop;
+import shop.matjalalzz.user.entity.QUser;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,10 +25,12 @@ public class ShopQueryDslRepository {
 
     private final JPAQueryFactory queryFactory;
     QShop shop = QShop.shop;
+    QUser user = QUser.user;
+    QImage image = QImage.image;
 
 
     public List<ShopsItem> findAllShops(double latitude, double  longitude, double radius
-        ,List<FoodCategory> foodCategories, Double cursor, int size, String sort) {
+        ,List<FoodCategory> foodCategories, Double distanceOrRating, int size, String sort, Long shopId) {
 
         // 거리 계산 공식
         NumberExpression<Double> distance = Expressions.numberTemplate(Double.class,
@@ -38,17 +45,33 @@ public class ShopQueryDslRepository {
         baseCondition.and(shop.category.in(foodCategories)); // 카테고리들만 가져오기 (선택하지 않으몬 모든 카테고리)
 
         //커서 조건 설정하는 부분
-        if (cursor != null) {
+        double epsilon = 0.01;
+        if (distanceOrRating != null && shopId != null) {
             if ("distance".equals(sort)) {
-                baseCondition.and(distance.gt(cursor)); //distance 값이 cursor보다 크다 (greater than로 이전 마지막 거리보다 먼 애들을 가져오기 위해)
+                baseCondition.and(distance.gt(distanceOrRating) //distance 값이 cursor보다 크다 (greater than로 이전 마지막 거리보다 먼 애들을 가져오기 위해)
+                    .or(distance.between(distanceOrRating - epsilon, distanceOrRating + epsilon).and(shop.id.goe(shopId))) // 다음 거리거나, 같은 거리 안에서 뒤에 있는 상점만 가져오기
+                );
             } else if ("rating".equals(sort)) {
-                baseCondition.and(shop.rating.lt(cursor)); //rating 값이 cursor보다 작다 (작은 값을 기준으로 점점 내려가는 형태로)
+                baseCondition.and(shop.rating.lt(distanceOrRating) //rating 값이 cursor보다 작다 (작은 값을 기준으로 점점 내려가는 형태로)
+                        .or(shop.rating.eq(distanceOrRating).and(shop.id.gt(shopId)))
+                );
             }
         }
 
 
         //정렬 조건 설정하는 부분
-        OrderSpecifier<?> orderSpecifier = "rating".equals(sort) ? shop.rating.desc(): distance.asc();
+        List<OrderSpecifier<?>> orderSpecifiers;
+        if ("rating".equals(sort)) {
+            orderSpecifiers = List.of(
+                shop.rating.desc().nullsLast(),
+                shop.id.asc()
+            );
+        } else {
+            orderSpecifiers = List.of(
+                distance.asc(),
+                shop.id.asc()
+            );
+        }
 
         //쿼리 실행
         return queryFactory
@@ -66,9 +89,39 @@ public class ShopQueryDslRepository {
             ))
             .from(shop)
             .where(baseCondition)
-            .orderBy(orderSpecifier)
+            .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
             .limit(size+1) // 다음 페이지 확인을 위한 size+1
             .fetch(); // 쿼리를 실행하고 결과를 즉시 리스트(List)로 반환 (List<ShopsItem>로)
     }
 
+
+
+
+    public AdminFindShopInfo adminFindShop(long shopId) {
+
+        Tuple result = queryFactory
+            .select(shop, user)
+            .from(shop)
+            .where(shop.id.eq(shopId))
+            .join(shop.user, user)
+            .fetchOne();
+
+        if (result == null) {
+            return null;
+        }
+
+        List<String> images = queryFactory
+            .select(image.s3Key)
+            .from(image)
+            .where(image.shopId.eq(shopId))
+            .fetch();
+
+        return new AdminFindShopInfo(
+            result.get(shop),
+            result.get(user),
+            images
+        );
+
+
+    }
 }
