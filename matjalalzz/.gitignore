@@ -40,3 +40,6 @@ data.sql
 logs
 
 build/generated/
+/**/build/
+**/build/generated/querydsl/
+**/build/generated/querydsl/**
