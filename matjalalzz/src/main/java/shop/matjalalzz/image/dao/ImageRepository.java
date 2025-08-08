@@ -10,8 +10,8 @@ import shop.matjalalzz.image.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
-    @Query("select i.s3Key from Image i where i.shopId = :shopId order by i.imageIndex asc")
-    String findFirstByShopIdOrderByImageIndexAsc(@Param("shopId") Long shopId);
+    @Query(" select i.s3Key from Image i where i.shopId = :shopId order by i.imageIndex asc, i.id asc")
+    List<String> findS3Keys(@Param("shopId") Long shopId, Pageable pageable);
 
 
     List<Image> findByShopIdOrderByImageIndexAsc(long shopId);
