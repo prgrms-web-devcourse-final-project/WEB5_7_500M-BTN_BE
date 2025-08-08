@@ -152,17 +152,20 @@ public class ShopService {
 
         List<OwnerShopItem> shops = shopList.stream().map(shop ->
             {
-//                String image = imageRepository.findFirstByShopIdOrderByImageIndexAsc(shop.getId());
-//                if (image != null) {
-//                    image = BASE_URL + image;
-//                }
-                String imageUrl = null;
-                List<Image> getImage = imageRepository.findByShopId(shop.getId());
-                if (getImage != null) {
-                    imageUrl = BASE_URL + getImage.getFirst().getS3Key();
+
+                String image = imageRepository.findS3Keys(shop.getId(), PageRequest.of(0, 1)).stream().findFirst().orElse(null);
+                if (image != null) {
+                    image = BASE_URL + image;
                 }
 
-                return ShopMapper.shopToOwnerShopItem(shop, imageUrl);
+
+
+//                List<Image> getImage = imageRepository.findByShopId(shop.getId());
+//                if (getImage != null) {
+//                    imageUrl = BASE_URL + getImage.getFirst().getS3Key();
+//                }
+
+                return ShopMapper.shopToOwnerShopItem(shop, image);
             }
         ).toList();
 
