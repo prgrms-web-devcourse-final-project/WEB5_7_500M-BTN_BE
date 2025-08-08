@@ -96,7 +96,7 @@ public class ShopService {
 //        Shop ownerShop = shopFind(shopId);
 //        User owner = ownerShop.getUser();
 //        List<String> images = imageRepository.findByShopImage(shopId);
-//          return ShopMapper.shopToShopAdminDetailResponse(ownerShop, images, owner, BASE_URL);
+//        return ShopMapper.shopToShopAdminDetailResponse(ownerShop, images, owner, BASE_URL);
 
     }
 
@@ -131,8 +131,7 @@ public class ShopService {
 
         log.info("상점 상세 조회 shopId = {}, shopName = {}", shopId, shop.getShopName());
 
-        List<String> imageUrllList = Optional.ofNullable(
-                imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
+        List<String> imageUrllList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -153,10 +152,17 @@ public class ShopService {
 
         List<OwnerShopItem> shops = shopList.stream().map(shop ->
             {
-                String image =
-                    BASE_URL + imageRepository.findByShopId(shop.getId()).stream().findFirst().get()
-                        .getS3Key();
-                return ShopMapper.shopToOwnerShopItem(shop, image);
+//                String image = imageRepository.findFirstByShopIdOrderByImageIndexAsc(shop.getId());
+//                if (image != null) {
+//                    image = BASE_URL + image;
+//                }
+                String imageUrl = null;
+                List<Image> getImage = imageRepository.findByShopId(shop.getId());
+                if (getImage != null) {
+                    imageUrl = BASE_URL + getImage.getFirst().getS3Key();
+                }
+
+                return ShopMapper.shopToOwnerShopItem(shop, imageUrl);
             }
         ).toList();
 
@@ -172,8 +178,7 @@ public class ShopService {
         Shop shop = ownerShopFind(shopId, userId);
 
         //사진 리스트로 가져왔을 때 없어도 에러는 반환 X
-        List<String> imageUrlList = Optional.ofNullable(
-                imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
+        List<String> imageUrlList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -416,8 +421,7 @@ public class ShopService {
     }
 
     private ShopPageResponse getShopListByName(String query, String cursor, int size) {
-        Slice<Shop> result = shopRepository.findCursorListByName(
-            cursor, query, Approve.APPROVED, PageRequest.of(0, size));
+        Slice<Shop> result = shopRepository.findCursorListByName(cursor, query, Approve.APPROVED, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getShopName());

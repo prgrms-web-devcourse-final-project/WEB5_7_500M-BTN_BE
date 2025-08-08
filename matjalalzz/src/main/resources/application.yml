@@ -8,6 +8,8 @@ spring:
     time-zone: Asia/Seoul
 
   datasource:
+    datasource-proxy:
+      count-query-time-with-nano: true
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}

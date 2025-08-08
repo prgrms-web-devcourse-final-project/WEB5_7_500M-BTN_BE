@@ -34,26 +34,33 @@ public class ShopQueryDslRepository {
 
         // 거리 계산 공식
         NumberExpression<Double> distance = Expressions.numberTemplate(Double.class,
-            "6371000 * acos(cos(radians({0})) * cos(radians({1})) * cos(radians({2}) - radians({3})) + sin(radians({0})) * sin(radians({1})))",
-            latitude, shop.latitude, shop.longitude, longitude);
+            "ST_Distance_Sphere(POINT({0}, {1}), POINT({2}, {3}))",
+            longitude, latitude, shop.longitude, shop.latitude
+        );
 
 
         // BooleanBuilder는 조건을 유동적으로 붙일 수 있는 객체
         BooleanBuilder baseCondition = new BooleanBuilder();
         baseCondition.and(shop.approve.eq(Approve.APPROVED)); // 식당 등록 상태가 APPROVED인 상점만 대상으로 함
+
+        double latDeg = radius / 111_320d; // 1도 ≈ 111.32km
+        double lonDeg = radius / (111_320d * Math.cos(Math.toRadians(latitude)));
+        baseCondition.and(shop.latitude.between(latitude - latDeg, latitude + latDeg));
+        baseCondition.and(shop.longitude.between(longitude - lonDeg, longitude + lonDeg));
+
+
         baseCondition.and(distance.loe(radius)); // 반경 필터
         baseCondition.and(shop.category.in(foodCategories)); // 카테고리들만 가져오기 (선택하지 않으몬 모든 카테고리)
 
         //커서 조건 설정하는 부분
-        double epsilon = 0.01;
         if (distanceOrRating != null && shopId != null) {
             if ("distance".equals(sort)) {
                 baseCondition.and(distance.gt(distanceOrRating) //distance 값이 cursor보다 크다 (greater than로 이전 마지막 거리보다 먼 애들을 가져오기 위해)
-                    .or(distance.between(distanceOrRating - epsilon, distanceOrRating + epsilon).and(shop.id.goe(shopId))) // 다음 거리거나, 같은 거리 안에서 뒤에 있는 상점만 가져오기
+                    .or(distance.eq(distanceOrRating).and(shop.id.goe(shopId))) // 다음 거리거나, 같은 거리 안에서 뒤에 있는 상점만 가져오기
                 );
             } else if ("rating".equals(sort)) {
                 baseCondition.and(shop.rating.lt(distanceOrRating) //rating 값이 cursor보다 작다 (작은 값을 기준으로 점점 내려가는 형태로)
-                        .or(shop.rating.eq(distanceOrRating).and(shop.id.gt(shopId)))
+                    .or(shop.rating.eq(distanceOrRating).and(shop.id.gt(shopId)))
                 );
             }
         }
@@ -103,7 +110,7 @@ public class ShopQueryDslRepository {
             .select(shop, user)
             .from(shop)
             .where(shop.id.eq(shopId))
-            .join(shop.user, user)
+            .join(shop.user, user).fetchJoin()
             .fetchOne();
 
         if (result == null) {
