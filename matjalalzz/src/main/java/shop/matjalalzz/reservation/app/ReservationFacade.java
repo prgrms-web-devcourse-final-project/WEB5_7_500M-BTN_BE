@@ -174,6 +174,7 @@ public class ReservationFacade {
 
         if (party != null) {
             reservationService.refundPartyReservationFee(party);
+            partyService.breakParty(party);
         } else {
             reservation.getUser().increasePoint(reservation.getReservationFee());
         }
@@ -260,6 +261,7 @@ public class ReservationFacade {
         if (party != null) {
             reservationService.refundPartyReservationFee(party);
             partyService.breakParty(party);
+
         } else {
             reservation.getUser().increasePoint(reservation.getReservationFee());
         }
