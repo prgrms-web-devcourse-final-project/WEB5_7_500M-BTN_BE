@@ -59,7 +59,11 @@ public class ReservationService {
                 throw new BusinessException(FORBIDDEN_ACCESS);
             }
 
-            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursor(
+//            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursor(
+//                shopId, status, cursor, pageable
+//            );
+
+            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursorQdsl(
                 shopId, status, cursor, pageable
             );
 
@@ -75,7 +79,11 @@ public class ReservationService {
             .map(Shop::getId)
             .toList();
 
-        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursor(
+//        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursor(
+//            shopIds, status, cursor, pageable
+//        );
+
+        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursorQdsl(
             shopIds, status, cursor, pageable
         );
 
@@ -97,7 +105,11 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
-        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(
+//        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(
+//            userId, cursor,
+//            PageRequest.of(0, size));
+
+        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursorQdsl(
             userId, cursor,
             PageRequest.of(0, size));
 
@@ -154,6 +166,8 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long reservationId, Long userId) {
         Reservation reservation = getReservationById(reservationId);
+        log.info("[CANCEL] reservationId={}, reservationUserId={}, callerUserId={}",
+            reservationId, reservation.getUser().getId(), userId);
         User user = userService.getUserById(userId);
 
         // 예약한 본인인지 확인
@@ -209,8 +223,14 @@ public class ReservationService {
     public int terminateExpiredReservations() {
         LocalDateTime threshold = LocalDateTime.now().minusDays(1);
 
+//        List<Reservation> toTerminate = reservationRepository
+//            .findAllByStatusAndReservedAtBefore(
+//                ReservationStatus.CONFIRMED,
+//                threshold
+//            );
+
         List<Reservation> toTerminate = reservationRepository
-            .findAllByStatusAndReservedAtBefore(
+            .findAllByStatusAndReservedAtBeforeQdsl(
                 ReservationStatus.CONFIRMED,
                 threshold
             );
