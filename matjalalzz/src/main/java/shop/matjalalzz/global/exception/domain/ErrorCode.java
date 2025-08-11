@@ -52,12 +52,13 @@ public enum ErrorCode {
 
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "데이터가 존재하지 않습니다."),
 
-
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     SHOP_NOT_FOUND(HttpStatus.NOT_FOUND, "음식점을 찾을 수 없습니다."),
     PARTY_NOT_FOUND(HttpStatus.NOT_FOUND, "파티를 찾을 수 없습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문 정보를 찾을 수 없습니다."),
+
+    OWNER_CANNOT_WITHDRAW(HttpStatus.NOT_ACCEPTABLE, "사장님은 직접 탈퇴할 수 없으니, 고객센터로 문의해주세요."),
 
     // 409 Conflict
     DUPLICATE_DATA(HttpStatus.CONFLICT, "데이터가 중복 되었습니다."),

@@ -10,17 +10,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ReservationScheduler {
 
-    private final ReservationService reservationService;
+    private final ReservationFacade reservationFacade;
 
     @Scheduled(cron = "0 0 * * * *")
     public void refusePendingReservations() {
-        int count = reservationService.refuseExpiredPendingReservations();
+        int count = reservationFacade.refuseExpiredPendingReservations();
         log.info("[PENDING -> REFUSED] 처리된 예약 수 = {}", count);
     }
 
     @Scheduled(cron = "0 0 0 * * *")
     public void terminateConfirmedReservations() {
-        int count = reservationService.terminateExpiredReservations();
+        int count = reservationFacade.terminateExpiredReservations();
         log.info("[CONFIRMED -> TERMINATED] 처리된 예약 수 = {}", count);
     }
 }
