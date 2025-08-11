@@ -9,11 +9,11 @@ import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.shop.entity.Shop;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long>, CustomReviewRepository {
 
-    @Query("SELECT r FROM Review r WHERE r.shop.id = :shopId AND (r.id < :cursor OR :cursor IS NULL ) ORDER BY r.id DESC")
-    Slice<Review> findByShopIdAndCursor(@Param("shopId") Long shopId, @Param("cursor") Long cursor,
-        Pageable pageable);
+//    @Query("SELECT r FROM Review r WHERE r.shop.id = :shopId AND (r.id < :cursor OR :cursor IS NULL ) ORDER BY r.id DESC")
+//    Slice<Review> findByShopIdAndCursor(@Param("shopId") Long shopId, @Param("cursor") Long cursor,
+//        Pageable pageable);
 
     @Query("""
         SELECT new shop.matjalalzz.review.dto.MyReviewResponse(
