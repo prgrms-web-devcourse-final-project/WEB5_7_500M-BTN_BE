@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,7 +90,8 @@ public class ShopService {
     @Transactional(readOnly = true)
     public ShopAdminDetailResponse adminGetShop(long shopId) {
 
-        return ShopMapper.shopToShopAdminDetailResponse(shopQueryDslRepository.adminFindShop(shopId), BASE_URL);
+        return ShopMapper.shopToShopAdminDetailResponse(
+            shopQueryDslRepository.adminFindShop(shopId), BASE_URL);
 
 //        Shop ownerShop = shopFind(shopId);
 //        User owner = ownerShop.getUser();
@@ -131,7 +131,8 @@ public class ShopService {
 
         log.info("상점 상세 조회 shopId = {}, shopName = {}", shopId, shop.getShopName());
 
-        List<String> imageUrllList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
+        List<String> imageUrllList = Optional.ofNullable(
+                imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -153,12 +154,11 @@ public class ShopService {
         List<OwnerShopItem> shops = shopList.stream().map(shop ->
             {
 
-                String image = imageRepository.findS3Keys(shop.getId(), PageRequest.of(0, 1)).stream().findFirst().orElse(null);
+                String image = imageRepository.findS3Keys(shop.getId(), PageRequest.of(0, 1)).stream()
+                    .findFirst().orElse(null);
                 if (image != null) {
                     image = BASE_URL + image;
                 }
-
-
 
 //                List<Image> getImage = imageRepository.findByShopId(shop.getId());
 //                if (getImage != null) {
@@ -181,7 +181,8 @@ public class ShopService {
         Shop shop = ownerShopFind(shopId, userId);
 
         //사진 리스트로 가져왔을 때 없어도 에러는 반환 X
-        List<String> imageUrlList = Optional.ofNullable(imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
+        List<String> imageUrlList = Optional.ofNullable(
+                imageRepository.findByShopIdOrderByImageIndexAsc(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -196,7 +197,8 @@ public class ShopService {
 
     // shop 수정
     @Transactional
-    public PreSignedUrlListResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
+    public PreSignedUrlListResponse editShop(Long shopId, long userId,
+        ShopUpdateRequest updateRequest) {
 
         User user = userFind(userId);
 
@@ -238,7 +240,8 @@ public class ShopService {
 
 
     @Transactional(readOnly = true)
-    public ShopsResponse getShops(ShopLocationSearchParam param, String sort, Double distanceOrRating, int size, Long shopId) {
+    public ShopsResponse getShops(ShopLocationSearchParam param, String sort,
+        Double distanceOrRating, int size, Long shopId) {
         log.info("상점 목록 조회");
         double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 좌표값은 종로
         double longitude = param.longitude() != null ? param.longitude() : 126.9794;
@@ -273,26 +276,22 @@ public class ShopService {
         boolean next = shopsItemStream.size() > size;
         ShopsItem last = null;
 
-
-        if (next){
+        if (next) {
             last = shopsItemStream.remove(size);  //위에서 size+1로 가져온 값들 중 마지막 값을 가져옴
-        }
-        else {
-            distanceOrRating=null;
-            shopId=null;
+        } else {
+            distanceOrRating = null;
+            shopId = null;
         }
 
         if (last != null) {
-            if ("rating".equals(sort)){
+            if ("rating".equals(sort)) {
                 distanceOrRating = last.rating();
                 shopId = last.shopId();
-            }
-            else {
-                distanceOrRating =  last.distance();
+            } else {
+                distanceOrRating = last.distance();
                 shopId = last.shopId();
             }
         }
-
 
         return ShopsResponse.builder()
             .distanceOrRating(distanceOrRating)
@@ -300,7 +299,6 @@ public class ShopService {
             .content(shopsItemStream)
             .build();
     }
-
 
 // 기본 JPA 쿼리로 속도 테스트 후 지울 예정
 
@@ -371,7 +369,7 @@ public class ShopService {
             }
         }
 
-        Slice<Shop> result = shopRepository.findCursorListByRating(
+        Slice<Shop> result = shopQueryDslRepository.findCursorListByRating(
             ratingCursor, query, Approve.APPROVED, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
@@ -400,7 +398,7 @@ public class ShopService {
             }
         }
 
-        Slice<Shop> result = shopRepository.findCursorListByCreatedAt(
+        Slice<Shop> result = shopQueryDslRepository.findCursorListByCreatedAt(
             timeCursor, query, Approve.APPROVED, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
@@ -424,7 +422,8 @@ public class ShopService {
     }
 
     private ShopPageResponse getShopListByName(String query, String cursor, int size) {
-        Slice<Shop> result = shopRepository.findCursorListByName(cursor, query, Approve.APPROVED, PageRequest.of(0, size));
+        Slice<Shop> result = shopQueryDslRepository.findCursorListByName(cursor, query,
+            Approve.APPROVED, PageRequest.of(0, size));
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getShopName());
