@@ -18,10 +18,11 @@ public interface PartyRepository extends JpaRepository<Party, Long>,
     @Query("""
         select p.id as partyId, p.title, s.shopName, p.metAt, p.deadline, p.status, p.maxCount, p.minCount,
                p.currentCount, p.genderCondition, p.minAge, p.maxAge, p.description, pu.isHost
-        from Party p
-            join p.shop  s
-            join p.partyUsers pu on pu.user.id = :userId
-        where :cursor is null or p.id < :cursor
+        from PartyUser pu
+            join pu.party p
+            join p.shop s
+        where pu.user.id = :userId
+            and (:cursor is null or pu.party.id < :cursor)
         order by p.id desc
         """)
     <T> Slice<T> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
