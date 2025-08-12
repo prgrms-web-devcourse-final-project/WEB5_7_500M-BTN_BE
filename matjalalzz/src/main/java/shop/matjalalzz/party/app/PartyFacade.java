@@ -180,7 +180,11 @@ public class PartyFacade {
             party.getId());
 
         if (existingPartyUser.isPresent()) {
-            throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
+            if (existingPartyUser.get().isDeleted()) {
+                throw new BusinessException(ErrorCode.QUIT_PARTY_USER);
+            } else {
+                throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
+            }
         }
 
         PartyUser partyUser = PartyUser.createUser(party, user);
@@ -207,7 +211,7 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.HOST_CANNOT_QUIT_PARTY);
         }
 
-        if(party.getStatus() == PartyStatus.TERMINATED) {
+        if (party.getStatus() == PartyStatus.TERMINATED) {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
         }
 
@@ -224,7 +228,7 @@ public class PartyFacade {
 
             reservationService.refundPartyReservationFee(party);
 
-            if(reservation != null) {
+            if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
             }
 
@@ -251,11 +255,12 @@ public class PartyFacade {
 
     @Transactional
     public void quitPartyForWithdraw(User user) {
-        List<Party> parties = partyService.findAllParticipatingPartyByUserIdForWithdraw(user.getId());
+        List<Party> parties = partyService.findAllParticipatingPartyByUserIdForWithdraw(
+            user.getId());
 
         log.info("quitPartyForWithdraw: {}", parties.size());
 
-        for(Party party : parties) {
+        for (Party party : parties) {
             Reservation reservation = party.getReservation();
 
             if (party.getStatus() == PartyStatus.COMPLETED
@@ -263,8 +268,7 @@ public class PartyFacade {
 
                 reservationService.refundPartyReservationFee(party);
 
-
-                if(reservation != null) {
+                if (reservation != null) {
                     reservation.changeStatus(ReservationStatus.CANCELLED);
                 }
 
@@ -344,7 +348,7 @@ public class PartyFacade {
         Party party = partyService.findByIdWithPartyUsers(partyId);
         PartyUser partyUser = partyService.findPartyUser(userId, party);
 
-        if(party.getStatus() == PartyStatus.TERMINATED) {
+        if (party.getStatus() == PartyStatus.TERMINATED) {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
         }
 
@@ -363,7 +367,7 @@ public class PartyFacade {
 
         reservationService.refundPartyReservationFee(party);
 
-        if(reservation != null) {
+        if (reservation != null) {
             reservation.changeStatus(ReservationStatus.CANCELLED);
         }
 
@@ -375,11 +379,11 @@ public class PartyFacade {
         List<Party> parties = partyService.findAllMyPartyByUserIdForWithdraw(user.getId());
         log.info("deletePartyForWithdraw: {}", parties.size());
 
-        for(Party party : parties) {
+        for (Party party : parties) {
             reservationService.refundPartyReservationFee(party);
 
             Reservation reservation = party.getReservation();
-            if(reservation != null) {
+            if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
             }
 

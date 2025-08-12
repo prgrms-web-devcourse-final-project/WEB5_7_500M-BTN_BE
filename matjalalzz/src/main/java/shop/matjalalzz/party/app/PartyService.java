@@ -75,7 +75,7 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public List<PartyMemberResponse> findAllByPartyIdToDto(long partyId) {
-        return partyUserRepository.findAllByPartyIdToDto(partyId, BASE_URL);
+        return partyUserRepository.findMembersByPartyId(partyId, BASE_URL);
     }
 
     @Transactional(readOnly = true)
