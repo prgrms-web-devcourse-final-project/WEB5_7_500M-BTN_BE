@@ -96,11 +96,13 @@ public class PartyService {
     public List<Party> findAllMyPartyByUserIdForWithdraw(long userId) {
         LocalDateTime threshold = LocalDateTime.now().plusDays(1);
 
+        // 회원이 파티장이며, 파티가 종료되지 않았고, 파티의 예약이 없거나, 예약일로부터 하루 이상 남은 파티 조회
         return partyRepository.findAllMyPartyByUserIdForWithdraw(userId, threshold);
     }
 
     @Transactional(readOnly = true)
     public List<Party> findAllParticipatingPartyByUserIdForWithdraw(long userId) {
+        // 회원이 파티원이며, 파티가 종료되지 않았고, 파티의 예약이 없거나 수락되지 않은 상태인 예약인 파티 조회
         return partyRepository.findAllParticipatingPartyByUserIdForWithdraw(userId);
     }
 

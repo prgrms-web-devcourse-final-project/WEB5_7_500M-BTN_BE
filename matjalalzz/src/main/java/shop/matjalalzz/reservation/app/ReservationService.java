@@ -73,6 +73,7 @@ public class ReservationService {
     public List<Reservation> findAllMyReservationByUserIdForWithdraw(Long userId) {
         LocalDateTime threshold = LocalDateTime.now().plusDays(1);
 
+        // 회원 단독으로 진행한 예약 중 대기 상태이거나 예약일로부터 하루 이상 남은 예약 조회
         return reservationRepository.findAllMyReservationByUserIdForWithdraw(userId, threshold);
     }
 

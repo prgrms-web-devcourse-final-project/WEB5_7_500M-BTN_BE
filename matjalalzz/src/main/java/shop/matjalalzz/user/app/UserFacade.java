@@ -163,7 +163,7 @@ public class UserFacade {
         partyFacade.quitPartyForWithdraw(user); // 본인이 파티참가자인 파티 중 탈퇴 가능한 파티 처리
         reservationFacade.cancelReservationForWithdraw(user); // 취소 가능한 예약 처리
 
-        tokenService.deleteRefreshToken(foundRefreshToken);
+        tokenService.deleteRefreshToken(foundRefreshToken); // 리프레시 토큰 제거
 
         user.delete();
 
