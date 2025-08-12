@@ -92,12 +92,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         WHERE r.user.id = :userId
             AND r.party IS NULL
             AND (
-                    r.status = "PENDING"
-                    OR (
-                         r.status = "CONFIRMED"
-                         AND r.reservedAt >= :threshold
-                       )
-                  )
+                r.status = "PENDING"
+                OR (
+                     r.status = "CONFIRMED"
+                     AND r.reservedAt >= :threshold
+                )
+            )
         """)
     List<Reservation> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
         @Param("threshold") LocalDateTime threshold);

@@ -42,14 +42,16 @@ public interface PartyRepository extends JpaRepository<Party, Long>,
             JOIN p.partyUsers pu ON
                 pu.user.id = :userId
                 AND pu.isHost
-            LEFT JOIN p.reservation r ON (
-                r.status = "PENDING"
+            LEFT JOIN p.reservation r
+        WHERE p.status <> "TERMINATED"
+            AND (
+                r IS NULL
+                OR r.status = "PENDING"
                 OR (
                     r.status = "CONFIRMED"
                     AND r.reservedAt >= :threshold
                 )
             )
-        WHERE p.status <> "TERMINATED"
         """)
     List<Party> findAllMyPartyByUserIdForWithdraw(@Param("userId") long userId,
         @Param("threshold") LocalDateTime threshold);
@@ -60,9 +62,12 @@ public interface PartyRepository extends JpaRepository<Party, Long>,
             JOIN p.partyUsers pu ON
                 pu.user.id = :userId
                 AND pu.isHost = false
-            LEFT JOIN p.reservation r ON
-                r.status = "PENDING"
+            LEFT JOIN p.reservation r
         WHERE p.status <> "TERMINATED"
+            AND (
+                r IS NULL
+                OR r.status = "PENDING"
+            )
         """)
     List<Party> findAllParticipatingPartyByUserIdForWithdraw(@Param("userId") long userId);
 }
