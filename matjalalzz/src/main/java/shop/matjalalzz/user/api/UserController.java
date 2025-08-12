@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.user.app.UserService;
+import shop.matjalalzz.user.app.UserFacade;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
@@ -30,13 +30,13 @@ import shop.matjalalzz.user.dto.SignUpRequest;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserFacade userFacade;
 
     @Operation(summary = "회원가입", description = "폼 로그인 회원가입(Completed)")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/signup")
     public BaseResponse<Void> signup(@RequestBody @Valid SignUpRequest signUpRequestDto) {
-        userService.signup(signUpRequestDto);
+        userFacade.signup(signUpRequestDto);
         return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 
@@ -45,8 +45,9 @@ public class UserController {
     @PostMapping("/signup/oauth")
     public BaseResponse<Void> oauthSignup(
         @AuthenticationPrincipal PrincipalUser userInfo,
-        @RequestBody @Valid OAuthSignUpRequest oauthSignUpRequestDto) {
-        userService.oauthSignup(userInfo.getId(), oauthSignUpRequestDto);
+        @RequestBody @Valid OAuthSignUpRequest oauthSignUpRequestDto,
+        HttpServletResponse response) {
+        userFacade.oauthSignup(userInfo.getId(), oauthSignUpRequestDto, response);
         return BaseResponse.ok(BaseStatus.CREATED); //201
     }
 
@@ -58,7 +59,7 @@ public class UserController {
         @Parameter(hidden = true)
         @CookieValue(name = "refreshToken") String refreshToken,
         HttpServletResponse response) {
-        userService.deleteUser(userInfo.getId(), refreshToken, response);
+        userFacade.deleteUser(userInfo.getId(), refreshToken, response);
     }
 
     @Operation(
@@ -69,7 +70,7 @@ public class UserController {
     @PostMapping("/login")
     public BaseResponse<Void> login(@RequestBody @Valid LoginRequest loginRequest,
         HttpServletResponse response) {
-        userService.login(loginRequest, response);
+        userFacade.login(loginRequest, response);
         return BaseResponse.ok(BaseStatus.OK); //200
     }
 }

@@ -86,6 +86,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("status") ReservationStatus status,
         @Param("threshold") LocalDateTime threshold);
 
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        WHERE r.user.id = :userId
+            AND r.party IS NULL
+            AND (
+                r.status = "PENDING"
+                OR (
+                     r.status = "CONFIRMED"
+                     AND r.reservedAt >= :threshold
+                )
+            )
+        """)
+    List<Reservation> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
+        @Param("threshold") LocalDateTime threshold);
+
     @Modifying
     @Query("""
         update User u
@@ -95,4 +111,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     void settleReservationFee(
         @Param("shopId") long shopId,
         @Param("reservationFee") int reservationFee);
+
+    @Modifying
+    @Query("""
+        update User u
+        set u.point = u.point + :refundAmount
+        where u.id IN (
+            select pu.user.id from PartyUser pu where pu.party.id = :partyId and pu.paymentCompleted = true
+        )
+        """)
+    void refundPartyReservationFee(@Param("partyId") Long partyId,
+        @Param("refundAmount") int refundAmount);
 }

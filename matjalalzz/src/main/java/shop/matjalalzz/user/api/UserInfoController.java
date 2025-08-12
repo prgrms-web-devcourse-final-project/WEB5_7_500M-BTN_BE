@@ -21,13 +21,13 @@ import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
-import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.app.ReservationFacade;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.review.app.ReviewService;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.user.app.UserService;
+import shop.matjalalzz.user.app.UserFacade;
 import shop.matjalalzz.user.dto.DeleteProfileRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
@@ -38,9 +38,9 @@ import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 @RequestMapping("/users/my-page")
 public class UserInfoController {
 
-    private final UserService userService;
-    private final ReservationService reservationService;
-    private final PartyService partyService;
+    private final UserFacade userFacade;
+    private final ReservationFacade reservationFacade;
+    private final PartyFacade partyFacade;
     private final ReviewService reviewService;
     private final PreSignedProvider preSignedProvider;
 
@@ -54,7 +54,7 @@ public class UserInfoController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<MyInfoResponse> getMyInfo(@AuthenticationPrincipal PrincipalUser userInfo) {
-        MyInfoResponse result = userService.getMyInfo(userInfo.getId());
+        MyInfoResponse result = userFacade.getMyInfo(userInfo.getId());
 
         return BaseResponse.ok(result, BaseStatus.OK);
     }
@@ -72,7 +72,7 @@ public class UserInfoController {
         @AuthenticationPrincipal PrincipalUser userInfo,
         @Valid @RequestBody MyInfoUpdateRequest request
     ) {
-        userService.updateMyInfo(userInfo.getId(), request);
+        userFacade.updateMyInfo(userInfo.getId(), request);
 
         return BaseResponse.ok(BaseStatus.OK);
     }
@@ -123,7 +123,8 @@ public class UserInfoController {
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyReservationPageResponse result = reservationService.findMyReservationPage(userInfo.getId(), cursor, size);
+        MyReservationPageResponse result = reservationFacade.findMyReservationPage(userInfo.getId(),
+            cursor, size);
 
         return BaseResponse.ok(result, BaseStatus.OK);
     }
@@ -142,7 +143,7 @@ public class UserInfoController {
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyPartyPageResponse result = partyService.findMyPartyPage(
+        MyPartyPageResponse result = partyFacade.findMyPartyPage(
             userInfo.getId(), cursor, size);
 
         return BaseResponse.ok(result, BaseStatus.OK);
