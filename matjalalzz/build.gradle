@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'idea'
 }
 
 dependencyManagement {
@@ -29,7 +30,34 @@ repositories {
     mavenCentral()
 }
 
-def querydslVersion = "5.0.0"
+
+// QueryDSL 설정
+def qdslMainDir = "$buildDir/generated/querydsl/main"
+def qdslTestDir = "$buildDir/generated/querydsl/test"
+
+def queryDslVersion = "7.0" // 25년 7월 기준 가장 최신
+def querydslSrcDir = layout.buildDirectory.dir("generated/querydsl").get().asFile // build/generated/querydsl
+
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslSrcDir))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += qdslMainDir
+        }
+    }
+    test {
+        java {
+            srcDirs += qdslTestDir
+        }
+    }
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+//
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -69,40 +97,21 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
-    // Querydsl
-    implementation "com.querydsl:querydsl-core:${querydslVersion}"
-    implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
-    annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
-
-    implementation "com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.12.0"
-    implementation "org.springframework.boot:spring-boot-starter-aop"
-
-
 
     implementation('net.dv8tion:JDA:5.0.0-beta.20') {
         exclude module: 'opus-java'
-        exclude module: 'tink'}
-}
+        exclude module: 'tink'
+    }
 
-// Querydsl 빌드 옵션 설정
-def generated = file("build/generated/querydsl")
+    implementation "net.ttddyy:datasource-proxy:1.10"
 
-// querydsl QClass 파일 생성 위치를 지정
-tasks.withType(JavaCompile).configureEach {
-    options.getGeneratedSourceOutputDirectory().set(file(generated))
-}
+    implementation "com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.9.2"
 
-// java source set 에 querydsl QClass 위치 추가
-sourceSets {
-    main.java.srcDirs += generated
-}
+    //Querydsl 추가
+    implementation("io.github.openfeign.querydsl:querydsl-core:${queryDslVersion}")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion")
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
 
-// gradle clean 시에 QClass 디렉토리 삭제
-clean {
-    delete file(generated)
 }
 
 tasks.named('test') {
