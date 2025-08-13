@@ -29,6 +29,8 @@ repositories {
     mavenCentral()
 }
 
+def querydslVersion = "5.0.0"
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
@@ -67,10 +69,40 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
+    // Querydsl
+    implementation "com.querydsl:querydsl-core:${querydslVersion}"
+    implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+
+    implementation "com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.12.0"
+    implementation "org.springframework.boot:spring-boot-starter-aop"
+
+
 
     implementation('net.dv8tion:JDA:5.0.0-beta.20') {
         exclude module: 'opus-java'
         exclude module: 'tink'}
+}
+
+// Querydsl 빌드 옵션 설정
+def generated = file("build/generated/querydsl")
+
+// querydsl QClass 파일 생성 위치를 지정
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
+
+// java source set 에 querydsl QClass 위치 추가
+sourceSets {
+    main.java.srcDirs += generated
+}
+
+// gradle clean 시에 QClass 디렉토리 삭제
+clean {
+    delete file(generated)
 }
 
 tasks.named('test') {
