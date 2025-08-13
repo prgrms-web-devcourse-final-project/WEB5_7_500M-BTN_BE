@@ -6,18 +6,18 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
+import shop.matjalalzz.party.dao.PartySearchRepository;
 import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyMemberResponse;
+import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
@@ -30,6 +30,7 @@ public class PartyService {
     private final PartyChatService partyChatService;
     private final PartyRepository partyRepository;
     private final PartyUserRepository partyUserRepository;
+    private final PartySearchRepository partySearchRepository;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -68,9 +69,14 @@ public class PartyService {
         return partyRepository.findByUserIdAndCursor(userId, cursor, of);
     }
 
+//    @Transactional(readOnly = true)
+//    public Slice<Party> findAll(Specification<Party> spec, Pageable pageable) {
+//        return partyRepository.findAll(spec, pageable);
+//    }
+
     @Transactional(readOnly = true)
-    public Slice<Party> findAll(Specification<Party> spec, Pageable pageable) {
-        return partyRepository.findAll(spec, pageable);
+    public List<Party> searchParties(PartySearchParam cond, int size) {
+        return partySearchRepository.searchWithCursor(cond, size);
     }
 
     @Transactional(readOnly = true)

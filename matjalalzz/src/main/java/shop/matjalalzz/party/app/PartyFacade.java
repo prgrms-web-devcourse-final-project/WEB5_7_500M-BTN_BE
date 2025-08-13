@@ -7,11 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -20,7 +16,6 @@ import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.image.app.ImageService;
-import shop.matjalalzz.party.dao.PartySpecification;
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
@@ -103,17 +98,34 @@ public class PartyFacade {
 
     @Transactional(readOnly = true)
     public PartyScrollResponse searchParties(PartySearchParam condition, int size) {
-        Specification<Party> spec = PartySpecification.createSpecification(condition);
+//        Specification<Party> spec = PartySpecification.createSpecification(condition);
+//
+//        Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
+//        Slice<Party> partyList = partyService.findAll(spec, pageable);
+//
+//        Long nextCursor = null;
+//        if (partyList.hasNext()) {
+//            nextCursor = partyList.getContent().getLast().getId();
+//        }
+//
+//        List<PartyListResponse> content = partyList.stream()
+//            .map(party -> PartyMapper.toListResponse
+//                (party, imageService.getShopThumbnail(party.getShop().getId()))
+//            )
+//            .toList();
+//
+//        return new PartyScrollResponse(content, nextCursor);
 
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
-        Slice<Party> partyList = partyService.findAll(spec, pageable);
+        List<Party> parties = partyService.searchParties(condition, size);
 
-        Long nextCursor = null;
-        if (partyList.hasNext()) {
-            nextCursor = partyList.getContent().getLast().getId();
+        boolean hasNext = parties.size() > size;
+        if (hasNext) {
+            parties = parties.subList(0, size);
         }
 
-        List<PartyListResponse> content = partyList.stream()
+        Long nextCursor = hasNext ? parties.getLast().getId() : null;
+
+        List<PartyListResponse> content = parties.stream()
             .map(party -> PartyMapper.toListResponse
                 (party, imageService.getShopThumbnail(party.getShop().getId()))
             )

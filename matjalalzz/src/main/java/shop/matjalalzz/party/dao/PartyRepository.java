@@ -6,14 +6,12 @@ import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 
-public interface PartyRepository extends JpaRepository<Party, Long>,
-    JpaSpecificationExecutor<Party> {
+public interface PartyRepository extends JpaRepository<Party, Long> {
 
     @Query("""
         select p.id as partyId, p.title, s.shopName, p.metAt, p.deadline, p.status, p.maxCount, p.minCount,
