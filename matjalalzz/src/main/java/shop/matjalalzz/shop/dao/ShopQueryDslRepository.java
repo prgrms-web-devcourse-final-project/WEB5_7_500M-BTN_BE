@@ -6,6 +6,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,7 @@ import shop.matjalalzz.shop.entity.Approve;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.QShop;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.entity.ShopListSort;
 import shop.matjalalzz.user.entity.QUser;
 
 @Repository
@@ -135,100 +137,41 @@ public class ShopQueryDslRepository {
 
     }
 
-    public Slice<Shop> findCursorListByRating(Double cursor, String query, Approve approve,
-        Pageable pageable) {
+    public Slice<Shop> findCursorList(Object cursor, String query, Approve approve,
+        Pageable pageable, ShopListSort sort) {
         BooleanBuilder condition = new BooleanBuilder();
-
-        // 커서 조건
-        if (cursor != null) {
-            condition.and(shop.rating.lt(cursor));
+        JPAQuery<Shop> q = queryFactory.selectFrom(shop);
+        switch (sort) {
+            case ShopListSort.RATING:
+                if (cursor != null) {
+                    condition.and(shop.rating.lt((Double) cursor));
+                }
+                q.orderBy(shop.rating.desc());
+                break;
+            case ShopListSort.CREATED_AT:
+                if (cursor != null) {
+                    condition.and(shop.createdAt.lt((LocalDateTime) cursor));
+                }
+                q.orderBy(shop.createdAt.desc());
+                break;
+            case ShopListSort.NAME:
+                if (cursor != null) {
+                    condition.and(shop.shopName.gt(cursor.toString()));
+                }
+                q.orderBy(shop.shopName.asc());
+                break;
         }
 
-        // 승인 상태 조건
         condition.and(shop.approve.eq(approve));
 
-        // 검색 조건
         if (query != null && !query.trim().isEmpty()) {
             condition.and(
                 shop.shopName.containsIgnoreCase(query)
                     .or(shop.description.containsIgnoreCase(query))
             );
         }
-
-        List<Shop> shops = queryFactory
-            .selectFrom(shop)
+        List<Shop> shops = q
             .where(condition)
-            .orderBy(shop.rating.desc())
-            .limit(pageable.getPageSize() + 1)
-            .fetch();
-
-        boolean hasNext = shops.size() > pageable.getPageSize();
-        if (hasNext) {
-            shops.remove(shops.size() - 1);
-        }
-
-        return new SliceImpl<>(shops, pageable, hasNext);
-    }
-
-    public Slice<Shop> findCursorListByName(String cursor, String query, Approve approve,
-        Pageable pageable) {
-        BooleanBuilder condition = new BooleanBuilder();
-
-        // 커서 조건
-        if (cursor != null) {
-            condition.and(shop.shopName.gt(cursor));
-        }
-
-        // 승인 상태 조건
-        condition.and(shop.approve.eq(approve));
-
-        // 검색 조건
-        if (query != null && !query.trim().isEmpty()) {
-            condition.and(
-                shop.shopName.containsIgnoreCase(query)
-                    .or(shop.description.containsIgnoreCase(query))
-            );
-        }
-
-        List<Shop> shops = queryFactory
-            .selectFrom(shop)
-            .where(condition)
-            .orderBy(shop.shopName.asc())
-            .limit(pageable.getPageSize() + 1)
-            .fetch();
-
-        boolean hasNext = shops.size() > pageable.getPageSize();
-        if (hasNext) {
-            shops.remove(shops.size() - 1);
-        }
-
-        return new SliceImpl<>(shops, pageable, hasNext);
-    }
-
-    public Slice<Shop> findCursorListByCreatedAt(LocalDateTime cursor, String query,
-        Approve approve, Pageable pageable) {
-        BooleanBuilder condition = new BooleanBuilder();
-
-        // 커서 조건
-        if (cursor != null) {
-            condition.and(shop.createdAt.lt(cursor));
-        }
-
-        // 승인 상태 조건
-        condition.and(shop.approve.eq(approve));
-
-        // 검색 조건
-        if (query != null && !query.trim().isEmpty()) {
-            condition.and(
-                shop.shopName.containsIgnoreCase(query)
-                    .or(shop.description.containsIgnoreCase(query))
-            );
-        }
-
-        List<Shop> shops = queryFactory
-            .selectFrom(shop)
-            .where(condition)
-            .orderBy(shop.createdAt.desc())
             .limit(pageable.getPageSize() + 1)
             .fetch();
 

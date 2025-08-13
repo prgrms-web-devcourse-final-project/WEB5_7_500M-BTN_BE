@@ -354,7 +354,6 @@ public class ShopService {
             case ShopListSort.RATING -> getShopListByRating(query, cursor, size);
             case ShopListSort.CREATED_AT -> getShopListByCreatedAt(query, cursor, size);
             case ShopListSort.NAME -> getShopListByName(query, cursor, size);
-            default -> throw new BusinessException(ErrorCode.INVALID_REQUEST_DATA);
         };
     }
 
@@ -369,8 +368,8 @@ public class ShopService {
             }
         }
 
-        Slice<Shop> result = shopQueryDslRepository.findCursorListByRating(
-            ratingCursor, query, Approve.APPROVED, PageRequest.of(0, size));
+        Slice<Shop> result = shopQueryDslRepository.findCursorList(
+            ratingCursor, query, Approve.APPROVED, PageRequest.of(0, size), ShopListSort.RATING);
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
@@ -398,8 +397,8 @@ public class ShopService {
             }
         }
 
-        Slice<Shop> result = shopQueryDslRepository.findCursorListByCreatedAt(
-            timeCursor, query, Approve.APPROVED, PageRequest.of(0, size));
+        Slice<Shop> result = shopQueryDslRepository.findCursorList(
+            timeCursor, query, Approve.APPROVED, PageRequest.of(0, size), ShopListSort.CREATED_AT);
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getCreatedAt());
@@ -422,8 +421,8 @@ public class ShopService {
     }
 
     private ShopPageResponse getShopListByName(String query, String cursor, int size) {
-        Slice<Shop> result = shopQueryDslRepository.findCursorListByName(cursor, query,
-            Approve.APPROVED, PageRequest.of(0, size));
+        Slice<Shop> result = shopQueryDslRepository.findCursorList(cursor, query,
+            Approve.APPROVED, PageRequest.of(0, size), ShopListSort.NAME);
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getShopName());
