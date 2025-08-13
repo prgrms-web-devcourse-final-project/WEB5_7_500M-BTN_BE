@@ -375,8 +375,7 @@ public class ShopService {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(
-                s.getId());
+            List<Image> images = s.getImages();
             if (images.isEmpty()) {
                 return null;
             }
@@ -404,8 +403,7 @@ public class ShopService {
             nextCursor = String.valueOf(result.getContent().getLast().getCreatedAt());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(
-                s.getId());
+            List<Image> images = s.getImages();
             if (images.isEmpty()) {
                 return null;
             }
@@ -428,8 +426,7 @@ public class ShopService {
             nextCursor = String.valueOf(result.getContent().getLast().getShopName());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            List<Image> images = imageRepository.findByShopIdOrderByImageIndexAsc(
-                s.getId());
+            List<Image> images = s.getImages();
             if (images.isEmpty()) {
                 return null;
             }

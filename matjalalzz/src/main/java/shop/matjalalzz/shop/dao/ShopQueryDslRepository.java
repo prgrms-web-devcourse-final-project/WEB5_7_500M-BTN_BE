@@ -10,11 +10,14 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.image.entity.QImage;
 import shop.matjalalzz.shop.dto.AdminFindShopInfo;
 import shop.matjalalzz.shop.dto.ShopsItem;
@@ -178,6 +181,23 @@ public class ShopQueryDslRepository {
         boolean hasNext = shops.size() > pageable.getPageSize();
         if (hasNext) {
             shops.remove(shops.size() - 1);
+        }
+
+        if (!shops.isEmpty()) {
+            List<Long> shopIds = shops.stream()
+                .map(Shop::getId)
+                .toList();
+
+            Map<Long, List<Image>> imageMap = queryFactory
+                .selectFrom(image)
+                .where(image.shopId.in(shopIds))
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(Image::getShopId));
+
+            // Shop에 Image 매핑
+            shops.forEach(shop ->
+                shop.setImages(imageMap.getOrDefault(shop.getId(), List.of())));
         }
 
         return new SliceImpl<>(shops, pageable, hasNext);
