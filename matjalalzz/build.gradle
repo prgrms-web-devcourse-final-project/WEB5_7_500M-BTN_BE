@@ -36,7 +36,7 @@ def qdslMainDir = "$buildDir/generated/querydsl/main"
 def qdslTestDir = "$buildDir/generated/querydsl/test"
 
 def queryDslVersion = "7.0" // 25년 7월 기준 가장 최신
-def querydslSrcDir = layout.buildDirectory.dir("generated/querydsl").get().asFile // build/generated/querydsl
+def querydslSrcDir  = layout.buildDirectory.dir("generated/querydsl").get().asFile // build/generated/querydsl
 
 tasks.withType(JavaCompile).configureEach {
     options.getGeneratedSourceOutputDirectory().set(file(querydslSrcDir))
@@ -98,10 +98,10 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
 
+
     implementation('net.dv8tion:JDA:5.0.0-beta.20') {
         exclude module: 'opus-java'
-        exclude module: 'tink'
-    }
+        exclude module: 'tink'}
 
     implementation "net.ttddyy:datasource-proxy:1.10"
 

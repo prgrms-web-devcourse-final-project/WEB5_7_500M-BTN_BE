@@ -106,7 +106,15 @@ toss:
   client-key: ${TOSS_CLIENT_KEY}
 
 logging:
-  root: INFO
+  level:
+    root: INFO
+    shop.matjalalzz.global.aop: INFO      # [PERF]
+    shop.matjalalzz.global.config: INFO   # [SQL]
+    net.ttddyy: INFO
+    shop.matjalalzz.reservation.api: DEBUG
+    shop.matjalalzz.reservation.app: DEBUG
+
+
 server:
   port: ${SERVER_PORT}
 
