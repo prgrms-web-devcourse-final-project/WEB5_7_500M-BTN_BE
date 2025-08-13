@@ -4,11 +4,15 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import shop.matjalalzz.image.entity.Image;
+import shop.matjalalzz.image.entity.QImage;
 import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.entity.QReview;
 import shop.matjalalzz.review.entity.Review;
@@ -23,6 +27,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
     @Override
     public Slice<Review> findByShopIdAndCursor(Long shopId, Long cursor, Pageable pageable) {
         QReview review = QReview.review;
+        QImage image = QImage.image;
 
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(review.shop.id.eq(shopId));
@@ -41,6 +46,22 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
         boolean hasNext = reviews.size() > pageable.getPageSize();
         if (hasNext) {
             reviews.removeLast();
+        }
+        if (!reviews.isEmpty()) {
+            List<Long> reviewIds = reviews.stream()
+                .map(Review::getId)
+                .toList();
+
+            Map<Long, List<Image>> imageMap = queryFactory
+                .selectFrom(image)
+                .where(image.reviewId.in(reviewIds))
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(Image::getReviewId));
+
+            // Shop에 Image 매핑
+            reviews.forEach(r ->
+                r.setImages(imageMap.getOrDefault(r.getId(), List.of())));
         }
 
         return new SliceImpl<>(reviews, pageable, hasNext);
