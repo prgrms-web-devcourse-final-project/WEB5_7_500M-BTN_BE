@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
@@ -16,6 +17,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     @Query("""
         SELECT r FROM Reservation r
+        JOIN FETCH r.shop s
+        JOIN FETCH r.user u
         WHERE r.shop.id = :shopId
           AND (:status IS NULL OR r.status = :status)
           AND (:cursor IS NULL OR r.id < :cursor)
@@ -30,6 +33,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     @Query("""
         SELECT r FROM Reservation r
+        JOIN FETCH r.shop s
+        JOIN FETCH r.user u
         WHERE r.shop.id IN :shopIds
           AND (:status IS NULL OR r.status = :status)
           AND (:cursor IS NULL OR r.id < :cursor)
@@ -95,4 +100,26 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
     void settleReservationFee(
         @Param("shopId") long shopId,
         @Param("reservationFee") int reservationFee);
+
+    @Query("""
+        select new shop.matjalalzz.reservation.dto.ReservationSummaryDto(
+        r.id, s.shopName, r.reservedAt, r.headCount, u.phoneNumber, r.status
+        )
+        from Reservation r
+        join r.shop s
+        join r.user u
+        where r.deleted = false
+        and s.user.id = :ownerId
+        and (:status is null or r.status = :status)
+        and (:cursor is null or r.id < :cursor)
+        order by r.id desc
+            """)
+    List<ReservationSummaryDto> findSummariesByOwnerWithCursor(
+        @Param("ownerId") Long ownerId,
+        @Param("status") ReservationStatus status,
+        @Param("cursor") Long cursor,
+        Pageable pageable
+    );
 }
+
+

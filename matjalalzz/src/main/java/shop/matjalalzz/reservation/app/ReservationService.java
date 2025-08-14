@@ -27,6 +27,7 @@ import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
+import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -59,16 +60,17 @@ public class ReservationService {
                 throw new BusinessException(FORBIDDEN_ACCESS);
             }
 
-//            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursor(
-//                shopId, status, cursor, pageable
-//            );
-
-            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursorQdsl(
+            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursor(
                 shopId, status, cursor, pageable
             );
 
+//            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursorQdsl(
+//                shopId, status, cursor, pageable
+//            );
+
             return reservationResponse(slice);
         }
+
 
         List<Shop> shops = shopService.findByOwnerId(ownerId);
         if (shops == null) {
@@ -79,15 +81,34 @@ public class ReservationService {
             .map(Shop::getId)
             .toList();
 
-//        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursor(
-//            shopIds, status, cursor, pageable
-//        );
-
-        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursorQdsl(
+        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursor(
             shopIds, status, cursor, pageable
         );
 
+//        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursorQdsl(
+//            shopIds, status, cursor, pageable
+//        );
+
         return reservationResponse(slice);
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status, Long cursor, int size) {
+        int sizePlusOne = size + 1;
+        Pageable pageable = PageRequest.of(0, sizePlusOne, Sort.by(Sort.Direction.DESC, "id"));
+
+        // A안: 오너 기준 (ShopService 호출 제거)
+        List<ReservationSummaryDto> rows =
+            reservationRepository.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
+
+        boolean hasNext = rows.size() > size;
+        if (hasNext) rows = rows.subList(0, size);
+        Long nextCursor = hasNext ? rows.get(rows.size() - 1).reservationId() : null;
+
+        List<ReservationListResponse.ReservationContent> content =
+            ReservationMapper.toReservationProjectionContent(rows);
+
+        return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
 
     private ReservationListResponse reservationResponse(Slice<Reservation> slice) {
@@ -105,13 +126,13 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
-//        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(
-//            userId, cursor,
-//            PageRequest.of(0, size));
-
-        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursorQdsl(
+        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursor(
             userId, cursor,
             PageRequest.of(0, size));
+
+//        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursorQdsl(
+//            userId, cursor,
+//            PageRequest.of(0, size));
 
         Long nextCursor = null;
         if (reservations.hasNext()) {
@@ -223,17 +244,17 @@ public class ReservationService {
     public int terminateExpiredReservations() {
         LocalDateTime threshold = LocalDateTime.now().minusDays(1);
 
-//        List<Reservation> toTerminate = reservationRepository
-//            .findAllByStatusAndReservedAtBefore(
-//                ReservationStatus.CONFIRMED,
-//                threshold
-//            );
-
         List<Reservation> toTerminate = reservationRepository
-            .findAllByStatusAndReservedAtBeforeQdsl(
+            .findAllByStatusAndReservedAtBefore(
                 ReservationStatus.CONFIRMED,
                 threshold
             );
+
+//        List<Reservation> toTerminate = reservationRepository
+//            .findAllByStatusAndReservedAtBeforeQdsl(
+//                ReservationStatus.CONFIRMED,
+//                threshold
+//            );
 
         for (Reservation r : toTerminate) {
             r.changeStatus(ReservationStatus.TERMINATED);
