@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import shop.matjalalzz.party.dto.PartyMemberResponse;
 import shop.matjalalzz.party.entity.PartyUser;
 
 public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
@@ -19,12 +20,14 @@ public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
     List<PartyUser> findAllByPartyId(Long partyId);
 
     @Query(value = """
-        select u.id as userId, u.nickname as userNickname, concat(:baseUrl, u.profileKey) as userProfile, pu.isHost
+        select new shop.matjalalzz.party.dto.PartyMemberResponse(
+            u.id, u.nickname, concat(:baseUrl, u.profileKey), pu.isHost
+        )
         from PartyUser pu
             join pu.user u
         where pu.party.id = :partyId
         """)
-    <T> List<T> findMembersByPartyId(@Param("partyId") long partyId,
+    List<PartyMemberResponse> findMembersByPartyId(@Param("partyId") long partyId,
         @Param("baseUrl") String baseUrl);
 
     boolean existsByUserIdAndPartyId(Long userId, Long partyId);

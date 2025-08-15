@@ -8,14 +8,17 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 
 public interface PartyRepository extends JpaRepository<Party, Long> {
 
     @Query("""
-        select p.id as partyId, p.title, s.shopName, p.metAt, p.deadline, p.status, p.maxCount, p.minCount,
-               p.currentCount, p.genderCondition, p.minAge, p.maxAge, p.description, pu.isHost
+        select new shop.matjalalzz.party.dto.MyPartyResponse(
+                p.id, p.title, s.shopName, p.metAt, p.deadline, p.status, p.maxCount, p.minCount,
+                p.currentCount, p.genderCondition, p.minAge, p.maxAge, p.description, pu.isHost
+        )
         from PartyUser pu
             join pu.party p
             join p.shop s
@@ -23,7 +26,7 @@ public interface PartyRepository extends JpaRepository<Party, Long> {
             and (:cursor is null or pu.party.id < :cursor)
         order by p.id desc
         """)
-    <T> Slice<T> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
+    Slice<MyPartyResponse> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
 
     List<Party> findByDeadlineAfterAndStatus(LocalDateTime now, PartyStatus status);
 
