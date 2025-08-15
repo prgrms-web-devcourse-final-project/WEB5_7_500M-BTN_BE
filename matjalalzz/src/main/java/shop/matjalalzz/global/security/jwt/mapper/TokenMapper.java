@@ -1,6 +1,6 @@
 package shop.matjalalzz.global.security.jwt.mapper;
 
-import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
+import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.user.entity.User;
@@ -22,9 +22,9 @@ public class TokenMapper {
                 .build();
     }
 
-    public static LoginTokenResponseDto toLoginTokenResponseDto(
+    public static LoginTokenResponse toLoginTokenResponseDto(
             String accessToken, String refreshToken) {
-        return LoginTokenResponseDto.builder()
+        return LoginTokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
