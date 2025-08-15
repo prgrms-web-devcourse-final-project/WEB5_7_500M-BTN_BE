@@ -3,15 +3,14 @@ package shop.matjalalzz.global.security.jwt.app;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
-import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
-import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
-import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
+import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponse;
+import shop.matjalalzz.global.security.jwt.dto.AuthUserInfoDto;
+import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.global.util.CookieUtils;
@@ -28,7 +27,7 @@ public class TokenService {
     private final TokenProvider tokenProvider;
 
     @Transactional
-    public LoginTokenResponseDto oauthLogin(String email) {
+    public LoginTokenResponse oauthLogin(String email) {
         User found = userRepository.findByEmail(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -51,20 +50,18 @@ public class TokenService {
     }
 
     @Transactional(readOnly = true)
-    public AccessTokenResponseDto refreshAccessToken(String refreshToken) {
+    public AccessTokenResponse refreshAccessToken(String refreshToken) {
         if (!tokenProvider.validate(refreshToken)) {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         Long userId = tokenProvider.parseRefreshToken(refreshToken);
-        RefreshToken token = refreshTokenRepository.findByUserIdWithUser(userId)
+        AuthUserInfoDto info = refreshTokenRepository.findByUserIdWithUser(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
-        User user = token.getUser();
 
         // 새로운 액세스 토큰 발급
-        String newAccessToken = tokenProvider.issueAccessToken(user.getId(), user.getRole(),
-            user.getEmail());
-        return new AccessTokenResponseDto(newAccessToken);
+        String newAccessToken = tokenProvider.issueAccessToken(userId, info.role(), info.email());
+        return new AccessTokenResponse(newAccessToken);
     }
 
     @Transactional
