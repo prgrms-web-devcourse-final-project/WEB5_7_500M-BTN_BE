@@ -11,11 +11,10 @@ import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponse;
 import shop.matjalalzz.global.security.jwt.dto.AuthUserInfoDto;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
-import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.user.dao.UserRepository;
-import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.dto.LoginInfoDto;
 
 @Slf4j
 @Service
@@ -28,25 +27,18 @@ public class TokenService {
 
     @Transactional
     public LoginTokenResponse oauthLogin(String email) {
-        User found = userRepository.findByEmail(email)
-            .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        LoginInfoDto found = userRepository.findByEmailForLogin(email)
+            .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND));
 
-        String accessToken = tokenProvider.issueAccessToken(found.getId(), found.getRole(),
-            found.getEmail());
+        String accessToken = tokenProvider.issueAccessToken(
+            found.userId(), found.role(), found.email()
+        );
 
-        RefreshToken refreshToken = refreshTokenRepository.findByUser(found)
-            .orElseGet(() -> refreshTokenRepository.save(
-                TokenMapper.toRefreshToken(
-                    tokenProvider.issueRefreshToken(found.getId()), found
-                )
-            ));
+        String newRefreshToken = tokenProvider.issueRefreshToken(found.userId());
 
-        if (!tokenProvider.validate(refreshToken.getRefreshToken())) {
-            String reissueRefreshToken = tokenProvider.issueRefreshToken(found.getId());
-            refreshToken.updateRefreshToken(reissueRefreshToken);
-        }
+        refreshTokenRepository.upsertByUserId(found.userId(), newRefreshToken);
 
-        return TokenMapper.toLoginTokenResponseDto(accessToken, refreshToken.getRefreshToken());
+        return TokenMapper.toLoginTokenResponseDto(accessToken, newRefreshToken);
     }
 
     @Transactional(readOnly = true)
