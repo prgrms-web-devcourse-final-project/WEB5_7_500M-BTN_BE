@@ -39,10 +39,17 @@ public class DsProxyLoggingConfig {
                 long ns = System.nanoTime() - start; //개별 쿼리 단위 경과 시간
                 JDBC_NS.set(JDBC_NS.get() + ns); //스레드별 누적
 
-                String sql = qi.isEmpty() ? "" : qi.get(0).getQuery();
-                String oneLine = sql == null ? "" : sql.replaceAll("\\s+", " ").trim();
                 double ms = ns / 1_000_000.0;
-                log.info(String.format("[SQL] %.3f ms | %s", ms, oneLine));
+//                String sql = qi.isEmpty() ? "" : qi.get(0).getQuery();
+//                String oneLine = sql == null ? "" : sql.replaceAll("\\s+", " ").trim();
+//                log.info(String.format("[SQL] %.3f ms | %s", ms, oneLine));
+
+                // 여러 SQL이 있을 수 있으니 모두 로그로 남기고 싶으면 loop
+                for (QueryInfo q : qi) {
+                    String sql = q.getQuery();
+                    String oneLine = sql == null ? "" : sql.replaceAll("\\s+", " ").trim();
+                    log.info("[SQL] {} ms | {}", String.format("%.3f", ms), oneLine);
+                }
             }
         };
     }
