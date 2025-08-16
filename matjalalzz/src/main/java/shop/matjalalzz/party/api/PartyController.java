@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.party.app.PartyService;
+import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyMemberResponse;
@@ -34,14 +34,14 @@ import shop.matjalalzz.party.dto.PartySearchParam;
 @Tag(name = "파티 API", description = "맛집 탐험 파티 관련 API")
 public class PartyController {
 
-    private final PartyService partyService;
+    private final PartyFacade partyFacade;
 
     @Operation(summary = "파티 생성", description = "맛집 탐험 파티 모집 게시글을 작성합니다.(Completed)")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BaseResponse<Void> createParty(@Valid @RequestBody PartyCreateRequest partyCreateRequest,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.createParty(partyCreateRequest, userInfo.getId());
+        partyFacade.createParty(partyCreateRequest, userInfo.getId());
         return BaseResponse.ok(BaseStatus.CREATED);
     }
 
@@ -49,7 +49,7 @@ public class PartyController {
     @GetMapping("/{partyId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<PartyDetailResponse> getPartyDetail(@PathVariable Long partyId) {
-        PartyDetailResponse response = partyService.getPartyDetail(partyId);
+        PartyDetailResponse response = partyFacade.getPartyDetail(partyId);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
@@ -57,7 +57,7 @@ public class PartyController {
     @GetMapping("/{partyId}/members")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<List<PartyMemberResponse>> getPartyMembers(@PathVariable Long partyId) {
-        List<PartyMemberResponse> response = partyService.getPartyMembers(partyId);
+        List<PartyMemberResponse> response = partyFacade.getPartyMembers(partyId);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
@@ -83,7 +83,7 @@ public class PartyController {
         @ParameterObject PartySearchParam param,
         @RequestParam(required = false, defaultValue = "10") int size
     ) {
-        PartyScrollResponse response = partyService.searchParties(param, size);
+        PartyScrollResponse response = partyFacade.searchParties(param, size);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
@@ -92,7 +92,7 @@ public class PartyController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> joinParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.joinParty(partyId, userInfo.getId());
+        partyFacade.joinParty(partyId, userInfo.getId());
         return BaseResponse.ok(BaseStatus.OK);
     }
 
@@ -101,7 +101,7 @@ public class PartyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void quitParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.quitParty(partyId, userInfo.getId());
+        partyFacade.quitParty(partyId, userInfo.getId());
     }
 
     @Operation(summary = "파티 강퇴", description = "맛집 탐험 파티에서 파티원을 강제 퇴장시킵니다.(Completed)")
@@ -110,7 +110,7 @@ public class PartyController {
     public BaseResponse<Void> quitParty(@PathVariable Long partyId,
         @PathVariable Long userId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.kickout(partyId, userInfo.getId(), userId);
+        partyFacade.kickout(partyId, userInfo.getId(), userId);
         return BaseResponse.ok(BaseStatus.OK);
     }
 
@@ -119,7 +119,7 @@ public class PartyController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.deleteParty(partyId, userInfo.getId());
+        partyFacade.deleteParty(partyId, userInfo.getId());
     }
 
     @Operation(summary = "파티 모집 완료 상태 변경", description = "모집중인 파티를 모집종료 상태로 변경합니다.(Completed)")
@@ -127,7 +127,7 @@ public class PartyController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<Void> completeParty(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.completePartyRecruit(partyId, userInfo.getId());
+        partyFacade.completePartyRecruit(partyId, userInfo.getId());
         return BaseResponse.ok(BaseStatus.OK);
     }
 
@@ -136,7 +136,7 @@ public class PartyController {
     @ResponseStatus(HttpStatus.OK)
     public void payPartyFee(@PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser userInfo) {
-        partyService.payReservationFee(partyId, userInfo.getId());
+        partyFacade.payReservationFee(partyId, userInfo.getId());
     }
 }
 

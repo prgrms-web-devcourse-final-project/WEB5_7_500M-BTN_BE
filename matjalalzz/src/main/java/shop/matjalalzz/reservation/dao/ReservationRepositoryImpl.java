@@ -17,6 +17,7 @@ import shop.matjalalzz.reservation.entity.QReservation;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.QShop;
+import shop.matjalalzz.user.entity.QUser;
 
 @Repository
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     private final JPAQueryFactory query;
     private static final QReservation r = QReservation.reservation;
     private static final QShop s = QShop.shop;
+    private static final QUser u = QUser.user;
 
     @Override
     public Slice<Reservation> findByShopIdWithFilterAndCursorQdsl(Long shopId, ReservationStatus status, Long cursor, Pageable pageable) {
@@ -53,12 +55,14 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
             .select(Projections.constructor(MyReservationResponse.class,
                 r.id,
                 s.shopName,
+                u.name,
                 r.reservedAt,
                 r.headCount,
                 r.reservationFee,
                 r.status
             ))
             .from(r)
+            .join(r.user, u)
             .join(r.shop, s)
             .where(r.user.id.eq(userId), ltCursor(cursor))
             .orderBy(r.id.desc())

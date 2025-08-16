@@ -1,6 +1,7 @@
 package shop.matjalalzz.global.security.jwt.app;
 
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,10 +12,12 @@ import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponse;
 import shop.matjalalzz.global.security.jwt.dto.AuthUserInfoDto;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
+import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.dto.LoginInfoDto;
+import shop.matjalalzz.user.entity.User;
 
 @Slf4j
 @Service
@@ -41,6 +44,23 @@ public class TokenService {
         return TokenMapper.toLoginTokenResponseDto(accessToken, newRefreshToken);
     }
 
+    @Transactional
+    public void logout(long userId, HttpServletResponse response) {
+        refreshTokenRepository.findById(userId).ifPresent(refreshTokenRepository::delete);
+
+        CookieUtils.deleteRefreshTokenCookie(response);
+    }
+
+    @Transactional
+    public void upsertRefreshToken(long userId, String refreshToken) {
+        refreshTokenRepository.upsertByUserId(userId, refreshToken);
+    }
+
+    @Transactional
+    public void deleteRefreshToken(RefreshToken refreshToken) {
+        refreshTokenRepository.delete(refreshToken);
+    }
+
     @Transactional(readOnly = true)
     public AccessTokenResponse refreshAccessToken(String refreshToken) {
         if (!tokenProvider.validate(refreshToken)) {
@@ -56,11 +76,9 @@ public class TokenService {
         return new AccessTokenResponse(newAccessToken);
     }
 
-    @Transactional
-    public void logout(long userId, HttpServletResponse response) {
-        refreshTokenRepository.findById(userId).ifPresent(refreshTokenRepository::delete);
-
-        CookieUtils.deleteRefreshTokenCookie(response);
+    @Transactional(readOnly = true)
+    public Optional<RefreshToken> findRefreshToken(User user) {
+        return refreshTokenRepository.findByUser(user);
     }
 
 }

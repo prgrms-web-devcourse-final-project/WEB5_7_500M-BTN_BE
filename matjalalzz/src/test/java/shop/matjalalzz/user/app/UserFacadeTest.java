@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,9 +18,12 @@ import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Gender;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+public class UserFacadeTest {
 
     @InjectMocks
+    private UserFacade userFacade;
+
+    @Mock
     private UserService userService;
 
     @Mock
@@ -41,10 +43,10 @@ public class UserServiceTest {
         when(user.getGender()).thenReturn(Gender.W);
         when(user.getProfileKey()).thenReturn("/profile/1/img.png");
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userService.getUserById(1L)).thenReturn(user);
 
         // when
-        MyInfoResponse response = userService.getMyInfo(1L);
+        MyInfoResponse response = userFacade.getMyInfo(1L);
 
         // then
         assertThat(response.userId()).isEqualTo(1L);
@@ -64,7 +66,7 @@ public class UserServiceTest {
             .profileKey("/profile/1/1234_img.png")
             .build();
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userService.getUserById(1L)).thenReturn(user);
 
         MyInfoUpdateRequest request = MyInfoUpdateRequest.builder()
             .nickname("newNick")
@@ -74,7 +76,7 @@ public class UserServiceTest {
             .build();
 
         // when
-        userService.updateMyInfo(1L, request);
+        userFacade.updateMyInfo(1L, request);
 
         // then
         assertThat(user.getNickname()).isEqualTo("newNick");
