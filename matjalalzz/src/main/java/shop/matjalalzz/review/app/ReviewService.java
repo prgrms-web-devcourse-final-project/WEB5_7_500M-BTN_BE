@@ -22,6 +22,7 @@ import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
+import shop.matjalalzz.review.dto.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.app.ShopService;
@@ -80,13 +81,14 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
-        Slice<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
+        Slice<ReviewProjection> reviews = reviewRepository.findByShopIdAndCursor(shopId, cursor,
             PageRequest.of(0, size));
         Long nextCursor = null;
-        if (comments.hasNext()) {
-            nextCursor = comments.getContent().getLast().getId();
+        if (reviews.hasNext()) {
+            nextCursor = reviews.getContent().getLast().getReviewId();
         }
-        return ReviewMapper.toReviewPageResponse(nextCursor, comments.getContent(), BASE_URL);
+        return ReviewMapper.toReviewPageResponseFromProjection(nextCursor, reviews.getContent(),
+            BASE_URL);
     }
 
     @Transactional(readOnly = true)
