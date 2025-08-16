@@ -2,6 +2,7 @@ package shop.matjalalzz.party.app;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -98,24 +99,6 @@ public class PartyFacade {
 
     @Transactional(readOnly = true)
     public PartyScrollResponse searchParties(PartySearchParam condition, int size) {
-//        Specification<Party> spec = PartySpecification.createSpecification(condition);
-//
-//        Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
-//        Slice<Party> partyList = partyService.findAll(spec, pageable);
-//
-//        Long nextCursor = null;
-//        if (partyList.hasNext()) {
-//            nextCursor = partyList.getContent().getLast().getId();
-//        }
-//
-//        List<PartyListResponse> content = partyList.stream()
-//            .map(party -> PartyMapper.toListResponse
-//                (party, imageService.getShopThumbnail(party.getShop().getId()))
-//            )
-//            .toList();
-//
-//        return new PartyScrollResponse(content, nextCursor);
-
         List<Party> parties = partyService.searchParties(condition, size);
 
         boolean hasNext = parties.size() > size;
@@ -125,9 +108,18 @@ public class PartyFacade {
 
         Long nextCursor = hasNext ? parties.getLast().getId() : null;
 
+        // shopId 수집
+        List<Long> shopIds = parties.stream()
+            .map(p -> p.getShop().getId())
+            .distinct()
+            .toList();
+
+        // 썸네일 이미지 한꺼번에 조회
+        Map<Long, String> thumbMap = imageService.getShopThumbnails(shopIds);
+
         List<PartyListResponse> content = parties.stream()
             .map(party -> PartyMapper.toListResponse
-                (party, imageService.getShopThumbnail(party.getShop().getId()))
+                (party, thumbMap.get(party.getShop().getId()))
             )
             .toList();
 
@@ -227,7 +219,7 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
         }
 
-        Reservation reservation = party.getReservation();
+        Reservation reservation = reservationService.findByPartyId(partyId);
 
         // 예약이 없거나, 아직 예약이 승인 대기 중일 때만 탈퇴 가능
         if (reservation != null && reservation.getStatus() != ReservationStatus.PENDING) {
@@ -273,7 +265,7 @@ public class PartyFacade {
         log.info("quitPartyForWithdraw: {}", parties.size());
 
         for (Party party : parties) {
-            Reservation reservation = party.getReservation();
+            Reservation reservation = reservationService.findByPartyId(party.getId());
 
             if (party.getStatus() == PartyStatus.COMPLETED
                 && party.getMinCount() > party.getCurrentCount() - 1) {
@@ -369,7 +361,7 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS_DELETE_PARTY);
         }
 
-        Reservation reservation = party.getReservation();
+        Reservation reservation = reservationService.findByPartyId(partyId);
 
         // 예약일 하루 전이라면 파티 삭제 불가
         if (reservation != null && reservation.getStatus() == ReservationStatus.CONFIRMED
@@ -393,8 +385,8 @@ public class PartyFacade {
 
         for (Party party : parties) {
             reservationService.refundPartyReservationFee(party);
+            Reservation reservation = reservationService.findByPartyId(party.getId());
 
-            Reservation reservation = party.getReservation();
             if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
             }

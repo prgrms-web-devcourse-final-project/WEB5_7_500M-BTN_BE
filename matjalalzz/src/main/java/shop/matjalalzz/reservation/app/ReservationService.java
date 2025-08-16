@@ -83,8 +83,14 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status, LocalDateTime threshold) {
+    public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status,
+        LocalDateTime threshold) {
         return reservationRepository.findAllByStatusAndReservedAtBefore(status, threshold);
+    }
+
+    @Transactional(readOnly = true)
+    public Reservation findByPartyId(Long partyId) {
+        return reservationRepository.findByPartyId(partyId);
     }
 }
 

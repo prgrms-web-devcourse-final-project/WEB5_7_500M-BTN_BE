@@ -1,5 +1,6 @@
 package shop.matjalalzz.image.dao;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,5 +24,11 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     Optional<Image> findByShopIdAndImageIndex(Long shopId, long imageIndex);
 
+    @Query("""
+        select i
+        from Image i
+        where i.shopId in :shopIds and i.imageIndex=0
+        """)
+    List<Image> findThumbnailByShopIds(@Param("shopIds") Collection<Long> shopIds);
 
 }

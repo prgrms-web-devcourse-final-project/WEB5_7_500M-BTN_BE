@@ -102,7 +102,7 @@ public class PartyService {
     public List<Party> findAllMyPartyByUserIdForWithdraw(long userId) {
         LocalDateTime threshold = LocalDateTime.now().plusDays(1);
 
-        return partyRepository.findAllMyPartyByUserIdForWithdraw(userId, threshold);
+        return partyRepository.findAllMyPartyByUserIdForWithdraw(userId);
     }
 
     @Transactional(readOnly = true)

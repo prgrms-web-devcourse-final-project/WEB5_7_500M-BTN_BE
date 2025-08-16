@@ -50,14 +50,11 @@ public class Image {
     @Column(nullable = false)
     private long imageIndex;
 
-
     @Column(name = "shop_id", nullable = true)
     private Long shopId;
 
-
     @Column(name = "review_id", nullable = true)
     private Long reviewId;
-
 
     @Column(name = "inquiry_id", nullable = true)
     private Long inquiryId;

@@ -122,4 +122,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         """)
     void refundPartyReservationFee(@Param("partyId") Long partyId,
         @Param("refundAmount") int refundAmount);
+
+    Reservation findByPartyId(Long partyId);
 }
