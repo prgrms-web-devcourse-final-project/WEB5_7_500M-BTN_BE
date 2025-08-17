@@ -10,7 +10,7 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponse;
-import shop.matjalalzz.global.security.jwt.dto.AuthUserInfoDto;
+import shop.matjalalzz.global.security.jwt.dto.AuthUserView;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
@@ -68,11 +68,16 @@ public class TokenService {
         }
 
         Long userId = tokenProvider.parseRefreshToken(refreshToken);
-        AuthUserInfoDto info = refreshTokenRepository.findByUserIdWithUser(userId)
+        AuthUserView info = refreshTokenRepository.findByUserIdWithUser(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
 
+        if (!refreshToken.equals(info.getRefreshToken())) {
+            throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
         // 새로운 액세스 토큰 발급
-        String newAccessToken = tokenProvider.issueAccessToken(userId, info.role(), info.email());
+        String newAccessToken = tokenProvider.issueAccessToken(userId, info.getRole(),
+            info.getEmail());
         return new AccessTokenResponse(newAccessToken);
     }
 

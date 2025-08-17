@@ -7,12 +7,6 @@ import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 
 public class TokenMapper {
-    public static RefreshToken toRefreshToken(String refreshToken, User user) {
-        return RefreshToken.builder()
-                .refreshToken(refreshToken)
-                .user(user)
-                .build();
-    }
 
     public static TokenBodyDto toTokenBodyDto(Long userId, String email, Role role) {
         return TokenBodyDto.builder()
