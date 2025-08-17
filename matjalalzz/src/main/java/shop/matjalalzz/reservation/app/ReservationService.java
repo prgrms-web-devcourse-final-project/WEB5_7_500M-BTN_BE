@@ -55,12 +55,6 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<MyReservationResponse> findByUserIdAndCursorQdsl(
-        Long userId, Long cursor, Pageable pageable) {
-        return reservationRepository.findByUserIdAndCursorQdsl(userId, cursor, pageable);
-    }
-
-    @Transactional(readOnly = true)
     public Slice<Reservation> findByShopIdsWithFilterAndCursor(
         List<Long> shopIds, ReservationStatus status, Long cursor, Pageable pageable) {
         return reservationRepository.findByShopIdsWithFilterAndCursor(

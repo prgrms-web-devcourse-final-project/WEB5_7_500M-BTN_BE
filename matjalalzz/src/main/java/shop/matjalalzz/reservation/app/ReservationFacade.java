@@ -122,11 +122,7 @@ public class ReservationFacade {
 
     @Transactional(readOnly = true)
     public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
-//        Slice<MyReservationResponse> reservations = reservationService.findByUserIdAndCursor(
-//            userId, cursor,
-//            PageRequest.of(0, size));
-
-        Slice<MyReservationResponse> reservations = reservationService.findByUserIdAndCursorQdsl(
+        Slice<MyReservationResponse> reservations = reservationService.findByUserIdAndCursor(
             userId, cursor,
             PageRequest.of(0, size));
 
