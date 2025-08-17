@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import shop.matjalalzz.image.dto.ReviewImageView;
 import shop.matjalalzz.image.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
@@ -23,5 +24,11 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     Optional<Image> findByShopIdAndImageIndex(Long shopId, long imageIndex);
 
-
+    @Query("""
+        SELECT i.reviewId AS reviewId, i.s3Key AS s3Key
+        FROM Image i
+        WHERE i.reviewId in :reviewIds
+        ORDER BY i.reviewId ASC, i.imageIndex ASC
+        """)
+    List<ReviewImageView> findImageKeyByReviewIds(@Param("reviewIds") List<Long> reviewIds);
 }

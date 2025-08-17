@@ -1,6 +1,8 @@
 package shop.matjalalzz.review.app;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +13,8 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.image.app.ImageService;
+import shop.matjalalzz.image.dto.ReviewImageView;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -19,7 +23,7 @@ import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.review.dto.MyReviewResponse;
+import shop.matjalalzz.review.dto.MyReviewView;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.entity.Review;
@@ -39,6 +43,7 @@ public class ReviewService {
     private final PartyService partyService;
     private final ShopService shopService;
     private final PreSignedProvider preSignedProvider;
+    private final ImageService imageService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -91,15 +96,25 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
-        Slice<MyReviewResponse> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
+        Slice<MyReviewView> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
             PageRequest.of(0, size));
+
+        List<MyReviewView> content = comments.getContent();
 
         Long nextCursor = null;
         if (comments.hasNext()) {
-            nextCursor = comments.getContent().getLast().reviewId();
+            nextCursor = content.getLast().getReviewId();
         }
 
-        return ReviewMapper.toMyReviewPageResponse(nextCursor, comments);
+        List<Long> reviewIds = content.stream().map(MyReviewView::getReviewId).toList();
+        List<ReviewImageView> reviewImages = imageService.findReviewImages(reviewIds);
+
+        Map<Long, List<String>> reviewImageMap = reviewImages.stream().collect(
+            Collectors.groupingBy(ReviewImageView::getReviewId,
+                Collectors.mapping(v -> BASE_URL + v.getS3Key(), Collectors.toList())
+            ));
+
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, content, reviewImageMap);
     }
 
     @Transactional(readOnly = true)
