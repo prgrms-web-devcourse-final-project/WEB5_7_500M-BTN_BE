@@ -13,6 +13,7 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.dto.MyReservationView;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
@@ -51,7 +52,10 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public Slice<MyReservationResponse> findByUserIdAndCursor(
         Long userId, Long cursor, Pageable pageable) {
-        return reservationRepository.findByUserIdAndCursor(userId, cursor, pageable);
+        Slice<MyReservationView> views = reservationRepository.findByUserIdAndCursor(
+            userId, cursor, pageable);
+
+        return views.map(ReservationMapper::toMyReservationResponse);
     }
 
     @Transactional(readOnly = true)

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.dto.MyReservationView;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
@@ -60,9 +61,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
     // 회원이 진행한 예약과 회원이 속한 파티가 진행한 예약을 조회
     @Query("""
-        select new shop.matjalalzz.reservation.dto.MyReservationResponse(
-                r.id, s.shopName, u.name, r.reservedAt, r.headCount, r.reservationFee, r.status
-        )
+        SELECT r.id as reservationId, s.shopName as shopName, u.name as name,
+               r.reservedAt as reservedAt, r.headCount as headCount,
+               r.reservationFee as reservationFee, r.status as status
         from Reservation r
             join r.shop  s
             join r.user  u
@@ -77,7 +78,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             )
         order by r.id desc
         """)
-    Slice<MyReservationResponse> findByUserIdAndCursor(
+    Slice<MyReservationView> findByUserIdAndCursor(
         @Param("userId") Long userId,
         @Param("cursor") Long cursor,
         Pageable pageable);
