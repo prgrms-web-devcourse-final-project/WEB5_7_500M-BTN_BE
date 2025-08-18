@@ -13,7 +13,6 @@ import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.dao.PartyRepository;
-import shop.matjalalzz.party.dao.PartySearchRepository;
 import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyMemberResponse;
@@ -21,6 +20,8 @@ import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
+import shop.matjalalzz.party.dao.PartySearchRepository;
+import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -30,7 +31,6 @@ public class PartyService {
     private final PartyChatService partyChatService;
     private final PartyRepository partyRepository;
     private final PartyUserRepository partyUserRepository;
-    private final PartySearchRepository partySearchRepository;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -97,11 +97,13 @@ public class PartyService {
     public List<Party> findAllMyPartyByUserIdForWithdraw(long userId) {
         LocalDateTime threshold = LocalDateTime.now().plusDays(1);
 
-        return partyRepository.findAllMyPartyByUserIdForWithdraw(userId);
+        // 회원이 파티장이며, 파티가 종료되지 않았고, 파티의 예약이 없거나, 예약일로부터 하루 이상 남은 파티 조회
+        return partyRepository.findAllMyPartyByUserIdForWithdraw(userId, threshold);
     }
 
     @Transactional(readOnly = true)
     public List<Party> findAllParticipatingPartyByUserIdForWithdraw(long userId) {
+        // 회원이 파티원이며, 파티가 종료되지 않았고, 파티의 예약이 없거나 수락되지 않은 상태인 예약인 파티 조회
         return partyRepository.findAllParticipatingPartyByUserIdForWithdraw(userId);
     }
 

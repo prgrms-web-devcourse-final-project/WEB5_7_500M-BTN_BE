@@ -159,12 +159,11 @@ public class UserFacade {
             throw new BusinessException(ErrorCode.OWNER_CANNOT_WITHDRAW);
         }
 
-        partyFacade.deletePartyForWithdraw(user);
-        partyFacade.quitPartyForWithdraw(user);
+        partyFacade.deletePartyForWithdraw(user); // 본인이 파티장인 파티 중 해체 가능한 파티 처리
+        partyFacade.quitPartyForWithdraw(user); // 본인이 파티참가자인 파티 중 탈퇴 가능한 파티 처리
+        reservationFacade.cancelReservationForWithdraw(user); // 취소 가능한 예약 처리
 
-        reservationFacade.cancelReservationForWithdraw(user);
-
-        tokenService.deleteRefreshToken(foundRefreshToken);
+        tokenService.deleteRefreshToken(foundRefreshToken); // 리프레시 토큰 제거
 
         user.delete();
 

@@ -184,14 +184,15 @@ public class ReservationFacade {
 
     @Transactional
     public void cancelReservationForWithdraw(User user) {
+        // 회원 탈퇴시에 회원 단독으로 진행한 예약 중 취소 가능한 예약 조회
         List<Reservation> reservations = reservationService.findAllMyReservationByUserIdForWithdraw(
             user.getId());
 
-        log.info("cancelReservationForWithdraw: {}", reservations.size());
-
         for (Reservation reservation : reservations) {
+            // 예약금 환불
             reservation.getUser().increasePoint(reservation.getReservationFee());
 
+            // 예약 취소
             reservation.changeStatus(ReservationStatus.CANCELLED);
         }
     }

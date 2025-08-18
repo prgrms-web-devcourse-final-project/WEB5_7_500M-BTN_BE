@@ -214,6 +214,7 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.HOST_CANNOT_QUIT_PARTY);
         }
 
+        // 파티가 이미 종료된 경우, 탈퇴 불가능
         if (party.getStatus() == PartyStatus.TERMINATED) {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
         }
@@ -224,6 +225,27 @@ public class PartyFacade {
         if (reservation != null && reservation.getStatus() != ReservationStatus.PENDING) {
             throw new BusinessException(ErrorCode.CANNOT_QUIT_PARTY_STATUS);
         }
+
+        processQuitParty(partyUser, party, user, reservation);
+    }
+
+    @Transactional
+    public void quitPartyForWithdraw(User user) {
+        // 회원 탈퇴시에 본인이 파티원이며, 파티 탈퇴 가능한 파티만 조회
+        List<Party> parties = partyService.findAllParticipatingPartyByUserIdForWithdraw(
+            user.getId());
+
+        for (Party party : parties) {
+            Reservation reservation = reservationService.findByPartyId(party.getId());
+            PartyUser partyUser = partyService.findPartyUser(user.getId(), party);
+
+            // 파티 탈퇴 진행
+            processQuitParty(partyUser, party, user, reservation);
+        }
+    }
+
+    private void processQuitParty(PartyUser partyUser, Party party, User user,
+        Reservation reservation) {
 
         // 파티 모집완료 상태에서 나갔을 때, 최소 인원보다 적을 시 파티 제거
         if (party.getStatus() == PartyStatus.COMPLETED
@@ -254,48 +276,6 @@ public class PartyFacade {
         party.decreaseCurrentCount();
 
         partyChatService.leaveParty(user, party);
-    }
-
-    @Transactional
-    public void quitPartyForWithdraw(User user) {
-        List<Party> parties = partyService.findAllParticipatingPartyByUserIdForWithdraw(
-            user.getId());
-
-        log.info("quitPartyForWithdraw: {}", parties.size());
-
-        for (Party party : parties) {
-            Reservation reservation = reservationService.findByPartyId(party.getId());
-
-            if (party.getStatus() == PartyStatus.COMPLETED
-                && party.getMinCount() > party.getCurrentCount() - 1) {
-
-                reservationService.refundPartyReservationFee(party);
-
-                if (reservation != null) {
-                    reservation.changeStatus(ReservationStatus.CANCELLED);
-                }
-
-                partyService.breakParty(party);
-            } else {
-                PartyUser partyUser = partyService.findPartyUser(user.getId(), party);
-
-                if (partyUser.isPaymentCompleted()) {
-                    int fee = party.getShop().getReservationFee();
-                    party.decreaseTotalReservationFee(fee);
-                    user.increasePoint(fee);
-
-                    if (reservation != null) {
-                        reservation.decreaseHeadCount();
-                        reservation.decreaseReservationFee(fee);
-                    }
-                }
-
-                partyUser.delete();
-                party.decreaseCurrentCount();
-
-                partyChatService.leaveParty(user, party);
-            }
-        }
     }
 
     @Retryable(
@@ -379,17 +359,20 @@ public class PartyFacade {
 
     @Transactional
     public void deletePartyForWithdraw(User user) {
+        // 회원 탈퇴시에 본인이 파티장이며 파티 해체시킬 수 있는 파티만 조회
         List<Party> parties = partyService.findAllMyPartyByUserIdForWithdraw(user.getId());
-        log.info("deletePartyForWithdraw: {}", parties.size());
 
         for (Party party : parties) {
+            // 예약금을 지불한 파티원에게 예약금 환불
             reservationService.refundPartyReservationFee(party);
-            Reservation reservation = reservationService.findByPartyId(party.getId());
 
+            // 예약이 진행 중일 때, 예약을 취소
+            Reservation reservation = reservationService.findByPartyId(party.getId());
             if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
             }
 
+            // 파티 해체
             partyService.breakParty(party);
         }
     }
