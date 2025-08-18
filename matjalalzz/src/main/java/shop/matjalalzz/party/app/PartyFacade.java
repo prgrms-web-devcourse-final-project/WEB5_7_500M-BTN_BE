@@ -179,13 +179,14 @@ public class PartyFacade {
         }
 
         // 6. 중복 참여, 이전에 참여 이력 존재 확인
-        Optional<PartyUser> existingPartyUser = partyService.findByUserIdAndPartyId(user.getId(),
+        Optional<Boolean> deletedOrNot = partyService.findByUserIdAndPartyId(user.getId(),
             party.getId());
 
-        if (existingPartyUser.isPresent()) {
-            if (existingPartyUser.get().isDeleted()) {
+        //이전에 참여 이력 존재
+        if (deletedOrNot.isPresent()) {
+            if (deletedOrNot.get()) { // 한번 파티에 참여했다가 탈퇴했던 유저
                 throw new BusinessException(ErrorCode.QUIT_PARTY_USER);
-            } else {
+            } else { //이미 파티에 참여중인 유저
                 throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
             }
         }

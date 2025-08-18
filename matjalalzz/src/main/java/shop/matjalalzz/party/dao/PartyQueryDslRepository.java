@@ -33,7 +33,7 @@ public class PartyQueryDslRepository {
 
     private JPAQuery<Party> baseQuery(PartySearchParam cond) {
         return query.selectFrom(party)
-            .join(party.shop, shop).fetchJoin() //TODO: shop.image까지 fetch join
+            .join(party.shop, shop).fetchJoin()
             .where(
                 statusEq(cond.status()),
                 genderEq(cond.gender()),

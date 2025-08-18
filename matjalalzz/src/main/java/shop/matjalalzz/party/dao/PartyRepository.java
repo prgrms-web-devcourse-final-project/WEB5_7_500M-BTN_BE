@@ -8,25 +8,36 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import shop.matjalalzz.party.dto.MyPartyResponse;
+import shop.matjalalzz.party.dto.projection.MyPartyProjection;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 
 public interface PartyRepository extends JpaRepository<Party, Long> {
 
     @Query("""
-        select new shop.matjalalzz.party.dto.MyPartyResponse(
-                p.id, p.title, s.shopName, p.metAt, p.deadline, p.status, p.maxCount, p.minCount,
-                p.currentCount, p.genderCondition, p.minAge, p.maxAge, p.description, pu.isHost
-        )
-        from PartyUser pu
-            join pu.party p
-            join p.shop s
-        where pu.user.id = :userId
-            and (:cursor is null or pu.party.id < :cursor)
-        order by p.id desc
+        SELECT
+            p.id as id,
+            p.title as title,
+            s.shopName as shopName,
+            p.metAt as metAt,
+            p.deadline as deadline,
+            p.status as status,
+            p.maxCount as maxCount,
+            p.minCount as minCount,
+            p.currentCount as currentCount,
+            p.genderCondition as genderCondition,
+            p.minAge as minAge,
+            p.maxAge as maxAge,
+            p.description as description,
+            pu.isHost as isHost
+        FROM PartyUser pu
+            JOIN pu.party p
+            JOIN p.shop s
+        WHERE pu.user.id = :userId
+            AND (:cursor is null or pu.party.id < :cursor)
+        ORDER BY p.id desc
         """)
-    Slice<MyPartyResponse> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
+    Slice<MyPartyProjection> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
 
     List<Party> findByDeadlineAfterAndStatus(LocalDateTime now, PartyStatus status);
 
@@ -40,21 +51,21 @@ public interface PartyRepository extends JpaRepository<Party, Long> {
 
     @Query("""
         SELECT p
-        FROM Party p
-            JOIN p.partyUsers pu ON
-                pu.user.id = :userId
-                AND pu.isHost
-        WHERE p.status <> "TERMINATED"
+        FROM PartyUser pu
+            JOIN pu.party p
+        WHERE pu.user.id = :userId
+            AND pu.isHost
+            AND p.status <> "TERMINATED"
         """)
     List<Party> findAllMyRecruitingParty(@Param("userId") long userId);
 
     @Query("""
         SELECT p
-        FROM Party p
-            JOIN p.partyUsers pu ON
-                pu.user.id = :userId
-                AND pu.isHost = false
-        WHERE p.status <> "TERMINATED"
+        FROM PartyUser pu
+            JOIN pu.party p
+        WHERE pu.user.id = :userId
+            AND pu.isHost = false
+            AND p.status <> "TERMINATED"
         """)
     List<Party> findAllParticipatingParty(@Param("userId") long userId);
 

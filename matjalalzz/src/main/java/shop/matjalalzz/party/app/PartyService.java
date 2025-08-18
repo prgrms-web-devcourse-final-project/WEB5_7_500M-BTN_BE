@@ -17,9 +17,11 @@ import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyMemberResponse;
 import shop.matjalalzz.party.dto.PartySearchParam;
+import shop.matjalalzz.party.dto.projection.MyPartyProjection;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
+import shop.matjalalzz.party.mapper.projection.ProjectionToDtoMapper;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -59,13 +61,16 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<PartyUser> findByUserIdAndPartyId(Long userId, Long partyId) {
+    public Optional<Boolean> findByUserIdAndPartyId(Long userId, Long partyId) {
         return partyUserRepository.findByUserIdAndPartyId(userId, partyId);
     }
 
     @Transactional(readOnly = true)
     public Slice<MyPartyResponse> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of) {
-        return partyRepository.findByUserIdAndCursor(userId, cursor, of);
+        Slice<MyPartyProjection> projections = partyRepository.findByUserIdAndCursor(userId,
+            cursor, of);
+
+        return projections.map(ProjectionToDtoMapper::toMyPartyResponse);
     }
 
     @Transactional(readOnly = true)
@@ -75,7 +80,9 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public List<PartyMemberResponse> findAllByPartyIdToDto(long partyId) {
-        return partyUserRepository.findMembersByPartyId(partyId, BASE_URL);
+        return partyUserRepository.findMembersByPartyId(partyId, BASE_URL).stream()
+            .map(ProjectionToDtoMapper::toPartyMemberResponse)
+            .toList();
     }
 
     @Transactional(readOnly = true)
@@ -119,7 +126,7 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public List<PartyUser> getPartyUsers(Long partyId) {
-        return partyUserRepository.findAllByPartyId(partyId);
+        return partyUserRepository.findAllByPartyIdWithUser(partyId);
     }
 
     @Transactional(readOnly = true)
