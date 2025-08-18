@@ -12,7 +12,7 @@ import shop.matjalalzz.party.dto.projection.MyPartyProjection;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 
-public interface PartyRepository extends JpaRepository<Party, Long> {
+public interface PartyRepository extends JpaRepository<Party, Long>, PartyRepositoryCustom {
 
     @Query("""
         SELECT

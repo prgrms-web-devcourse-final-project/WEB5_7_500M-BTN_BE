@@ -5,7 +5,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.QParty;
@@ -14,9 +13,8 @@ import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.QShop;
 
-@Repository
 @RequiredArgsConstructor
-public class PartyQueryDslRepository {
+public class PartyRepositoryImpl {
 
     private final JPAQueryFactory query;
 

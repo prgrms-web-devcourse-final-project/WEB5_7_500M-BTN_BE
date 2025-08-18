@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.party.dao.PartyQueryDslRepository;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.MyPartyResponse;
@@ -31,7 +30,6 @@ public class PartyService {
     private final PartyChatService partyChatService;
     private final PartyRepository partyRepository;
     private final PartyUserRepository partyUserRepository;
-    private final PartyQueryDslRepository partyQueryDslRepository;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -75,7 +73,7 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public List<Party> searchParties(PartySearchParam cond, int size) {
-        return partyQueryDslRepository.searchWithCursor(cond, size);
+        return partyRepository.searchWithCursor(cond, size);
     }
 
     @Transactional(readOnly = true)
