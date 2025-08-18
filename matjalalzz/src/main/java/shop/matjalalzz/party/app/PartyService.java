@@ -1,6 +1,5 @@
 package shop.matjalalzz.party.app;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.party.dao.PartyQueryDslRepository;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.MyPartyResponse;
@@ -20,8 +20,6 @@ import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
-import shop.matjalalzz.party.dao.PartySearchRepository;
-import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -31,6 +29,7 @@ public class PartyService {
     private final PartyChatService partyChatService;
     private final PartyRepository partyRepository;
     private final PartyUserRepository partyUserRepository;
+    private final PartyQueryDslRepository partyQueryDslRepository;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -71,7 +70,7 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public List<Party> searchParties(PartySearchParam cond, int size) {
-        return partySearchRepository.searchWithCursor(cond, size);
+        return partyQueryDslRepository.searchWithCursor(cond, size);
     }
 
     @Transactional(readOnly = true)
@@ -94,17 +93,13 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public List<Party> findAllMyPartyByUserIdForWithdraw(long userId) {
-        LocalDateTime threshold = LocalDateTime.now().plusDays(1);
-
-        // 회원이 파티장이며, 파티가 종료되지 않았고, 파티의 예약이 없거나, 예약일로부터 하루 이상 남은 파티 조회
-        return partyRepository.findAllMyPartyByUserIdForWithdraw(userId, threshold);
+    public List<Party> findAllMyRecruitingParty(long userId) {
+        return partyRepository.findAllMyRecruitingParty(userId);
     }
 
     @Transactional(readOnly = true)
-    public List<Party> findAllParticipatingPartyByUserIdForWithdraw(long userId) {
-        // 회원이 파티원이며, 파티가 종료되지 않았고, 파티의 예약이 없거나 수락되지 않은 상태인 예약인 파티 조회
-        return partyRepository.findAllParticipatingPartyByUserIdForWithdraw(userId);
+    public List<Party> findAllParticipatingParty(long userId) {
+        return partyRepository.findAllParticipatingParty(userId);
     }
 
     @Transactional(readOnly = true)

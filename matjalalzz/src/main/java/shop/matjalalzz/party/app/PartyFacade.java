@@ -231,12 +231,17 @@ public class PartyFacade {
 
     @Transactional
     public void quitPartyForWithdraw(User user) {
-        // 회원 탈퇴시에 본인이 파티원이며, 파티 탈퇴 가능한 파티만 조회
-        List<Party> parties = partyService.findAllParticipatingPartyByUserIdForWithdraw(
+        // 종료되지 않은 파티 중 회원으로 참여중인 파티 조회
+        List<Party> parties = partyService.findAllParticipatingParty(
             user.getId());
 
         for (Party party : parties) {
             Reservation reservation = reservationService.findByPartyId(party.getId());
+
+            //PENDING 상태가 아닌 예약을 가진 파티는 탈퇴 불가능
+            if (reservation != null && reservation.getStatus() != ReservationStatus.PENDING) {
+                continue;
+            }
             PartyUser partyUser = partyService.findPartyUser(user.getId(), party);
 
             // 파티 탈퇴 진행
@@ -343,8 +348,7 @@ public class PartyFacade {
         Reservation reservation = reservationService.findByPartyId(partyId);
 
         // 예약일 하루 전이라면 파티 삭제 불가
-        if (reservation != null && reservation.getStatus() == ReservationStatus.CONFIRMED
-            && reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1))) {
+        if (cannotDeleteParty(reservation)) {
             throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_D_DAY);
         }
 
@@ -359,15 +363,21 @@ public class PartyFacade {
 
     @Transactional
     public void deletePartyForWithdraw(User user) {
-        // 회원 탈퇴시에 본인이 파티장이며 파티 해체시킬 수 있는 파티만 조회
-        List<Party> parties = partyService.findAllMyPartyByUserIdForWithdraw(user.getId());
+        // 회원 탈퇴시에 본인이 파티장이며 종료되지 않은 파티만 조회
+        List<Party> parties = partyService.findAllMyRecruitingParty(user.getId());
 
         for (Party party : parties) {
+            Reservation reservation = reservationService.findByPartyId(party.getId());
+
+            //파티의 예약일이 하루 전인 파티는 해체 시키지 않음
+            if (cannotDeleteParty(reservation)) {
+                continue;
+            }
+
             // 예약금을 지불한 파티원에게 예약금 환불
             reservationService.refundPartyReservationFee(party);
 
             // 예약이 진행 중일 때, 예약을 취소
-            Reservation reservation = reservationService.findByPartyId(party.getId());
             if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
             }
@@ -375,6 +385,12 @@ public class PartyFacade {
             // 파티 해체
             partyService.breakParty(party);
         }
+    }
+
+    private boolean cannotDeleteParty(Reservation reservation) {
+        return reservation != null
+            && reservation.getStatus() == ReservationStatus.CONFIRMED
+            && reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1));
     }
 
     @Transactional

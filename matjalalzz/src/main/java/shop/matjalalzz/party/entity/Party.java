@@ -73,9 +73,6 @@ public class Party extends BaseEntity {
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
 
-//    @OneToOne(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Reservation reservation;
-
     @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartyUser> partyUsers;
 
@@ -99,6 +96,7 @@ public class Party extends BaseEntity {
         status = PartyStatus.RECRUITING;
         currentCount = 1;
         partyUsers = new ArrayList<>();
+        comments = new ArrayList<>();
     }
 
     public void complete() {

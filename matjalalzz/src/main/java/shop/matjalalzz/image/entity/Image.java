@@ -24,7 +24,8 @@ import lombok.NoArgsConstructor;
     indexes = {
         @Index(name = "image_idx", columnList = "shop_id"),
         @Index(name = "image_idx", columnList = "review_id"),
-        @Index(name = "image_idx", columnList = "inquiry_id")
+        @Index(name = "image_idx", columnList = "inquiry_id"),
+        @Index(name = "idx_shop_image_index", columnList = "shop_id, image_index")
     },
     uniqueConstraints = {
         @UniqueConstraint(name = "unique_shop_image_index", columnNames = {"shop_id",

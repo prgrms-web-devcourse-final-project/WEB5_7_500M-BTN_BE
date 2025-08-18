@@ -16,7 +16,7 @@ import shop.matjalalzz.shop.entity.QShop;
 
 @Repository
 @RequiredArgsConstructor
-public class PartySearchRepository {
+public class PartyQueryDslRepository {
 
     private final JPAQueryFactory query;
 
