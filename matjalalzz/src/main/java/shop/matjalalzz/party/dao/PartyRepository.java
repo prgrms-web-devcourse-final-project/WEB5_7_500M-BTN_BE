@@ -57,4 +57,12 @@ public interface PartyRepository extends JpaRepository<Party, Long> {
         WHERE p.status <> "TERMINATED"
         """)
     List<Party> findAllParticipatingPartyByUserIdForWithdraw(@Param("userId") long userId);
+
+    @Query("""
+            SELECT p
+            FROM Party p
+                JOIN FETCH p.shop
+            WHERE p.id=:partyId
+        """)
+    Optional<Party> findByIdWithShop(@Param("partyId") Long partyId);
 }

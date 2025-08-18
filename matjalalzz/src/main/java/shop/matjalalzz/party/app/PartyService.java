@@ -69,11 +69,6 @@ public class PartyService {
         return partyRepository.findByUserIdAndCursor(userId, cursor, of);
     }
 
-//    @Transactional(readOnly = true)
-//    public Slice<Party> findAll(Specification<Party> spec, Pageable pageable) {
-//        return partyRepository.findAll(spec, pageable);
-//    }
-
     @Transactional(readOnly = true)
     public List<Party> searchParties(PartySearchParam cond, int size) {
         return partySearchRepository.searchWithCursor(cond, size);
@@ -133,5 +128,11 @@ public class PartyService {
     @Transactional(readOnly = true)
     public boolean isInParty(Long partyId, Long userId) {
         return partyUserRepository.existsByUserIdAndPartyId(userId, partyId);
+    }
+
+    @Transactional(readOnly = true)
+    public Party findByIdWithShop(Long partyId) {
+        return partyRepository.findByIdWithShop(partyId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 }
