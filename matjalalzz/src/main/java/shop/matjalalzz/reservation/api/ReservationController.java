@@ -59,6 +59,9 @@ public class ReservationController {
         ReservationListResponse response = reservationService.getReservations(shopId, filter,
             userInfo.getId(), cursor, size);
 
+//        ReservationListResponse response = reservationService.getReservationsProjection(userInfo.getId(), filter,
+//            cursor, size);
+
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 

@@ -28,6 +28,8 @@ import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.view.MyReservationView;
+import shop.matjalalzz.reservation.dto.view.ReservationSummaryView;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -64,10 +66,6 @@ public class ReservationService {
                 shopId, status, cursor, pageable
             );
 
-//            Slice<Reservation> slice = reservationRepository.findByShopIdWithFilterAndCursorQdsl(
-//                shopId, status, cursor, pageable
-//            );
-
             return reservationResponse(slice);
         }
 
@@ -94,22 +92,32 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status, Long cursor, int size) {
-        int sizePlusOne = size + 1;
-        Pageable pageable = PageRequest.of(0, sizePlusOne, Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
-        // A안: 오너 기준 (ShopService 호출 제거)
-        List<ReservationSummaryDto> rows =
-            reservationRepository.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
+        Slice<ReservationSummaryView> slice =
+            reservationRepository.findOwnerSummariesWithCursor(ownerId, status, cursor, pageable);
 
-        boolean hasNext = rows.size() > size;
-        if (hasNext) rows = rows.subList(0, size);
-        Long nextCursor = hasNext ? rows.get(rows.size() - 1).reservationId() : null;
+        Long nextCursor = slice.hasNext()
+            ? slice.getContent().getLast().getReservationId()
+            : null;
 
-        List<ReservationListResponse.ReservationContent> content =
-            ReservationMapper.toReservationProjectionContent(rows);
+        List<ReservationSummaryDto> dtoRows = slice.getContent().stream()
+            .map(v -> new ReservationSummaryDto(
+                v.getReservationId(),
+                v.getShopName(),
+                v.getReservedAt(),
+                v.getHeadCount(),
+                v.getPhoneNumber(),
+                v.getStatus()
+            ))
+            .toList();
+
+        List<ReservationContent> content =
+            ReservationMapper.toReservationProjectionContent(dtoRows);
 
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
+
 
     private ReservationListResponse reservationResponse(Slice<Reservation> slice) {
         List<Reservation> reservations = slice.getContent();
@@ -138,6 +146,32 @@ public class ReservationService {
         if (reservations.hasNext()) {
             nextCursor = reservations.getContent().getLast().reservationId();
         }
+
+        return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
+    }
+
+    @Transactional(readOnly = true)
+    public MyReservationPageResponse findMyReservationPageProjection(Long userId, Long cursor, int size) {
+
+        Slice<MyReservationView> views = reservationRepository.findMyRowsByUserIdAndCursor(
+            userId, cursor, PageRequest.of(0, size)
+        );
+
+        Slice<MyReservationResponse> reservations = views.map(v ->
+            new MyReservationResponse(
+                v.getReservationId(),
+                v.getShopName(),
+                v.getName(),
+                v.getReservedAt(),
+                v.getHeadCount(),
+                v.getReservationFee(),
+                v.getStatus()
+            )
+        );
+
+        Long nextCursor = reservations.hasNext()
+            ? reservations.getContent().getLast().reservationId()
+            : null;
 
         return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
     }
