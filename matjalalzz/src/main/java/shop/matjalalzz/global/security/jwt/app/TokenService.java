@@ -16,7 +16,7 @@ import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.user.dao.UserRepository;
-import shop.matjalalzz.user.dto.LoginInfoDto;
+import shop.matjalalzz.user.dto.LoginInfoView;
 import shop.matjalalzz.user.entity.User;
 
 @Slf4j
@@ -30,16 +30,16 @@ public class TokenService {
 
     @Transactional
     public LoginTokenResponse oauthLogin(String email) {
-        LoginInfoDto found = userRepository.findByEmailForLogin(email)
+        LoginInfoView found = userRepository.findByEmailForLogin(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND));
 
         String accessToken = tokenProvider.issueAccessToken(
-            found.userId(), found.role(), found.email()
+            found.getUserId(), found.getRole(), found.getEmail()
         );
 
-        String newRefreshToken = tokenProvider.issueRefreshToken(found.userId());
+        String newRefreshToken = tokenProvider.issueRefreshToken(found.getUserId());
 
-        refreshTokenRepository.upsertByUserId(found.userId(), newRefreshToken);
+        refreshTokenRepository.upsertByUserId(found.getUserId(), newRefreshToken);
 
         return TokenMapper.toLoginTokenResponseDto(accessToken, newRefreshToken);
     }

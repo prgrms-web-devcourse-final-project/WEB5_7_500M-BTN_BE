@@ -15,11 +15,10 @@ import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
-import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.reservation.app.ReservationFacade;
-import shop.matjalalzz.user.dto.LoginInfoDto;
+import shop.matjalalzz.user.dto.LoginInfoView;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
@@ -51,20 +50,20 @@ public class UserFacade {
     @Transactional
     public void login(LoginRequest dto, HttpServletResponse response) {
         //가입된 email과 password가 같은지 확인
-        LoginInfoDto found = userService.getUserByEmailForLogin(dto.email());
+        LoginInfoView found = userService.getUserByEmailForLogin(dto.email());
 
-        if(StringUtils.isEmpty(found.password()) ||
-            !passwordEncoder.matches(dto.password(), found.password())) {
+        if(StringUtils.isEmpty(found.getPassword()) ||
+            !passwordEncoder.matches(dto.password(), found.getPassword())) {
             throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);
         }
 
         String accessToken = tokenProvider.issueAccessToken(
-            found.userId(), found.role(), found.email()
+            found.getUserId(), found.getRole(), found.getEmail()
         );
 
-        String newRefreshToken = tokenProvider.issueRefreshToken(found.userId());
+        String newRefreshToken = tokenProvider.issueRefreshToken(found.getUserId());
 
-        tokenService.upsertRefreshToken(found.userId(), newRefreshToken);
+        tokenService.upsertRefreshToken(found.getUserId(), newRefreshToken);
 
         // http only 쿠키 방식으로 refresh Token을 클라이언트에게 줌
         response.setHeader("Authorization", "Bearer " + accessToken);

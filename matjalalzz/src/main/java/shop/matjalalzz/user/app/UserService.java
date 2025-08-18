@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.user.dao.UserRepository;
-import shop.matjalalzz.user.dto.LoginInfoDto;
+import shop.matjalalzz.user.dto.LoginInfoView;
 import shop.matjalalzz.user.entity.User;
 
 @Slf4j
@@ -25,7 +25,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public LoginInfoDto getUserByEmailForLogin(String email) {
+    public LoginInfoView getUserByEmailForLogin(String email) {
         return userRepository.findByEmailForLogin(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND));
     }
