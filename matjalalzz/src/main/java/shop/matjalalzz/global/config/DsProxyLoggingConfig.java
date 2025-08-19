@@ -40,9 +40,6 @@ public class DsProxyLoggingConfig {
                 JDBC_NS.set(JDBC_NS.get() + ns); //스레드별 누적
 
                 double ms = ns / 1_000_000.0;
-//                String sql = qi.isEmpty() ? "" : qi.get(0).getQuery();
-//                String oneLine = sql == null ? "" : sql.replaceAll("\\s+", " ").trim();
-//                log.info(String.format("[SQL] %.3f ms | %s", ms, oneLine));
 
                 // 여러 SQL이 있을 수 있으니 모두 로그로 남기고 싶으면 loop
                 for (QueryInfo q : qi) {

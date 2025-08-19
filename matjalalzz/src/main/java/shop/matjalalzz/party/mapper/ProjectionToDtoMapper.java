@@ -1,4 +1,4 @@
-package shop.matjalalzz.party.mapper.projection;
+package shop.matjalalzz.party.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -20,7 +20,7 @@ import shop.matjalalzz.party.dto.projection.MyPartyProjection;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
-import shop.matjalalzz.party.mapper.projection.ProjectionToDtoMapper;
+import shop.matjalalzz.party.mapper.ProjectionToDtoMapper;
 import shop.matjalalzz.user.entity.User;
 
 @Service

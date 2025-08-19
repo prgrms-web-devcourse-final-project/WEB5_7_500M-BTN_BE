@@ -33,7 +33,7 @@ public class QueryPerfAspect {
 
             if (cur == 0) { // 바깥 레벨에서만 로그 + ThreadLocal 정리
                 double total = (System.nanoTime() - t0) / 1_000_000.0; //바깥 메서드 전체 수행시간
-                double jdbc = JDBC_NS.get() / 1_000_000.0; //DsProxy 리스너가 누적해둔 db 오아복 시간의 합
+                double jdbc = JDBC_NS.get() / 1_000_000.0; //DsProxy 리스너가 누적해둔 db 왕복 시간의 합
                 double overhead = Math.max(0, total - jdbc);
 
                 String sig = pjp.getSignature().toShortString();
