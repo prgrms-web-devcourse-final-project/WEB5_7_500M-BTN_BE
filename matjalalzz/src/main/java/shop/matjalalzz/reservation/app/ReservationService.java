@@ -101,19 +101,8 @@ public class ReservationService {
             ? slice.getContent().getLast().getReservationId()
             : null;
 
-        List<ReservationSummaryDto> dtoRows = slice.getContent().stream()
-            .map(v -> new ReservationSummaryDto(
-                v.getReservationId(),
-                v.getShopName(),
-                v.getReservedAt(),
-                v.getHeadCount(),
-                v.getPhoneNumber(),
-                v.getStatus()
-            ))
-            .toList();
-
         List<ReservationContent> content =
-            ReservationMapper.toReservationProjectionContent(dtoRows);
+            ReservationMapper.toReservationProjectionContentFromView(slice.getContent());
 
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
@@ -157,17 +146,7 @@ public class ReservationService {
             userId, cursor, PageRequest.of(0, size)
         );
 
-        Slice<MyReservationResponse> reservations = views.map(v ->
-            new MyReservationResponse(
-                v.getReservationId(),
-                v.getShopName(),
-                v.getName(),
-                v.getReservedAt(),
-                v.getHeadCount(),
-                v.getReservationFee(),
-                v.getStatus()
-            )
-        );
+        Slice<MyReservationResponse> reservations = views.map(ReservationMapper::toMyReservationResponse);
 
         Long nextCursor = reservations.hasNext()
             ? reservations.getContent().getLast().reservationId()

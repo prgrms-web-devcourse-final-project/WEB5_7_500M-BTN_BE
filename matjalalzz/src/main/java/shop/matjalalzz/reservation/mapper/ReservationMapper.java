@@ -13,6 +13,8 @@ import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.view.MyReservationView;                // ★ 추가
+import shop.matjalalzz.reservation.dto.view.ReservationSummaryView;          // ★ 추가
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.Shop;
@@ -102,4 +104,32 @@ public class ReservationMapper {
         }
         return out;
     }
+
+    public static MyReservationResponse toMyReservationResponse(MyReservationView v) {
+        return new MyReservationResponse(
+            v.getReservationId(),
+            v.getShopName(),
+            v.getName(),
+            v.getReservedAt(),
+            v.getHeadCount(),
+            v.getReservationFee(),
+            v.getStatus()
+        );
+    }
+
+    public static List<ReservationContent> toReservationProjectionContentFromView(List<ReservationSummaryView> views) {
+        var out = new java.util.ArrayList<ReservationContent>(views.size());
+        for (var v : views) {
+            out.add(ReservationContent.builder()
+                .reservationId(v.getReservationId())
+                .shopName(v.getShopName())
+                .reservedAt(v.getReservedAt())
+                .headCount(v.getHeadCount())
+                .phoneNumber(v.getPhoneNumber())
+                .status(v.getStatus())
+                .build());
+        }
+        return out;
+    }
+
 }
