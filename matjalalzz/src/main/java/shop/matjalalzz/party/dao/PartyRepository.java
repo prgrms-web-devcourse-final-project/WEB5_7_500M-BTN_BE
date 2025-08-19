@@ -35,7 +35,7 @@ public interface PartyRepository extends JpaRepository<Party, Long>, PartyReposi
             JOIN p.shop s
         WHERE pu.user.id = :userId
             AND (:cursor is null or pu.party.id < :cursor)
-        ORDER BY p.id desc
+        ORDER BY pu.party.id desc
         """)
     Slice<MyPartyProjection> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of);
 

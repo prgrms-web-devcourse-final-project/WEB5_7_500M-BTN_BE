@@ -84,8 +84,7 @@ public class PartyFacade {
     @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
         Party party = partyService.findByIdWithShop(partyId);
-        List<PartyMemberResponse> members = partyService.findAllByPartyIdToDto(partyId);
-
+        List<PartyMemberResponse> members = partyService.findMembersByPartyId(partyId);
         String thumbnailUrl = imageService.getShopThumbnail(party.getShop().getId());
 
         return PartyMapper.toDetailResponse(party, thumbnailUrl, members);
@@ -93,7 +92,7 @@ public class PartyFacade {
 
     @Transactional(readOnly = true)
     public List<PartyMemberResponse> getPartyMembers(Long partyId) {
-        return partyService.findAllByPartyIdToDto(partyId);
+        return partyService.findMembersByPartyId(partyId);
     }
 
     @Transactional(readOnly = true)

@@ -6,7 +6,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -23,10 +22,6 @@ import shop.matjalalzz.user.entity.User;
 @Entity
 @Getter
 @Table(
-    indexes = {
-        @Index(name = "idx_party_user_user_party", columnList = "user_id, party_id"),
-        @Index(name = "idx_party_user_party_user", columnList = "party_id, user_id")
-    },
     uniqueConstraints = {
         @UniqueConstraint(name = "unique_user_party", columnNames = {"user_id", "party_id"})
     }

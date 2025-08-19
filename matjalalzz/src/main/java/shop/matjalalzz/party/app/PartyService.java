@@ -77,7 +77,7 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public List<PartyMemberResponse> findAllByPartyIdToDto(long partyId) {
+    public List<PartyMemberResponse> findMembersByPartyId(long partyId) {
         return partyUserRepository.findMembersByPartyId(partyId, BASE_URL).stream()
             .map(ProjectionToDtoMapper::toPartyMemberResponse)
             .toList();
