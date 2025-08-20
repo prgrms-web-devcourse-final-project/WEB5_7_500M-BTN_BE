@@ -3,7 +3,7 @@
 <div align="center">
 
   <!-- 프로젝트 로고 또는 메인 이미지 -->
-  <img src="https://via.placeholder.com/500x250/667eea/ffffff?text=5억년+버튼+BACKEND" alt="5억년 버튼 로고" width="500" style="border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);"/>
+  <img src="https://github.com/user-attachments/assets/9db92943-b3e1-4a1d-8720-cebb8d838a05" alt="5억년 버튼 로고" width="500" style="border-radius: 15px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);"/>
 
 <br><br>
 
@@ -14,7 +14,7 @@
 ![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=socket.io&logoColor=white)
 
   <br>
-  
+
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Gradle](https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white)
 ![OAuth2](https://img.shields.io/badge/OAuth2-4285F4?style=for-the-badge&logo=oauth&logoColor=white)
@@ -22,14 +22,8 @@
 
 <br><br>
 
-<h3>🎯 데브코스 7회차 최종 프로젝트</h3>
+<h3>🎯 프로그래머스 클라우드 기반 백엔드 엔지니어링 데브코스 5기 7회차 최종 프로젝트</h3>
   <p><em>식당 예약과 맛집 파티 모임을 위한 실시간 플랫폼의 백엔드 시스템</em></p>
-
-  <br>
-
-[🌐 **라이브 데모**](https://your-demo-url.com) &nbsp;&nbsp;•&nbsp;&nbsp; [📚 **API 문서
-**](https://your-api-docs.com) &nbsp;&nbsp;•&nbsp;&nbsp; [🎨 **프론트엔드
-**](https://github.com/your-frontend-repo)
 
 </div>
 
@@ -38,10 +32,8 @@
 ---
 
 <br>
-
-## 🌐 배포 및 데모
-
 <div align="center">
+## 🌐 배포 및 데모
 
 ### 🔗 **서비스 링크**
 
@@ -49,21 +41,21 @@
 <tr>
 <td align="center" width="33%">
 <h4>🌟 메인 서비스</h4>
-<a href="https://your-main-site.com" target="_blank">
+<a href="https://web-5-7-500-m-btn-fe-copy.vercel.app/" target="_blank">
 <img src="https://img.shields.io/badge/Live_Demo-4CAF50?style=for-the-badge&logo=vercel&logoColor=white"/>
 </a>
 <br><em>실제 서비스 체험하기</em>
 </td>
 <td align="center" width="33%">
 <h4>📖 API 문서</h4>
-<a href="https://your-api-docs.com" target="_blank">
+<a href="https://matjalalzz.shop/swagger-ui/index.html" target="_blank">
 <img src="https://img.shields.io/badge/Swagger_UI-85EA2D?style=for-the-badge&logo=swagger&logoColor=black"/>
 </a>
 <br><em>API 명세 및 테스트</em>
 </td>
 <td align="center" width="33%">
 <h4>🎨 프론트엔드</h4>
-<a href="https://github.com/your-frontend-repo" target="_blank">
+<a href="https://github.com/prgrms-web-devcourse-final-project/WEB5_7_500M-BTN_FE" target="_blank">
 <img src="https://img.shields.io/badge/Frontend_Repo-181717?style=for-the-badge&logo=github&logoColor=white"/>
 </a>
 <br><em>프론트엔드 저장소</em>
@@ -113,7 +105,7 @@
 - **Architecture**: Layered Architecture
 - **Security**: Spring Security + OAuth2
 - **Real-time**: WebSocket (채팅)
-- **Database**: MySQL
+- **Database**: MySQL,MariaDB
 - **Documentation**: Swagger/OpenAPI
 - **Build Tool**: Gradle
 
@@ -199,23 +191,23 @@
 
 #### 🏠 메인 페이지
 
-<img src="https://via.placeholder.com/800x450/f8f9fa/333333?text=메인+페이지+-+식당+검색+%26+추천" alt="메인 페이지" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
+<img src="https://github.com/user-attachments/assets/0733f426-321a-43bf-8a78-dca5d63ee246" alt="메인 페이지" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
 
 #### 🔍 식당 검색 결과
 
-<img src="https://via.placeholder.com/800x450/e3f2fd/1976d2?text=식당+검색+결과+-+필터링+%26+지도+뷰" alt="식당 검색" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
+<img src="https://github.com/user-attachments/assets/eb98c910-0bde-496a-bf7c-16e8d143aeeb" alt="식당 검색" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
 
 #### 📅 예약 프로세스
 
-<img src="https://via.placeholder.com/800x450/f3e5f5/7b1fa2?text=예약+프로세스+-+날짜+시간+선택" alt="예약 프로세스" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
+<img src="https://github.com/user-attachments/assets/4608a638-acbc-45c9-9a67-d23379620f0f" alt="예약 프로세스" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
 
 #### ⚡ 맛집 파티 모임 (파티)
 
-<img src="https://via.placeholder.com/800x450/fff3e0/ef6c00?text=맛집 파티+모임+-+파티+생성+%26+참여" alt="맛집 파티 모임" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
+<img src="https://github.com/user-attachments/assets/93c7615b-c87a-447c-ac21-4554d5a646ea" alt="맛집 파티 모임" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
 
 #### 💬 실시간 채팅
 
-<img src="https://via.placeholder.com/800x450/e8f5e8/2e7d32?text=실시간+채팅+-+파티원+소통" alt="실시간 채팅" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
+<img src="https://github.com/user-attachments/assets/b7e3a5d6-e8d3-428f-876b-9ed4b311379a" alt="실시간 채팅" width="800" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef; margin: 10px 0;"/>
 
 </div>
 
@@ -291,29 +283,31 @@
 @Version
 private int version;
 
-    @Retryable(
-        retryFor = DataAccessException.class,
-        maxAttemptsExpression = MAX_ATTEMPTS,
-        backoff = @Backoff(
-            delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
-        )
+@Retryable(
+    retryFor = DataAccessException.class,
+    maxAttemptsExpression = MAX_ATTEMPTS,
+    backoff = @Backoff(
+        delayExpression = MAX_DELAY, multiplierExpression = MULTIPLIER, random = true
     )
-    @Transactional
-    public void joinParty(Long partyId, long userId) {
-        // 파티 참가 로직
-    }
+)
+@Transactional
+public void joinParty(Long partyId, long userId) {
+    // 파티 참가 로직
+}
 ```
+
+</details>
 
 <details>
 <summary><strong>💬 확장 가능한 채팅 시스템</strong></summary>
 
 ```java
 // WebSocket 기반 실시간 채팅
-    @MessageMapping("/chat.send")
-    public void sendMessage(@Payload ChatMessageRequest message,
-        StompPrincipal user) {
+@MessageMapping("/chat.send")
+public void sendMessage(@Payload ChatMessageRequest message,
+    StompPrincipal user) {
     // 채팅 관련 로직
-    }
+}
 ```
 
 </details>
@@ -350,44 +344,7 @@ private int version;
 
 <div align="center">
 
-```mermaid
-graph TB
-    subgraph "Frontend"
-        A[React Application]
-    end
-    
-    subgraph "Backend Services"
-        B[Spring Boot Application]
-        C[WebSocket Handler]
-        D[Security Layer]
-        E[Reservation Service]
-        F[Party Service]
-        G[Chat Service]
-    end
-    
-    subgraph "Database Layer"
-        H[(MySQL Database)]
-    end
-    
-    subgraph "External Services"
-        I[OAuth2 Providers]
-        J[Map API]
-    end
-    
-    A --> B
-    A --> C
-    B --> D
-    B --> E
-    B --> F
-    B --> G
-    C --> G
-    B --> H
-    E --> H
-    F --> H
-    G --> H
-    D --> I
-    B --> J
-```
+<img width="600" alt="Image" src="https://github.com/user-attachments/assets/4bc68739-1d09-4167-9bb4-f9a7ccd7d2fb" />
 
 </div>
 
@@ -430,11 +387,13 @@ graph TB
 │   │   ├── dao/                     # 채팅 데이터 접근
 │   │   └── domain/                  # 채팅 메시지 엔티티
 │   ├── 💬 comment/                  # 댓글 관리 (리뷰 댓글)
+│   ├── 🎆 image/                    # 이미지 관리
+│   ├── 📝 inquiry/                  # 문의 관리
+│   ├── 💸 tosspay/                  # 결제 관리
 │   └── ⭐ review/                   # 리뷰 시스템
 ├── 📋 src/main/resources/
 │   ├── application.yml              # 환경 설정
-│   ├── logback.xml                 # 로깅 설정
-│   └── websocket-Test.html         # WebSocket 테스트
+│   └── logback.xml                 # 로깅 설정
 └── 📂 src/test/                    # 테스트 코드
 ```
 
@@ -473,8 +432,8 @@ graph TB
 </tr>
 <tr>
 <td><strong>Database</strong></td>
-<td>MySQL</td>
-<td>8.0</td>
+<td>MySQL, MariaDB</td>
+<td>8.0, 12.x.x</td>
 <td>안정적인 관계형 데이터베이스</td>
 </tr>
 <tr>
@@ -499,17 +458,7 @@ graph TB
 
 <br>
 
-## 📊 API 문서
-
-<div align="center">
-  <img src="https://via.placeholder.com/600x300/20B2AA/FFFFFF?text=Swagger+API+문서" alt="API 문서" width="600"/>
-</div>
-
-서버 실행 후 다음 URL에서 상세한 API 문서를 확인할 수 있습니다:
-
-**🔗 [Swagger UI](http://localhost:8080/swagger-ui.html)**
-
-### 주요 API 엔드포인트
+## 주요 API 엔드포인트
 
 #### 🏪 **식당 관련**
 
@@ -547,46 +496,46 @@ graph TB
 <table>
 <tr>
 <td align="center" width="150px">
-<img src="https://via.placeholder.com/120x120/4285f4/ffffff?text=DEV1" style="border-radius: 50%;" width="120"/>
+<img src="https://avatars.githubusercontent.com/u/88488962?v=4" style="border-radius: 50%;" width="120"/>
 <br><br>
 <strong>전민서</strong><br>
 <em>PO & 백엔드</em><br>
 <a href="https://github.com/dev1">@dev1</a>
 </td>
 <td align="center" width="150px">
-<img src="https://via.placeholder.com/120x120/34a853/ffffff?text=DEV2" style="border-radius: 50%;" width="120"/>
+<img src="https://avatars.githubusercontent.com/u/53886275?v=4" style="border-radius: 50%;" width="120"/>
 <br><br>
 <strong>김승중</strong><br>
 <em>백엔드 팀장</em><br>
-<a href="https://github.com/dev2">@dev2</a>
+<a href="https://github.com/kimsj0970">@dev2</a>
 </td>
 <td align="center" width="150px">
-<img src="https://via.placeholder.com/120x120/ea4335/ffffff?text=DEV3" style="border-radius: 50%;" width="120"/>
+<img src="https://avatars.githubusercontent.com/u/193809590?v=4" style="border-radius: 50%;" width="120"/>
 <br><br>
 <strong>남지은</strong><br>
 <em>백엔드</em><br>
-<a href="https://github.com/dev3">@dev3</a>
+<a href="https://github.com/zie-ning">@dev3</a>
 </td>
 <td align="center" width="150px">
-<img src="https://via.placeholder.com/120x120/fbbc04/ffffff?text=DEV4" style="border-radius: 50%;" width="120"/>
+<img src="https://avatars.githubusercontent.com/u/88488962?v=4" style="border-radius: 50%;" width="120"/>
 <br><br>
 <strong>안필온</strong><br>
 <em>백엔드</em><br>
-<a href="https://github.com/dev4">@dev4</a>
+<a href="https://github.com/KEEKE132">@dev4</a>
 </td>
 <td align="center" width="150px">
-<img src="https://via.placeholder.com/120x120/9c27b0/ffffff?text=DEV5" style="border-radius: 50%;" width="120"/>
+<img src="https://avatars.githubusercontent.com/u/72946232?v=4" style="border-radius: 50%;" width="120"/>
 <br><br>
 <strong>임예성</strong><br>
 <em>백엔드</em><br>
-<a href="https://github.com/dev5">@dev5</a>
+<a href="https://github.com/sjsk3232">@dev5</a>
 </td>
 <td align="center" width="150px">
-<img src="https://via.placeholder.com/120x120/ff9800/ffffff?text=DEV6" style="border-radius: 50%;" width="120"/>
+<img src="https://avatars.githubusercontent.com/u/33424923?v=4" style="border-radius: 50%;" width="120"/>
 <br><br>
 <strong>조영재</strong><br>
 <em>프론트엔드</em><br>
-<a href="https://github.com/dev6">@dev6</a>
+<a href="https://github.com/wo7864">@dev6</a>
 </td>
 </tr>
 </table>
@@ -608,7 +557,7 @@ graph TB
 
 <br>
 
-**📅 2024년 데브코스 7회차 최종 프로젝트**
+**📅 2025년 프로그래머스 백엔드 기반 백엔드 엔지니어링 데브코스 5기 7회차 최종 프로젝트**
 
 <br>
 
