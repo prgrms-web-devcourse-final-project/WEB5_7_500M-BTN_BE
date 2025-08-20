@@ -211,18 +211,6 @@
 
 </div>
 
-### 🎬 **데모 영상**
-
-<div align="center">
-
-#### 📹 서비스 전체 시연
-
-<img src="https://via.placeholder.com/600x400/ffebee/c62828?text=🎥+서비스+데모+영상+%28GIF%29" alt="서비스 데모" width="600" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 2px solid #f44336; margin: 10px 0;"/>
-
-<p><em>📺 주요 기능들의 실제 동작 모습을 확인하세요!</em></p>
-
-</div>
-
 <br>
 
 ---
