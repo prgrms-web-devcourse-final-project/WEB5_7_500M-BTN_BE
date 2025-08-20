@@ -318,28 +318,6 @@ public void sendMessage(@Payload ChatMessageRequest message,
 
 <br>
 
-## 🖼️ 시스템 스크린샷
-
-<div align="center">
-
-### 📊 API 문서 (Swagger UI)
-
-<img src="https://via.placeholder.com/900x500/f8f9fa/333333?text=Swagger+API+Documentation" alt="API 문서" width="900" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef;"/>
-
-<br><br>
-
-### 🏗️ 시스템 아키텍처
-
-<img src="https://via.placeholder.com/900x600/fff3e0/ef6c00?text=System+Architecture+Diagram" alt="시스템 아키텍처" width="900" style="border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); border: 1px solid #e9ecef;"/>
-
-</div>
-
-<br>
-
----
-
-<br>
-
 ## 🏛️ 시스템 아키텍처
 
 <div align="center">
