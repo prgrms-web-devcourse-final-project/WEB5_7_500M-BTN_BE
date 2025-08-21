@@ -30,6 +30,7 @@ public class TokenProvider {
     private int refreshTokenValiditySeconds;
     @Value("${custom.jwt.secret}")
     private String secret;
+
     private SecretKey secretKey;
 
     @PostConstruct

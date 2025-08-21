@@ -1,11 +1,13 @@
 package shop.matjalalzz.user.mapper;
 
-
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.SignUpRequest;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
 
     public static User toUser(SignUpRequest signUpRequest, String password, Role role) {
