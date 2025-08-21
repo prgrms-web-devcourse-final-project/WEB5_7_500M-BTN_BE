@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import shop.matjalalzz.user.dto.LoginInfoView;
+import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -19,5 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
             LEFT JOIN RefreshToken rt on u.id = rt.user.id
         WHERE u.email = :email
         """)
-    Optional<LoginInfoView> findByEmailForLogin(@Param("email") String email);
+    Optional<LoginUserProjection> findByEmailForLogin(@Param("email") String email);
 }

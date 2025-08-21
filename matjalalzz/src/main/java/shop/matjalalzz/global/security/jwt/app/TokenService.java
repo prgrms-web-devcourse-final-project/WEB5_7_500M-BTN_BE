@@ -10,13 +10,13 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.jwt.dao.RefreshTokenRepository;
 import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponse;
-import shop.matjalalzz.global.security.jwt.dto.AuthUserView;
+import shop.matjalalzz.global.security.jwt.dto.projection.AuthUserProjection;
 import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.user.dao.UserRepository;
-import shop.matjalalzz.user.dto.LoginInfoView;
+import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.entity.User;
 
 @Slf4j
@@ -30,7 +30,7 @@ public class TokenService {
 
     @Transactional
     public LoginTokenResponse oauthLogin(String email) {
-        LoginInfoView found = userRepository.findByEmailForLogin(email)
+        LoginUserProjection found = userRepository.findByEmailForLogin(email)
             .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND));
 
         String accessToken = tokenProvider.issueAccessToken(
@@ -68,7 +68,7 @@ public class TokenService {
         }
 
         Long userId = tokenProvider.parseRefreshToken(refreshToken);
-        AuthUserView info = refreshTokenRepository.findByUserIdWithUser(userId)
+        AuthUserProjection info = refreshTokenRepository.findByUserIdWithUser(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         if (!refreshToken.equals(info.getRefreshToken())) {

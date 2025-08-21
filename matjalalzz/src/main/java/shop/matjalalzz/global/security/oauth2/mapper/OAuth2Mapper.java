@@ -2,7 +2,7 @@ package shop.matjalalzz.global.security.oauth2.mapper;
 
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
-import shop.matjalalzz.global.security.oauth2.dto.OAuth2ResponseDto;
+import shop.matjalalzz.global.security.oauth2.dto.OAuth2Response;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 
@@ -24,10 +24,10 @@ public class OAuth2Mapper {
             .build();
     }
 
-    public static User toUser(OAuth2ResponseDto oAuth2ResponseDto) {
-        String oauthId = oAuth2ResponseDto.getProvider() + "_" + oAuth2ResponseDto.getProviderId();
-        String email = oAuth2ResponseDto.getEmail();
-        String name = oAuth2ResponseDto.getName();
+    public static User toUser(OAuth2Response oAuth2Response) {
+        String oauthId = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
+        String email = oAuth2Response.getEmail();
+        String name = oAuth2Response.getName();
 
         return User.builder()
             .oauthId(oauthId)

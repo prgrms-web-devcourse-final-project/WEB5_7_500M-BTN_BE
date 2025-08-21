@@ -1,8 +1,8 @@
-package shop.matjalalzz.user.dto;
+package shop.matjalalzz.user.dto.projection;
 
 import shop.matjalalzz.user.entity.enums.Role;
 
-public interface LoginInfoView {
+public interface LoginUserProjection {
     Long getUserId();
     String getPassword();
     Role getRole();

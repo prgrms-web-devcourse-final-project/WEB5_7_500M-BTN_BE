@@ -18,7 +18,7 @@ import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.reservation.app.ReservationFacade;
-import shop.matjalalzz.user.dto.LoginInfoView;
+import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
@@ -50,7 +50,7 @@ public class UserFacade {
     @Transactional
     public void login(LoginRequest dto, HttpServletResponse response) {
         //가입된 email과 password가 같은지 확인
-        LoginInfoView found = userService.getUserByEmailForLogin(dto.email());
+        LoginUserProjection found = userService.getUserByEmailForLogin(dto.email());
 
         if(StringUtils.isEmpty(found.getPassword()) ||
             !passwordEncoder.matches(dto.password(), found.getPassword())) {
