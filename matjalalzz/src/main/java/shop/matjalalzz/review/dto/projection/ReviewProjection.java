@@ -1,4 +1,4 @@
-package shop.matjalalzz.review.dto;
+package shop.matjalalzz.review.dto.projection;
 
 import java.time.LocalDateTime;
 import java.util.List;

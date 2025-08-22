@@ -4,6 +4,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -144,6 +145,59 @@ public class ShopQueryDslRepository {
         Pageable pageable, ShopListSort sort) {
         BooleanBuilder condition = new BooleanBuilder();
         JPAQuery<Shop> q = queryFactory.selectFrom(shop);
+
+        processSorting(cursor, sort, condition, q);
+
+        condition.and(shop.approve.eq(approve));
+        condition.and(queryCondition(query));
+
+        List<Shop> shops = q
+            .where(condition)
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+
+        boolean hasNext = processPage(pageable, shops);
+
+        if (!shops.isEmpty()) {
+            List<Long> shopIds = shops.stream()
+                .map(Shop::getId)
+                .toList();
+
+            // TODO: 이미지 정보 조회 분리
+            Map<Long, List<Image>> imageMap = queryFactory
+                .selectFrom(image)
+                .where(image.shopId.in(shopIds))
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(Image::getShopId));
+
+            // Shop에 Image 매핑
+            shops.forEach(shop ->
+                shop.setImages(imageMap.getOrDefault(shop.getId(), List.of())));
+        }
+
+        return new SliceImpl<>(shops, pageable, hasNext);
+    }
+
+    private boolean processPage(Pageable pageable, List<Shop> shops) {
+        boolean hasNext = shops.size() > pageable.getPageSize();
+        if (hasNext) {
+            shops.removeLast();
+        }
+        return hasNext;
+    }
+
+    private BooleanExpression queryCondition(String query) {
+        if (query != null && !query.trim().isEmpty()) {
+            return shop.shopName.containsIgnoreCase(query)
+                .or(shop.description.containsIgnoreCase(query));
+        } else {
+            return null;
+        }
+    }
+
+    private void processSorting(Object cursor, ShopListSort sort, BooleanBuilder condition,
+        JPAQuery<Shop> q) {
         switch (sort) {
             case ShopListSort.RATING:
                 if (cursor != null) {
@@ -164,42 +218,5 @@ public class ShopQueryDslRepository {
                 q.orderBy(shop.shopName.asc());
                 break;
         }
-
-        condition.and(shop.approve.eq(approve));
-
-        if (query != null && !query.trim().isEmpty()) {
-            condition.and(
-                shop.shopName.containsIgnoreCase(query)
-                    .or(shop.description.containsIgnoreCase(query))
-            );
-        }
-        List<Shop> shops = q
-            .where(condition)
-            .limit(pageable.getPageSize() + 1)
-            .fetch();
-
-        boolean hasNext = shops.size() > pageable.getPageSize();
-        if (hasNext) {
-            shops.remove(shops.size() - 1);
-        }
-
-        if (!shops.isEmpty()) {
-            List<Long> shopIds = shops.stream()
-                .map(Shop::getId)
-                .toList();
-
-            Map<Long, List<Image>> imageMap = queryFactory
-                .selectFrom(image)
-                .where(image.shopId.in(shopIds))
-                .fetch()
-                .stream()
-                .collect(Collectors.groupingBy(Image::getShopId));
-
-            // Shop에 Image 매핑
-            shops.forEach(shop ->
-                shop.setImages(imageMap.getOrDefault(shop.getId(), List.of())));
-        }
-
-        return new SliceImpl<>(shops, pageable, hasNext);
     }
 }

@@ -2,6 +2,7 @@ package shop.matjalalzz.review.dao;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.matjalalzz.image.entity.QImage;
 import shop.matjalalzz.review.dto.MyReviewResponse;
-import shop.matjalalzz.review.dto.ReviewProjection;
+import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.QReview;
 import shop.matjalalzz.shop.entity.QShop;
 import shop.matjalalzz.user.entity.QUser;
@@ -33,10 +34,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
 
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(review.shop.id.eq(shopId));
-
-        if (cursor != null) {
-            builder.and(review.id.lt(cursor));
-        }
+        builder.and(cursorDescCondition(cursor));
 
         // 1. 먼저 리뷰 정보를 중간 DTO로 조회
         List<ReviewProjection> reviewProjections = queryFactory
@@ -53,10 +51,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
             .limit(pageable.getPageSize() + 1)
             .fetch();
 
-        boolean hasNext = reviewProjections.size() > pageable.getPageSize();
-        if (hasNext) {
-            reviewProjections.removeLast();
-        }
+        boolean hasNext = processPage(pageable, reviewProjections);
 
         if (!reviewProjections.isEmpty()) {
             List<Long> reviewIds = reviewProjections.stream()
@@ -68,7 +63,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
                 .distinct()
                 .toList();
 
-            // 2. 사용자 정보 조회
+            // TODO: 사용자 정보 조회 분리
             Map<Long, String> userMap = queryFactory
                 .select(user.id, user.nickname)
                 .from(user)
@@ -80,7 +75,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
                     )
                 );
 
-            // 3. 이미지 정보 조회
+            // TODO: 이미지 정보 조회 분리
             Map<Long, List<String>> imageMap = queryFactory
                 .select(image.reviewId, image.s3Key)
                 .from(image)
@@ -103,6 +98,22 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
         return new SliceImpl<>(reviewProjections, pageable, hasNext);
     }
 
+    private boolean processPage(Pageable pageable, List<ReviewProjection> reviewProjections) {
+        boolean hasNext = reviewProjections.size() > pageable.getPageSize();
+        if (hasNext) {
+            reviewProjections.removeLast();
+        }
+        return hasNext;
+    }
+
+    private BooleanExpression cursorDescCondition(Long cursor) {
+        if (cursor != null) {
+            return QReview.review.id.lt(cursor);
+        } else {
+            return null;
+        }
+    }
+
     //TODO: 병합 이후 제거
     @Override
     public Slice<MyReviewResponse> findByUserIdAndCursor(Long userId, Long cursor,
@@ -112,10 +123,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
 
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(review.writer.id.eq(userId));
-
-        if (cursor != null && cursor != 0) {
-            builder.and(review.id.lt(cursor));
-        }
+        builder.and(cursorDescCondition(cursor));
 
         List<MyReviewResponse> reviews = queryFactory
             .select(Projections.constructor(MyReviewResponse.class,
