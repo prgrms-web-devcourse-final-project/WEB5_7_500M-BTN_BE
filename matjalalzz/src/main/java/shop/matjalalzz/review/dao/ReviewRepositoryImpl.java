@@ -103,6 +103,7 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
         return new SliceImpl<>(reviewProjections, pageable, hasNext);
     }
 
+    //TODO: 병합 이후 제거
     @Override
     public Slice<MyReviewResponse> findByUserIdAndCursor(Long userId, Long cursor,
         Pageable pageable) {

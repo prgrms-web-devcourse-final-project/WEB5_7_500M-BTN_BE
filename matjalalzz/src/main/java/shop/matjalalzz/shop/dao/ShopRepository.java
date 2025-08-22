@@ -61,47 +61,6 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
         Pageable pageable
     );
 
-//    @Query("""
-//        SELECT s FROM Shop s
-//        WHERE (s.rating < :cursor OR :cursor IS NULL )
-//        AND s.approve = :approve
-//        AND (:query IS NULL
-//            OR s.shopName LIKE %:query%
-//            OR s.description LIKE %:query%)
-//        ORDER BY s.rating DESC
-//        """)
-//    Slice<Shop> findCursorListByRating(@Param("cursor") Double cursor,
-//        @Param("query") String query,
-//        @Param("approve") Approve approve,
-//        Pageable pageable);
-//
-//    @Query("""
-//        SELECT s FROM Shop s
-//        WHERE (s.shopName > :cursor OR :cursor IS NULL)
-//        AND s.approve = :approve
-//        AND (:query IS NULL
-//            OR s.shopName LIKE %:query%
-//            OR s.description LIKE %:query%)
-//        ORDER BY s.shopName ASC
-//        """)
-//    Slice<Shop> findCursorListByName(@Param("cursor") String cursor, @Param("query") String query,
-//        @Param("approve") Approve approve,
-//        Pageable pageable);
-//
-//    @Query("""
-//        SELECT s FROM Shop s
-//        WHERE (s.createdAt < :cursor OR :cursor IS NULL )
-//        AND s.approve = :approve
-//        AND (:query IS NULL
-//            OR s.shopName LIKE %:query%
-//            OR s.description LIKE %:query%)
-//        ORDER BY s.createdAt DESC
-//        """)
-//    Slice<Shop> findCursorListByCreatedAt(@Param("cursor") LocalDateTime cursor,
-//        @Param("query") String query,
-//        @Param("approve") Approve approve,
-//        Pageable pageable);
-
     Optional<Shop> findByIdAndUserId(Long id, Long userId);
 
     User user(User user);
