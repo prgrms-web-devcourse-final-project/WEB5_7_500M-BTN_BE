@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -25,13 +24,16 @@ import shop.matjalalzz.comment.dto.CommentResponse;
 import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.inquiry.dao.InquiryRepository;
+import shop.matjalalzz.inquiry.entity.Inquiry;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
+import shop.matjalalzz.user.entity.enums.Role;
 
 @ExtendWith(MockitoExtension.class)
-class CommentServiceTest {
+class CommentCommandServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
@@ -42,8 +44,11 @@ class CommentServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private InquiryRepository inquiryRepository;
+
     @InjectMocks
-    private CommentService commentService;
+    private CommentCommandService commentCommandService;
 
     @Nested
     @DisplayName("댓글 생성 테스트")
@@ -78,7 +83,8 @@ class CommentServiceTest {
             when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
             // when
-            CommentResponse response = commentService.createComment(request, partyId, writerId);
+            CommentResponse response = commentCommandService.createComment(request, partyId,
+                writerId);
 
             // then
             assertThat(response).isNotNull();
@@ -129,7 +135,8 @@ class CommentServiceTest {
             when(commentRepository.save(any(Comment.class))).thenReturn(childComment);
 
             // when
-            CommentResponse response = commentService.createComment(request, partyId, writerId);
+            CommentResponse response = commentCommandService.createComment(request, partyId,
+                writerId);
 
             // then
             assertThat(response).isNotNull();
@@ -156,7 +163,8 @@ class CommentServiceTest {
                 new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
-            assertThatThrownBy(() -> commentService.createComment(request, partyId, writerId))
+            assertThatThrownBy(
+                () -> commentCommandService.createComment(request, partyId, writerId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
 
@@ -181,7 +189,8 @@ class CommentServiceTest {
                 new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
-            assertThatThrownBy(() -> commentService.createComment(request, partyId, writerId))
+            assertThatThrownBy(
+                () -> commentCommandService.createComment(request, partyId, writerId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
 
@@ -202,16 +211,15 @@ class CommentServiceTest {
                 .build();
 
             Party party = mock(Party.class);
-
             User writer = mock(User.class);
 
             when(partyService.findById(partyId)).thenReturn(party);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(commentRepository.findById(parentId)).thenThrow(
-                new BusinessException(ErrorCode.DATA_NOT_FOUND));
+            when(commentRepository.findById(parentId)).thenReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> commentService.createComment(request, partyId, writerId))
+            assertThatThrownBy(
+                () -> commentCommandService.createComment(request, partyId, writerId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
 
@@ -220,113 +228,151 @@ class CommentServiceTest {
     }
 
     @Nested
-    @DisplayName("댓글 조회 테스트")
-    class FindCommentTest {
+    @DisplayName("문의 댓글 생성 테스트")
+    class CreateInquiryCommentTest {
 
         @Test
-        @DisplayName("단일 댓글 조회 성공")
-        void findComment_success() {
+        @DisplayName("관리자가 문의 댓글 생성 성공")
+        void createInquiryComment_admin_success() {
             // given
+            Long inquiryId = 1L;
+            Long adminId = 1L;
             Long commentId = 1L;
-            Long writerId = 1L;
 
-            Party party = mock(Party.class);
+            CommentCreateRequest request = CommentCreateRequest.builder()
+                .content("관리자 답변")
+                .build();
 
-            User writer = mock(User.class);
-            when(writer.getId()).thenReturn(writerId);
-            when(writer.getNickname()).thenReturn("작성자");
+            User inquiryWriter = mock(User.class);
+            when(inquiryWriter.getId()).thenReturn(2L);
+
+            User admin = mock(User.class);
+            when(admin.getId()).thenReturn(adminId);
+            when(admin.getRole()).thenReturn(Role.ADMIN);
+
+            Inquiry inquiry = mock(Inquiry.class);
+            when(inquiry.getUser()).thenReturn(inquiryWriter);
 
             Comment comment = Comment.builder()
                 .id(commentId)
-                .content("테스트 댓글")
-                .party(party)
-                .writer(writer)
+                .content(request.content())
+                .inquiry(inquiry)
+                .writer(admin)
                 .build();
 
-            when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
+            when(inquiryRepository.findById(inquiryId)).thenReturn(Optional.of(inquiry));
+            when(userService.getUserById(adminId)).thenReturn(admin);
+            when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
             // when
-            CommentResponse response = commentService.findComment(commentId);
+            CommentResponse response = commentCommandService.createInquiryComment(request,
+                inquiryId, adminId);
 
             // then
             assertThat(response).isNotNull();
             assertThat(response.commentId()).isEqualTo(commentId);
-            assertThat(response.content()).isEqualTo("테스트 댓글");
-            assertThat(response.writer().userId()).isEqualTo(writerId);
-            assertThat(response.writer().nickname()).isEqualTo("작성자");
+            assertThat(response.content()).isEqualTo(request.content());
+            assertThat(response.writer().userId()).isEqualTo(adminId);
+
+            verify(commentRepository).save(any(Comment.class));
         }
 
         @Test
-        @DisplayName("존재하지 않는 댓글 조회 실패")
-        void findComment_notFound_fail() {
+        @DisplayName("문의 작성자가 자신의 문의에 댓글 생성 성공")
+        void createInquiryComment_writer_success() {
             // given
+            Long inquiryId = 1L;
+            Long writerId = 1L;
             Long commentId = 1L;
 
-            when(commentRepository.findById(commentId)).thenThrow(
-                new BusinessException(ErrorCode.DATA_NOT_FOUND));
-
-            // when & then
-            assertThatThrownBy(() -> commentService.findComment(commentId))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
-        }
-
-        @Test
-        @DisplayName("모임별 댓글 목록 조회 성공")
-        void findCommentsByParty_success() {
-            // given
-            Long partyId = 1L;
-            Long writerId = 1L;
-
-            Party party = mock(Party.class);
+            CommentCreateRequest request = CommentCreateRequest.builder()
+                .content("작성자 추가 댓글")
+                .build();
 
             User writer = mock(User.class);
             when(writer.getId()).thenReturn(writerId);
+            when(writer.getRole()).thenReturn(Role.USER);
 
-            Comment comment1 = Comment.builder()
-                .id(1L)
-                .content("테스트 댓글 1")
-                .party(party)
+            Inquiry inquiry = mock(Inquiry.class);
+            when(inquiry.getUser()).thenReturn(writer);
+
+            Comment comment = Comment.builder()
+                .id(commentId)
+                .content(request.content())
+                .inquiry(inquiry)
                 .writer(writer)
                 .build();
 
-            Comment comment2 = Comment.builder()
-                .id(2L)
-                .content("테스트 댓글 2")
-                .party(party)
-                .writer(writer)
-                .build();
-
-            List<Comment> comments = Arrays.asList(comment1, comment2);
-
-            when(commentRepository.findAllByPartyId(partyId)).thenReturn(comments);
+            when(inquiryRepository.findById(inquiryId)).thenReturn(Optional.of(inquiry));
+            when(userService.getUserById(writerId)).thenReturn(writer);
+            when(commentRepository.save(any(Comment.class))).thenReturn(comment);
 
             // when
-            List<CommentResponse> responses = commentService.findCommentsByParty(partyId);
+            CommentResponse response = commentCommandService.createInquiryComment(request,
+                inquiryId, writerId);
 
             // then
-            assertThat(responses).isNotNull();
-            assertThat(responses).hasSize(2);
-            assertThat(responses.get(0).commentId()).isEqualTo(1L);
-            assertThat(responses.get(0).content()).isEqualTo("테스트 댓글 1");
-            assertThat(responses.get(1).commentId()).isEqualTo(2L);
-            assertThat(responses.get(1).content()).isEqualTo("테스트 댓글 2");
+            assertThat(response).isNotNull();
+            assertThat(response.commentId()).isEqualTo(commentId);
+            assertThat(response.content()).isEqualTo(request.content());
+            assertThat(response.writer().userId()).isEqualTo(writerId);
+
+            verify(commentRepository).save(any(Comment.class));
         }
 
         @Test
-        @DisplayName("모임별 댓글이 없는 경우 빈 목록 반환")
-        void findCommentsByParty_emptyList() {
+        @DisplayName("권한 없는 사용자가 문의 댓글 생성 실패")
+        void createInquiryComment_forbidden_fail() {
             // given
-            Long partyId = 1L;
+            Long inquiryId = 1L;
+            Long unauthorizedUserId = 2L;
 
-            when(commentRepository.findAllByPartyId(partyId)).thenReturn(List.of());
+            CommentCreateRequest request = CommentCreateRequest.builder()
+                .content("권한 없는 댓글")
+                .build();
 
-            // when
-            List<CommentResponse> responses = commentService.findCommentsByParty(partyId);
+            User inquiryWriter = mock(User.class);
+            when(inquiryWriter.getId()).thenReturn(1L);
 
-            // then
-            assertThat(responses).isNotNull();
-            assertThat(responses).isEmpty();
+            User unauthorizedUser = mock(User.class);
+            when(unauthorizedUser.getId()).thenReturn(unauthorizedUserId);
+            when(unauthorizedUser.getRole()).thenReturn(Role.USER);
+
+            Inquiry inquiry = mock(Inquiry.class);
+            when(inquiry.getUser()).thenReturn(inquiryWriter);
+
+            when(inquiryRepository.findById(inquiryId)).thenReturn(Optional.of(inquiry));
+            when(userService.getUserById(unauthorizedUserId)).thenReturn(unauthorizedUser);
+
+            // when & then
+            assertThatThrownBy(() -> commentCommandService.createInquiryComment(request, inquiryId,
+                unauthorizedUserId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
+
+            verify(commentRepository, never()).save(any(Comment.class));
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 문의에 댓글 생성 실패")
+        void createInquiryComment_inquiryNotFound_fail() {
+            // given
+            Long inquiryId = 1L;
+            Long userId = 1L;
+
+            CommentCreateRequest request = CommentCreateRequest.builder()
+                .content("댓글")
+                .build();
+
+            when(inquiryRepository.findById(inquiryId)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(
+                () -> commentCommandService.createInquiryComment(request, inquiryId, userId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FIND_INQUIRY);
+
+            verify(commentRepository, never()).save(any(Comment.class));
         }
     }
 
@@ -356,11 +402,10 @@ class CommentServiceTest {
             when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
             // when
-            commentService.deleteComment(commentId, writerId);
+            commentCommandService.deleteComment(commentId, writerId);
 
             // then
             verify(commentRepository).findById(commentId);
-            // 삭제가 호출되었는지는 mocking으로 검증이 어려우므로 생략
         }
 
         @Test
@@ -393,11 +438,10 @@ class CommentServiceTest {
             when(commentRepository.findById(commentId)).thenReturn(Optional.of(parentComment));
 
             // when
-            commentService.deleteComment(commentId, writerId);
+            commentCommandService.deleteComment(commentId, writerId);
 
             // then
             verify(commentRepository).findById(commentId);
-            // 삭제가 호출되었는지는 mocking으로 검증이 어려우므로 생략
         }
 
         @Test
@@ -407,11 +451,10 @@ class CommentServiceTest {
             Long commentId = 1L;
             Long writerId = 1L;
 
-            when(commentRepository.findById(commentId)).thenThrow(
-                new BusinessException(ErrorCode.DATA_NOT_FOUND));
+            when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> commentService.deleteComment(commentId, writerId))
+            assertThatThrownBy(() -> commentCommandService.deleteComment(commentId, writerId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATA_NOT_FOUND);
         }
@@ -438,7 +481,8 @@ class CommentServiceTest {
             when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
             // when & then
-            assertThatThrownBy(() -> commentService.deleteComment(commentId, unauthorizedUserId))
+            assertThatThrownBy(
+                () -> commentCommandService.deleteComment(commentId, unauthorizedUserId))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN_ACCESS);
         }

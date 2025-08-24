@@ -15,7 +15,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import shop.matjalalzz.chat.app.ChatService;
+import shop.matjalalzz.chat.app.ChatCommandService;
+import shop.matjalalzz.chat.app.ChatQueryService;
 import shop.matjalalzz.chat.dto.ChatMessagePageResponse;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
@@ -34,7 +35,8 @@ import shop.matjalalzz.global.security.PrincipalUser;
 public class ChatController implements ChatControllerSpec {
 
     private final SimpMessagingTemplate messagingTemplate;
-    private final ChatService chatService;
+    private final ChatCommandService chatCommandService;
+    private final ChatQueryService chatQueryService;
     private final MessageChannel clientOutboundChannel;
 
     @MessageMapping("/chat.send")
@@ -42,7 +44,7 @@ public class ChatController implements ChatControllerSpec {
         StompPrincipal user) {
         log.trace("Sending message: {}", message);
 
-        ChatMessageResponse messageResponse = chatService.sendMessage(message, user.getId());
+        ChatMessageResponse messageResponse = chatCommandService.sendMessage(message, user.getId());
         messagingTemplate.convertAndSend("/topic/party/" + message.partyId(), messageResponse);
     }
 
@@ -51,7 +53,7 @@ public class ChatController implements ChatControllerSpec {
         @PathVariable Long partyId,
         @AuthenticationPrincipal PrincipalUser user) {
 
-        List<ChatMessageResponse> chatMessages = chatService.restoreMessages(partyId,
+        List<ChatMessageResponse> chatMessages = chatQueryService.restoreMessages(partyId,
             user.getId());
 
         return BaseResponse.ok(chatMessages, BaseStatus.OK);
@@ -62,7 +64,7 @@ public class ChatController implements ChatControllerSpec {
         @RequestParam Long cursor,
         @AuthenticationPrincipal PrincipalUser user) {
 
-        ChatMessagePageResponse chatMessages = chatService.loadMessages(partyId, cursor,
+        ChatMessagePageResponse chatMessages = chatQueryService.loadMessages(partyId, cursor,
             user.getId());
 
         return BaseResponse.ok(chatMessages, BaseStatus.OK);

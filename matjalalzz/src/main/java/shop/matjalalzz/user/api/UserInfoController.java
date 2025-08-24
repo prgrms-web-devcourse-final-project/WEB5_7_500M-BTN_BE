@@ -25,7 +25,7 @@ import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.reservation.app.ReservationFacade;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
-import shop.matjalalzz.review.app.ReviewService;
+import shop.matjalalzz.review.app.ReviewQueryService;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.user.app.UserFacade;
 import shop.matjalalzz.user.dto.DeleteProfileRequest;
@@ -41,7 +41,7 @@ public class UserInfoController {
     private final UserFacade userFacade;
     private final ReservationFacade reservationFacade;
     private final PartyFacade partyFacade;
-    private final ReviewService reviewService;
+    private final ReviewQueryService reviewQueryService;
     private final PreSignedProvider preSignedProvider;
 
     @Operation(
@@ -163,7 +163,7 @@ public class UserInfoController {
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyReviewPageResponse result = reviewService.findMyReviewPage(
+        MyReviewPageResponse result = reviewQueryService.findMyReviewPage(
             userInfo.getId(), cursor, size);
 
         return BaseResponse.ok(result, BaseStatus.OK);

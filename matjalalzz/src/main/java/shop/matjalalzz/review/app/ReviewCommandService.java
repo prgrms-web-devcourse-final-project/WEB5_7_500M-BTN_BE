@@ -2,9 +2,6 @@ package shop.matjalalzz.review.app;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -18,11 +15,7 @@ import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dao.ReviewRepository;
-import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
-import shop.matjalalzz.review.dto.ReviewPageResponse;
-import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.app.ShopService;
@@ -32,7 +25,8 @@ import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
-public class ReviewService {
+@Transactional
+public class ReviewCommandService {
 
     private final ReviewRepository reviewRepository;
     private final UserService userService;
@@ -41,10 +35,6 @@ public class ReviewService {
     private final ShopService shopService;
     private final PreSignedProvider preSignedProvider;
 
-    @Value("${aws.credentials.AWS_BASE_URL}")
-    private String BASE_URL;
-
-    @Transactional
     public void deleteReview(Long reviewId, Long userId) {
         Review review = getReview(reviewId);
         validatePermission(review, userId);
@@ -54,7 +44,6 @@ public class ReviewService {
         removeShopRating(review.getShop(), review.getRating());
     }
 
-    @Transactional
     public PreSignedUrlListResponse createReview(ReviewCreateRequest request, Long writerId) {
         if (reviewRepository.existsByReservationIdAndWriterId(request.reservationId(), writerId)) {
             throw new BusinessException(ErrorCode.DUPLICATE_DATA);
@@ -77,38 +66,6 @@ public class ReviewService {
         Review result = reviewRepository.save(review);
         return preSignedProvider.createReviewUploadUrls(request.imageCount(), shop.getId(),
             result.getId());
-    }
-
-    @Transactional(readOnly = true)
-    public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
-        Slice<ReviewProjection> reviews = reviewRepository.findByShopIdAndCursor(shopId, cursor,
-            PageRequest.of(0, size));
-        Long nextCursor = null;
-        if (reviews.hasNext()) {
-            nextCursor = reviews.getContent().getLast().getReviewId();
-        }
-        return ReviewMapper.toReviewPageResponseFromProjection(nextCursor, reviews.getContent(),
-            BASE_URL);
-    }
-
-    @Transactional(readOnly = true)
-    public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
-        Slice<MyReviewResponse> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
-            PageRequest.of(0, size));
-
-        Long nextCursor = null;
-        if (comments.hasNext()) {
-            nextCursor = comments.getContent().getLast().reviewId();
-        }
-
-        return ReviewMapper.toMyReviewPageResponse(nextCursor, comments);
-    }
-
-    @Transactional(readOnly = true)
-    public Review getReview(Long reviewId) {
-        return reviewRepository.findById(reviewId).orElseThrow(
-            () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
-
     }
 
     private void validatePermission(Review review, Long actorId) {
@@ -149,4 +106,11 @@ public class ReviewService {
         }
         shop.updateRating(newRating);
     }
+
+    private Review getReview(Long reviewId) {
+        return reviewRepository.findById(reviewId).orElseThrow(
+            () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+
+    }
+
 }
