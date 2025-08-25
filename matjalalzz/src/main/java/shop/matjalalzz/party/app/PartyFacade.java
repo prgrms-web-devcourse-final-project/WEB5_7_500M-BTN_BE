@@ -97,14 +97,12 @@ public class PartyFacade {
 
     @Transactional(readOnly = true)
     public PartyScrollResponse searchParties(PartySearchParam condition, int size) {
-        List<Party> parties = partyService.searchParties(condition, size);
+        Slice<Party> parties = partyService.searchParties(condition, PageRequest.of(0, size));
 
-        boolean hasNext = parties.size() > size;
-        if (hasNext) {
-            parties = parties.subList(0, size);
+        Long nextCursor = null;
+        if (parties.hasNext()) {
+            nextCursor = parties.getContent().getLast().getId();
         }
-
-        Long nextCursor = hasNext ? parties.getLast().getId() : null;
 
         // shopId 수집
         List<Long> shopIds = parties.stream()

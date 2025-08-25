@@ -5,6 +5,9 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import shop.matjalalzz.party.dto.PartySearchParam;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.QParty;
@@ -14,7 +17,7 @@ import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.QShop;
 
 @RequiredArgsConstructor
-public class PartyRepositoryImpl {
+public class PartyRepositoryImpl implements PartyRepositoryCustom {
 
     private final JPAQueryFactory query;
 
@@ -22,11 +25,22 @@ public class PartyRepositoryImpl {
     private static final QParty party = QParty.party;
     private static final QShop shop = QShop.shop;
 
-    public List<Party> searchWithCursor(PartySearchParam cond, int size) {
-        return baseQuery(cond)
+    @Override
+    public Slice<Party> searchWithCursor(PartySearchParam cond, Pageable pageable) {
+        List<Party> list = baseQuery(cond)
             .orderBy(party.id.desc())
-            .limit(size + 1)
+            .limit(pageable.getPageSize() + 1)
             .fetch();
+
+        return toSlice(list, pageable);
+    }
+
+    private Slice<Party> toSlice(List<Party> list, Pageable pageable) {
+        boolean hasNext = list.size() > pageable.getPageSize();
+        if (hasNext) {
+            list.removeLast();
+        }
+        return new SliceImpl<>(list, pageable, hasNext);
     }
 
     private JPAQuery<Party> baseQuery(PartySearchParam cond) {

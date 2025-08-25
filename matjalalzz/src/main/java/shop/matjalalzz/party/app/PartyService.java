@@ -5,6 +5,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,8 +73,8 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public List<Party> searchParties(PartySearchParam cond, int size) {
-        return partyRepository.searchWithCursor(cond, size);
+    public Slice<Party> searchParties(PartySearchParam cond, Pageable pageable) {
+        return partyRepository.searchWithCursor(cond, pageable);
     }
 
     @Transactional(readOnly = true)
