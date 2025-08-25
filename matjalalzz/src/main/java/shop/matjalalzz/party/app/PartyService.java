@@ -20,7 +20,7 @@ import shop.matjalalzz.party.dto.projection.MyPartyProjection;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
-import shop.matjalalzz.party.mapper.ProjectionToDtoMapper;
+import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -68,7 +68,7 @@ public class PartyService {
         Slice<MyPartyProjection> projections = partyRepository.findByUserIdAndCursor(userId,
             cursor, of);
 
-        return projections.map(ProjectionToDtoMapper::toMyPartyResponse);
+        return projections.map(PartyMapper::toMyPartyResponse);
     }
 
     @Transactional(readOnly = true)
@@ -79,7 +79,7 @@ public class PartyService {
     @Transactional(readOnly = true)
     public List<PartyMemberResponse> findMembersByPartyId(long partyId) {
         return partyUserRepository.findMembersByPartyId(partyId, BASE_URL).stream()
-            .map(ProjectionToDtoMapper::toPartyMemberResponse)
+            .map(PartyMapper::toPartyMemberResponse)
             .toList();
     }
 
