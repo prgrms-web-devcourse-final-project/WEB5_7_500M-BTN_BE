@@ -11,8 +11,7 @@ import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.review.app.ReviewCommandService;
-import shop.matjalalzz.review.app.ReviewQueryService;
+import shop.matjalalzz.review.app.ReviewFacade;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 
@@ -20,14 +19,13 @@ import shop.matjalalzz.review.dto.ReviewPageResponse;
 @RequiredArgsConstructor
 public class ReviewController implements ReviewControllerSpec {
 
-    private final ReviewQueryService reviewQueryService;
-    private final ReviewCommandService reviewCommandService;
+    private final ReviewFacade reviewFacade;
 
     @Override
     public BaseResponse<ReviewPageResponse> getReviews(@PathVariable Long shopId,
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10", required = false) int size) {
-        return BaseResponse.ok(reviewQueryService.findReviewPageByShop(shopId, cursor, size),
+        return BaseResponse.ok(reviewFacade.findReviewPageByShop(shopId, cursor, size),
             BaseStatus.OK);
     }
 
@@ -36,13 +34,13 @@ public class ReviewController implements ReviewControllerSpec {
         @Valid @RequestBody ReviewCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
 
-        return BaseResponse.ok(reviewCommandService.createReview(request, principal.getId()),
+        return BaseResponse.ok(reviewFacade.createReview(request, principal.getId()),
             BaseStatus.CREATED);
     }
 
     @Override
     public void deleteReview(@PathVariable Long reviewId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reviewCommandService.deleteReview(reviewId, principal.getId());
+        reviewFacade.deleteReview(reviewId, principal.getId());
     }
 }
