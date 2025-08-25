@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.party.dto.projection.MyPartyProjection;
 import shop.matjalalzz.party.entity.Party;
+import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 
 public interface PartyRepository extends JpaRepository<Party, Long>, PartyRepositoryCustom {
@@ -60,14 +61,14 @@ public interface PartyRepository extends JpaRepository<Party, Long>, PartyReposi
     List<Party> findAllMyRecruitingParty(@Param("userId") long userId);
 
     @Query("""
-        SELECT p
+        SELECT pu
         FROM PartyUser pu
-            JOIN pu.party p
+            JOIN FETCH pu.party p
         WHERE pu.user.id = :userId
             AND pu.isHost = false
             AND p.status <> "TERMINATED"
         """)
-    List<Party> findAllParticipatingParty(@Param("userId") long userId);
+    List<PartyUser> findAllParticipatingParty(@Param("userId") long userId);
 
     @Query("""
             SELECT p

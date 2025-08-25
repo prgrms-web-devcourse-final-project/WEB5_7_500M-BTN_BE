@@ -125,4 +125,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Reservation findByPartyId(Long partyId);
 
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        WHERE r.party.id in :partyIds
+        """)
+    List<Reservation> findAllByPartyIds(@Param("partyIds") List<Long> partyIds);
 }

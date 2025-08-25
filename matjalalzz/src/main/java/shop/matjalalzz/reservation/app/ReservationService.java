@@ -1,7 +1,9 @@
 package shop.matjalalzz.reservation.app;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -84,13 +86,30 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status, LocalDateTime threshold) {
+    public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status,
+        LocalDateTime threshold) {
         return reservationRepository.findAllByStatusAndReservedAtBefore(status, threshold);
     }
 
     @Transactional(readOnly = true)
     public Reservation findByPartyId(Long partyId) {
         return reservationRepository.findByPartyId(partyId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Reservation> findAllByPartyIds(List<Long> partyIds) {
+
+        //key는 partyId, value는 null인 map으로 초기화
+        Map<Long, Reservation> byPartyId = new HashMap<>();
+        partyIds.stream().distinct().forEach(id -> byPartyId.put(id, null));
+
+        List<Reservation> reservations = reservationRepository.findAllByPartyIds(partyIds);
+        // 연동된 예약이 있는 경우 map 값 덮어쓰기
+        for (Reservation reservation : reservations) {
+            Long partyId = reservation.getParty().getId();
+            byPartyId.put(partyId, reservation);
+        }
+        return byPartyId;
     }
 }
 

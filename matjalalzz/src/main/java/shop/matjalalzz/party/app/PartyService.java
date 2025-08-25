@@ -104,7 +104,7 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public List<Party> findAllParticipatingParty(long userId) {
+    public List<PartyUser> findAllParticipatingParty(long userId) {
         return partyRepository.findAllParticipatingParty(userId);
     }
 

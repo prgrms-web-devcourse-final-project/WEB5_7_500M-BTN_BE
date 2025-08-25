@@ -229,21 +229,36 @@ public class PartyFacade {
 
     @Transactional
     public void quitPartyForWithdraw(User user) {
-        // 종료되지 않은 파티 중 회원으로 참여중인 파티 조회
-        List<Party> parties = partyService.findAllParticipatingParty(
+        // 종료되지 않은 파티 중 본인이 호스트가 아닌 partyUser 조회
+        List<PartyUser> participatingPartyUsers = partyService.findAllParticipatingParty(
             user.getId());
 
-        for (Party party : parties) {
-            Reservation reservation = reservationService.findByPartyId(party.getId());
+        // 탈퇴할 파티가 없을 경우 바로 리턴
+        if (participatingPartyUsers == null || participatingPartyUsers.isEmpty()) {
+            return;
+        }
+
+        // partyId 수집
+        List<Long> partyIds = participatingPartyUsers.stream()
+            .map(pu -> pu.getParty().getId())
+            .distinct()
+            .toList();
+
+        // 파티별 예약 map 생성(없으면 null)
+        Map<Long, Reservation> reservationByPartyId = reservationService.findAllByPartyIds(
+            partyIds);
+
+        for (PartyUser pu : participatingPartyUsers) {
+            Long partyId = pu.getParty().getId();
+            Reservation reservation = reservationByPartyId.get(partyId);
 
             //PENDING 상태가 아닌 예약을 가진 파티는 탈퇴 불가능
             if (reservation != null && reservation.getStatus() != ReservationStatus.PENDING) {
                 continue;
             }
-            PartyUser partyUser = partyService.findPartyUser(user.getId(), party);
 
             // 파티 탈퇴 진행
-            processQuitParty(partyUser, party, user, reservation);
+            processQuitParty(pu, pu.getParty(), user, reservation);
         }
     }
 
