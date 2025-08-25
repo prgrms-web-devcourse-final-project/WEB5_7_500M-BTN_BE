@@ -244,7 +244,7 @@ public class PartyFacade {
             .distinct()
             .toList();
 
-        // 파티별 예약 map 생성(없으면 null)
+        // 파티별 예약 map 생성
         Map<Long, Reservation> reservationByPartyId = reservationService.findAllByPartyIds(
             partyIds);
 

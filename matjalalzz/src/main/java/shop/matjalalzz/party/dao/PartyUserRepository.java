@@ -40,4 +40,14 @@ public interface PartyUserRepository extends JpaRepository<PartyUser, Long> {
         @Param("baseUrl") String baseUrl);
 
     boolean existsByUserIdAndPartyId(Long userId, Long partyId);
+
+    @Query("""
+        SELECT pu
+        FROM PartyUser pu
+            JOIN FETCH pu.party p
+        WHERE pu.user.id = :userId
+            AND pu.isHost = false
+            AND p.status <> "TERMINATED"
+        """)
+    List<PartyUser> findAllParticipatingParty(@Param("userId") long userId);
 }
