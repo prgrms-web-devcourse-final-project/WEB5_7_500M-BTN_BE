@@ -245,7 +245,7 @@ public class PartyFacade {
             .toList();
 
         // 파티별 예약 map 생성
-        Map<Long, Reservation> reservationByPartyId = reservationService.findAllByPartyIds(
+        Map<Long, Reservation> reservationByPartyId = reservationService.getMapByPartyIds(
             partyIds);
 
         for (PartyUser pu : participatingPartyUsers) {
@@ -379,8 +379,18 @@ public class PartyFacade {
         // 회원 탈퇴시에 본인이 파티장이며 종료되지 않은 파티만 조회
         List<Party> parties = partyService.findAllMyRecruitingParty(user.getId());
 
+        //partyId 수집
+        List<Long> partyIds = parties.stream()
+            .map(Party::getId)
+            .distinct()
+            .toList();
+
+        // 파티별 예약 map 생성
+        Map<Long, Reservation> reservationByPartyId = reservationService.getMapByPartyIds(
+            partyIds);
+
         for (Party party : parties) {
-            Reservation reservation = reservationService.findByPartyId(party.getId());
+            Reservation reservation = reservationByPartyId.get(party.getId());
 
             //파티의 예약일이 하루 전인 파티는 해체 시키지 않음
             if (cannotDeleteParty(reservation)) {

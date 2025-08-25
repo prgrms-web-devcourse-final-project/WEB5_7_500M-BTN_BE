@@ -97,7 +97,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, Reservation> findAllByPartyIds(List<Long> partyIds) {
+    public Map<Long, Reservation> getMapByPartyIds(List<Long> partyIds) {
 
         //key는 partyId, value는 null인 map으로 초기화
         Map<Long, Reservation> byPartyId = new HashMap<>();
