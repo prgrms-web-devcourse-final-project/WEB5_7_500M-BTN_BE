@@ -1,9 +1,9 @@
-package shop.matjalalzz.reservation.dto;
+package shop.matjalalzz.reservation.dto.projection;
 
 import java.time.LocalDateTime;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
-public interface MyReservationView {
+public interface MyReservationProjection {
     long getReservationId();
     String getShopName();
     String getName();

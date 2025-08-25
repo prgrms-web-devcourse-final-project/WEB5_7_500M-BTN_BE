@@ -21,7 +21,7 @@ import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.review.dto.MyReviewView;
+import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.entity.Review;
@@ -94,7 +94,7 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
-        Slice<MyReviewView> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
+        Slice<MyReviewProjection> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
             PageRequest.of(0, size));
 
         Long nextCursor = null;
@@ -102,7 +102,7 @@ public class ReviewService {
             nextCursor = comments.getContent().getLast().getReviewId();
         }
 
-        List<Long> reviewIds = comments.stream().map(MyReviewView::getReviewId).toList();
+        List<Long> reviewIds = comments.stream().map(MyReviewProjection::getReviewId).toList();
 
         Map<Long, List<String>> reviewImageMap = imageService.findReviewImagesById(reviewIds);
 

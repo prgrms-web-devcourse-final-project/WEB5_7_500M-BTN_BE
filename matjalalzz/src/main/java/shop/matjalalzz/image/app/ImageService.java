@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.image.dao.ImageRepository;
-import shop.matjalalzz.image.dto.ReviewImageView;
+import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +29,7 @@ public class ImageService {
     @Transactional(readOnly = true)
     public Map<Long, List<String>> findReviewImagesById(List<Long> reviewIds) {
         return imageRepository.findImageKeyByReviewIds(reviewIds).stream().collect(
-            Collectors.groupingBy(ReviewImageView::getReviewId,
+            Collectors.groupingBy(ReviewImageProjection::getReviewId,
                 Collectors.mapping(v -> BASE_URL + v.getS3Key(), Collectors.toList())
             ));
     }

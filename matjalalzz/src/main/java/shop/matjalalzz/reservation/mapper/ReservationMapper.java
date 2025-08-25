@@ -10,13 +10,12 @@ import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.dto.MyReservationView;
+import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 
@@ -82,7 +81,7 @@ public class ReservationMapper {
             .toList();
     }
 
-    public static MyReservationResponse toMyReservationResponse(MyReservationView view) {
+    public static MyReservationResponse toMyReservationResponse(MyReservationProjection view) {
         return MyReservationResponse.builder()
             .reservationId(view.getReservationId())
             .shopName(view.getShopName())

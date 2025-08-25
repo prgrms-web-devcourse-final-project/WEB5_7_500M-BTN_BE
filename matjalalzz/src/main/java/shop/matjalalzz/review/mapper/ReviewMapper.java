@@ -8,7 +8,7 @@ import org.springframework.data.domain.Slice;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
-import shop.matjalalzz.review.dto.MyReviewView;
+import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
@@ -38,7 +38,7 @@ public class ReviewMapper {
             .build();
     }
 
-    public static MyReviewResponse toMyReviewResponse(MyReviewView view, List<String> reviewImages) {
+    public static MyReviewResponse toMyReviewResponse(MyReviewProjection view, List<String> reviewImages) {
         return MyReviewResponse.builder()
             .reviewId(view.getReviewId())
             .shopName(view.getShopName())
@@ -50,7 +50,7 @@ public class ReviewMapper {
     }
 
     public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
-        Slice<MyReviewView> reviews, Map<Long, List<String>> reviewImageMap) {
+        Slice<MyReviewProjection> reviews, Map<Long, List<String>> reviewImageMap) {
         List<MyReviewResponse> responses = reviews.stream()
             .map(v -> toMyReviewResponse(v, reviewImageMap.get(v.getReviewId())))
             .toList();

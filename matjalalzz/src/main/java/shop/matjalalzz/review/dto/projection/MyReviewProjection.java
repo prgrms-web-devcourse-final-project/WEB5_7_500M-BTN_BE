@@ -1,8 +1,8 @@
-package shop.matjalalzz.review.dto;
+package shop.matjalalzz.review.dto.projection;
 
 import java.time.LocalDateTime;
 
-public interface MyReviewView {
+public interface MyReviewProjection {
     long getReviewId();
     String getShopName();
     double getRating();
