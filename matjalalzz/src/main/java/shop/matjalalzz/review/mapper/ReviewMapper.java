@@ -50,7 +50,7 @@ public class ReviewMapper {
     }
 
     public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
-        List<MyReviewView> reviews, Map<Long, List<String>> reviewImageMap) {
+        Slice<MyReviewView> reviews, Map<Long, List<String>> reviewImageMap) {
         List<MyReviewResponse> responses = reviews.stream()
             .map(v -> toMyReviewResponse(v, reviewImageMap.get(v.getReviewId())))
             .toList();

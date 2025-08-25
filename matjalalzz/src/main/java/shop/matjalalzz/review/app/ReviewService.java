@@ -2,7 +2,6 @@ package shop.matjalalzz.review.app;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +13,6 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.app.ImageService;
-import shop.matjalalzz.image.dto.ReviewImageView;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -99,22 +97,16 @@ public class ReviewService {
         Slice<MyReviewView> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
             PageRequest.of(0, size));
 
-        List<MyReviewView> content = comments.getContent();
-
         Long nextCursor = null;
         if (comments.hasNext()) {
-            nextCursor = content.getLast().getReviewId();
+            nextCursor = comments.getContent().getLast().getReviewId();
         }
 
-        List<Long> reviewIds = content.stream().map(MyReviewView::getReviewId).toList();
-        List<ReviewImageView> reviewImages = imageService.findReviewImages(reviewIds);
+        List<Long> reviewIds = comments.stream().map(MyReviewView::getReviewId).toList();
 
-        Map<Long, List<String>> reviewImageMap = reviewImages.stream().collect(
-            Collectors.groupingBy(ReviewImageView::getReviewId,
-                Collectors.mapping(v -> BASE_URL + v.getS3Key(), Collectors.toList())
-            ));
+        Map<Long, List<String>> reviewImageMap = imageService.findReviewImagesById(reviewIds);
 
-        return ReviewMapper.toMyReviewPageResponse(nextCursor, content, reviewImageMap);
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, comments, reviewImageMap);
     }
 
     @Transactional(readOnly = true)
