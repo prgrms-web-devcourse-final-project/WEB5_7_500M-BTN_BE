@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.dto.MyReservationView;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
+import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
@@ -78,7 +78,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
             )
         order by r.id desc
         """)
-    Slice<MyReservationView> findByUserIdAndCursor(
+    Slice<MyReservationProjection> findByUserIdAndCursor(
         @Param("userId") Long userId,
         @Param("cursor") Long cursor,
         Pageable pageable);
@@ -93,19 +93,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Param("threshold") LocalDateTime threshold);
 
     @Query("""
-        SELECT r
+        SELECT r.id AS reservationId, r.reservationFee AS reservationFee
         FROM Reservation r
         WHERE r.user.id = :userId
             AND r.party IS NULL
             AND (
                 r.status = "PENDING"
                 OR (
-                     r.status = "CONFIRMED"
-                     AND r.reservedAt >= :threshold
+                    r.status = "CONFIRMED"
+                    AND r.reservedAt >= :threshold
                 )
             )
         """)
-    List<Reservation> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
+    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
         @Param("threshold") LocalDateTime threshold);
 
     @Modifying
@@ -148,4 +148,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Param("cursor") Long cursor,
         Pageable pageable
     );
+
+    @Modifying
+    @Query("""
+        update Reservation r
+        set r.status = "CANCELLED"
+        where r.id in :reservationIds
+        """)
+    void cancelReservationByIds(@Param("reservationIds") List<Long> reservationIds);
 }

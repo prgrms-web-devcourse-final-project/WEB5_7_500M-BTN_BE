@@ -6,6 +6,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -89,7 +91,8 @@ public class ReservationFacade {
     }
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status, Long cursor, int size) {
+    public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status,
+        Long cursor, int size) {
         int sizePlusOne = size + 1;
         Pageable pageable = PageRequest.of(0, sizePlusOne, Sort.by(Sort.Direction.DESC, "id"));
 
@@ -98,7 +101,9 @@ public class ReservationFacade {
             reservationService.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
 
         boolean hasNext = rows.size() > size;
-        if (hasNext) rows = rows.subList(0, size);
+        if (hasNext) {
+            rows = rows.subList(0, size);
+        }
         Long nextCursor = hasNext ? rows.get(rows.size() - 1).reservationId() : null;
 
         List<ReservationListResponse.ReservationContent> content =
@@ -215,16 +220,19 @@ public class ReservationFacade {
     @Transactional
     public void cancelReservationForWithdraw(User user) {
         // 회원 탈퇴시에 회원 단독으로 진행한 예약 중 취소 가능한 예약 조회
-        List<Reservation> reservations = reservationService.findAllMyReservationByUserIdForWithdraw(
-            user.getId());
+        List<CancelReservationProjection> reservations = reservationService.
+            findAllMyReservationByUserIdForWithdraw(user.getId());
 
-        for (Reservation reservation : reservations) {
-            // 예약금 환불
-            reservation.getUser().increasePoint(reservation.getReservationFee());
+        AtomicInteger totalReservationFee = new AtomicInteger();
 
-            // 예약 취소
-            reservation.changeStatus(ReservationStatus.CANCELLED);
-        }
+        List<Long> reservationIds = reservations.stream().map(r -> {
+            totalReservationFee.addAndGet(r.getReservationFee());
+            return r.getReservationId();
+        }).toList();
+
+        reservationService.cancelReservations(reservationIds);
+
+        user.increasePoint(totalReservationFee.get());
     }
 
     @Transactional
