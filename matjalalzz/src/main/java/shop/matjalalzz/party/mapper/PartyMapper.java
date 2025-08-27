@@ -10,6 +10,8 @@ import shop.matjalalzz.party.dto.PartyCreateRequest;
 import shop.matjalalzz.party.dto.PartyDetailResponse;
 import shop.matjalalzz.party.dto.PartyListResponse;
 import shop.matjalalzz.party.dto.PartyMemberResponse;
+import shop.matjalalzz.party.dto.projection.MyPartyProjection;
+import shop.matjalalzz.party.dto.projection.PartyMemberProjection;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.shop.entity.Shop;
 
@@ -78,6 +80,34 @@ public class PartyMapper {
         return MyPartyPageResponse.builder()
             .nextCursor(nextCursor)
             .content(parties.getContent())
+            .build();
+    }
+
+    public static MyPartyResponse toMyPartyResponse(MyPartyProjection projection) {
+        return MyPartyResponse.builder()
+            .partyId(projection.getId())
+            .title(projection.getTitle())
+            .shopName(projection.getShopName())
+            .metAt(projection.getMetAt())
+            .deadline(projection.getDeadline())
+            .status(projection.getStatus())
+            .maxCount(projection.getMaxCount())
+            .minCount(projection.getMinCount())
+            .currentCount(projection.getCurrentCount())
+            .genderCondition(projection.getGenderCondition())
+            .minAge(projection.getMinAge())
+            .maxAge(projection.getMaxAge())
+            .description(projection.getDescription())
+            .isHost(projection.getIsHost())
+            .build();
+    }
+
+    public static PartyMemberResponse toPartyMemberResponse(PartyMemberProjection projection) {
+        return PartyMemberResponse.builder()
+            .userId(projection.getUserId())
+            .userNickname(projection.getUserNickname())
+            .userProfile(projection.getUserProfile())
+            .isHost(projection.getIsHost())
             .build();
     }
 }
