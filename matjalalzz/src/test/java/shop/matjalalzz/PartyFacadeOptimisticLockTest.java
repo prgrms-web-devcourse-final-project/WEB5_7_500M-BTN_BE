@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
+import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.entity.Party;
@@ -32,15 +33,26 @@ import shop.matjalalzz.user.entity.enums.Role;
 @Slf4j
 @SpringBootTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)   // 각 쓰레드가 독립 트랜잭션
-class PartyServiceOptimisticLockTest {
+class PartyFacadeOptimisticLockTest {
 
-    @Autowired PartyService partyService;
-    @Autowired PartyRepository partyRepository;
-    @Autowired UserService userService;
     @Autowired
-    ShopRepository shopRepository;   // 테스트용
+    PartyService partyService;
+
+    @Autowired
+    PartyFacade partyFacade;
+
+    @Autowired
+    PartyRepository partyRepository;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    ShopRepository shopRepository;
+
     @Autowired
     UserRepository userRepository;
+
     @MockBean
     PartyChatService partyChatService;
 
@@ -79,7 +91,7 @@ class PartyServiceOptimisticLockTest {
                 ready.countDown();      // 준비 완료
                 try {
                     start.await();      // 동시에 시작
-                    partyService.joinParty(party.getId(), u.getId());  // @Retryable + 낙관적락
+                    partyFacade.joinParty(party.getId(), u.getId());  // @Retryable + 낙관적락
                 } catch (Exception e) {
                     log.error("exception: {}", e.getMessage());
                     throw new RuntimeException(e);
@@ -89,18 +101,15 @@ class PartyServiceOptimisticLockTest {
             });
         }
 
-        ready.await();   // 모든 쓰레드 준비될 때까지
+        ready.await();
         start.countDown();
         done.await();
         es.shutdown();
 
-        /* ── THEN : 버전·인원 검증 ───────────────────────── */
         Party reloaded = partyRepository.findById(party.getId()).orElseThrow();
         assertEquals(maxCount, reloaded.getCurrentCount());
         assertEquals(maxCount - 1, reloaded.getVersion(), "version 값이 참가자 수만큼 증가해야 한다");
     }
-
-    /* --------- 헬퍼 메서드 ---------- */
 
     private User mockUser(String email, Role role) {
         return User.builder()

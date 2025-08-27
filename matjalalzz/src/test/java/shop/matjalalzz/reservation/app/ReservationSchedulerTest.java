@@ -29,7 +29,7 @@ class ReservationSchedulerTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationService reservationService;
+    private ReservationFacade reservationFacade;
 
     @Autowired
     private UserRepository userRepository;
@@ -68,7 +68,7 @@ class ReservationSchedulerTest {
         alreadyTerminated.changeStatus(ReservationStatus.TERMINATED);
 
         // when
-        int result = reservationService.terminateExpiredReservations();
+        int result = reservationFacade.terminateExpiredReservations();
 
         // then
         assertThat(result).isEqualTo(2);
@@ -112,7 +112,7 @@ class ReservationSchedulerTest {
         alreadyRefused.changeStatus(ReservationStatus.REFUSED);
 
         // when
-        int result = reservationService.refuseExpiredPendingReservations();
+        int result = reservationFacade.refuseExpiredPendingReservations();
 
         // then
         assertThat(result).isEqualTo(2);
