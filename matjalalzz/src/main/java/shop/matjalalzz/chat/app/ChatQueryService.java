@@ -5,48 +5,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.dao.ChatMessageRepository;
-import shop.matjalalzz.chat.dto.ChatMessagePageResponse;
-import shop.matjalalzz.chat.dto.ChatMessageResponse;
 import shop.matjalalzz.chat.entity.ChatMessage;
-import shop.matjalalzz.chat.mapper.ChatMapper;
-import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.party.app.PartyService;
 
 @Service
 @RequiredArgsConstructor
 public class ChatQueryService {
 
     private final ChatMessageRepository chatMessageRepository;
-    private final PartyService partyService;
 
-    @Transactional(readOnly = true)
-    public ChatMessagePageResponse loadMessages(Long partyId, Long cursor, Long userId) {
-        if (!partyService.isInParty(partyId, userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-        Slice<ChatMessage> chatMessages = chatMessageRepository.findByPartyIdAndCursor(
+    public Slice<ChatMessage> findChatByPartyId(Long partyId, Long cursor) {
+        return chatMessageRepository.findByPartyIdAndCursor(
             partyId, cursor, PageRequest.of(0, 20));
-        Long nextCursor = null;
-
-        if (chatMessages.hasNext()) {
-            nextCursor = chatMessages.getContent().getLast().getId();
-        }
-
-        return ChatMapper.toChatMessagePageResponse(chatMessages, nextCursor);
     }
 
-    @Transactional(readOnly = true)
-    public List<ChatMessageResponse> restoreMessages(Long partyId, Long userId) {
-        if (!partyService.isInParty(partyId, userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
+    public List<ChatMessage> findLatestChatByPartyId(Long partyId) {
         return chatMessageRepository.findAllByPartyIdOrderByIdDesc(partyId,
-                PageRequest.of(0, 30))
-            .stream()
-            .map(ChatMapper::toChatMessageResponse)
-            .toList().reversed();
+            PageRequest.of(0, 30));
     }
 }
