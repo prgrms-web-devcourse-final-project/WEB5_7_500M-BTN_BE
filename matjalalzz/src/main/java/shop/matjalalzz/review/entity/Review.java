@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.image.entity.Image;
@@ -64,6 +65,7 @@ public class Review extends BaseEntity {
 
     @OneToMany
     @JoinColumn(name = "review_id")
+    @Setter
     private List<Image> images;
 
 }

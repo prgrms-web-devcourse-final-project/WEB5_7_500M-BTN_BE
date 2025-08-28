@@ -16,5 +16,7 @@ public record ShopsItem (
     double latitude, //위도
     double longitude, //경도
     Double rating,
-    String thumbnailUrl)
+    String thumbnailUrl,
+    Double distance
+    )
 {}

@@ -1,5 +1,6 @@
 package shop.matjalalzz.shop.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,13 +12,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalTime;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import shop.matjalalzz.global.common.BaseEntity;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.user.entity.User;
 
@@ -82,6 +87,11 @@ public class Shop extends BaseEntity {
     @Column(nullable = false)
     private Approve approve;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "shop_id")
+    @Setter
+    private List<Image> images;
+
     @Builder
     public Shop(String shopName, String roadAddress, String sido, Double latitude,
         Double longitude, String description, FoodCategory category, String tel,
@@ -126,6 +136,8 @@ public class Shop extends BaseEntity {
         this.rating = rating;
     }
 
-    public void updateApprove(Approve approve) {this.approve = approve;}
+    public void updateApprove(Approve approve) {
+        this.approve = approve;
+    }
 
 }

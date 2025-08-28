@@ -8,6 +8,8 @@ spring:
     time-zone: Asia/Seoul
 
   datasource:
+    datasource-proxy:
+      count-query-time-with-nano: true
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
@@ -28,12 +30,12 @@ spring:
     init:
       mode: always
 
-    data:
-      redis:
-        host: ${REDIS_HOST}
-        port: ${REDIS_PORT}
-        password: ${REDIS_PASSWORD}
-        timeout: ${REDIS_TIMEOUT}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      timeout: ${REDIS_TIMEOUT}
   security:
     oauth2:
       client:
@@ -104,7 +106,15 @@ toss:
   client-key: ${TOSS_CLIENT_KEY}
 
 logging:
-  root: INFO
+  level:
+    root: INFO
+    shop.matjalalzz.global.aop: INFO      # [PERF]
+    shop.matjalalzz.global.config: INFO   # [SQL]
+    net.ttddyy: INFO
+    shop.matjalalzz.reservation.api: DEBUG
+    shop.matjalalzz.reservation.app: DEBUG
+
+
 server:
   port: ${SERVER_PORT}
 

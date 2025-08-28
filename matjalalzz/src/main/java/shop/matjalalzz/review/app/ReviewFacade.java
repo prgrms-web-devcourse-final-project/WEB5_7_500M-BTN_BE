@@ -3,7 +3,6 @@ package shop.matjalalzz.review.app;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +16,11 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
+import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
 import shop.matjalalzz.shop.app.ShopService;
@@ -31,33 +30,32 @@ import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
-public class ReviewService {
+public class ReviewFacade {
 
-    private final ReviewRepository reviewRepository;
     private final UserService userService;
     private final ReservationService reservationService;
     private final PartyService partyService;
     private final ShopService shopService;
     private final PreSignedProvider preSignedProvider;
+    private final ReviewQueryService reviewQueryService;
+    private final ReviewCommandService reviewCommandService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
 
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
-        Review review = getReview(reviewId);
+        Review review = reviewQueryService.getReview(reviewId);
         validatePermission(review, userId);
         review.delete();
         List<String> imageKeys = review.getImages().stream().map(Image::getS3Key).toList();
         preSignedProvider.deleteObjects(imageKeys);
-        removeShopRating(review.getShop(), review.getRating());
+        reviewCommandService.removeShopRating(review.getShop(), review.getRating());
     }
 
     @Transactional
     public PreSignedUrlListResponse createReview(ReviewCreateRequest request, Long writerId) {
-        if (reviewRepository.existsByReservationIdAndWriterId(request.reservationId(), writerId)) {
-            throw new BusinessException(ErrorCode.DUPLICATE_DATA);
-        }
+        reviewQueryService.validateDuplicatedReview(request.reservationId(), writerId);
 
         User writer = userService.getUserById(writerId);
         Reservation reservation = reservationService.getReservationById(request.reservationId());
@@ -70,43 +68,37 @@ public class ReviewService {
 
         Shop shop = shopService.shopFind(request.shopId());
 
-        addShopRating(shop, request.rating());
+        reviewCommandService.addShopRating(shop, request.rating());
 
         Review review = ReviewMapper.fromReviewCreateRequest(request, writer, shop, reservation);
-        Review result = reviewRepository.save(review);
+        Review result = reviewCommandService.save(review);
         return preSignedProvider.createReviewUploadUrls(request.imageCount(), shop.getId(),
             result.getId());
     }
 
     @Transactional(readOnly = true)
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
-        Slice<Review> comments = reviewRepository.findByShopIdAndCursor(shopId, cursor,
-            PageRequest.of(0, size));
+        Slice<ReviewProjection> reviews = reviewQueryService.findReviewPageByShop(shopId, cursor,
+            size);
         Long nextCursor = null;
-        if (comments.hasNext()) {
-            nextCursor = comments.getContent().getLast().getId();
+        if (reviews.hasNext()) {
+            nextCursor = reviews.getContent().getLast().getReviewId();
         }
-        return ReviewMapper.toReviewPageResponse(nextCursor, comments.getContent(), BASE_URL);
+        return ReviewMapper.toReviewPageResponseFromProjection(nextCursor, reviews.getContent(),
+            BASE_URL);
     }
 
     @Transactional(readOnly = true)
     public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
-        Slice<MyReviewResponse> comments = reviewRepository.findByUserIdAndCursor(userId, cursor,
-            PageRequest.of(0, size));
+        Slice<MyReviewResponse> reviews = reviewQueryService.findReviewPageByUser(userId, cursor,
+            size);
 
         Long nextCursor = null;
-        if (comments.hasNext()) {
-            nextCursor = comments.getContent().getLast().reviewId();
+        if (reviews.hasNext()) {
+            nextCursor = reviews.getContent().getLast().reviewId();
         }
 
-        return ReviewMapper.toMyReviewPageResponse(nextCursor, comments);
-    }
-
-    @Transactional(readOnly = true)
-    public Review getReview(Long reviewId) {
-        return reviewRepository.findById(reviewId).orElseThrow(
-            () -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
-
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, reviews);
     }
 
     private void validatePermission(Review review, Long actorId) {
@@ -129,22 +121,4 @@ public class ReviewService {
         }
     }
 
-    private void addShopRating(Shop shop, Double rating) {
-        Double currentRating = shop.getRating();
-        int currentCount = reviewRepository.countReviewByShop(shop);
-        double newRating = currentRating * currentCount + rating;
-        newRating /= (currentCount + 1);
-        shop.updateRating(newRating);
-    }
-
-    private void removeShopRating(Shop shop, Double rating) {
-        Double currentRating = shop.getRating();
-        int currentCount = reviewRepository.countReviewByShop(shop);
-        double newRating = currentRating * currentCount - rating;
-        newRating /= (currentCount - 1);
-        if (newRating < 0) {
-            newRating = 0.0;
-        }
-        shop.updateRating(newRating);
-    }
 }

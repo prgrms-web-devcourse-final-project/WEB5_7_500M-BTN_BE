@@ -12,7 +12,7 @@ import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
 
     @Query("""
         SELECT r FROM Reservation r
