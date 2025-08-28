@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 
 @Slf4j
-public class GoogleResponseDto implements OAuth2ResponseDto {
+public class GoogleResponse implements OAuth2Response {
 
     private final Map<String, Object> attribute;
 
-    public GoogleResponseDto(Map<String, Object> attribute) {
+    public GoogleResponse(Map<String, Object> attribute) {
         this.attribute = attribute;
     }
 

@@ -15,10 +15,10 @@ import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.security.jwt.app.TokenProvider;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
-import shop.matjalalzz.global.security.jwt.mapper.TokenMapper;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.reservation.app.ReservationFacade;
+import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
@@ -50,32 +50,24 @@ public class UserFacade {
     @Transactional
     public void login(LoginRequest dto, HttpServletResponse response) {
         //가입된 email과 password가 같은지 확인
-        User found = userService.getUserByEmail(dto.email());
+        LoginUserProjection found = userService.getUserByEmailForLogin(dto.email());
 
-        if (!passwordEncoder.matches(dto.password(), found.getPassword()) || found.isDeleted()) {
-            throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);  //404
+        if(StringUtils.isEmpty(found.getPassword()) ||
+            !passwordEncoder.matches(dto.password(), found.getPassword())) {
+            throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);
         }
 
         String accessToken = tokenProvider.issueAccessToken(
-            found.getId(), found.getRole(), found.getEmail()
+            found.getUserId(), found.getRole(), found.getEmail()
         );
 
-        RefreshToken refreshToken = tokenService.findRefreshToken(found)
-            .orElseGet(() -> tokenService.saveRefreshToken(
-                TokenMapper.toRefreshToken(
-                    tokenProvider.issueRefreshToken(found.getId()), found
-                )
-            ));
+        String newRefreshToken = tokenProvider.issueRefreshToken(found.getUserId());
 
-        if (!tokenProvider.validate(refreshToken.getRefreshToken())) {
-            String reissueRefreshToken = tokenProvider.issueRefreshToken(found.getId());
-            refreshToken.updateRefreshToken(reissueRefreshToken);
-        }
+        tokenService.upsertRefreshToken(found.getUserId(), newRefreshToken);
 
         // http only 쿠키 방식으로 refresh Token을 클라이언트에게 줌
         response.setHeader("Authorization", "Bearer " + accessToken);
-        CookieUtils.setRefreshTokenCookie(response, refreshToken.getRefreshToken(),
-            refreshTokenValiditySeconds);
+        CookieUtils.setRefreshTokenCookie(response, newRefreshToken, refreshTokenValiditySeconds);
     }
 
     @Transactional

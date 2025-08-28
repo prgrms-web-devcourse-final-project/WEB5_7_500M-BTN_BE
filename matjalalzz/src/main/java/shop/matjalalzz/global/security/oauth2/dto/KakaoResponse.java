@@ -2,12 +2,12 @@ package shop.matjalalzz.global.security.oauth2.dto;
 
 import java.util.Map;
 
-public class KakaoResponseDto implements OAuth2ResponseDto {
+public class KakaoResponse implements OAuth2Response {
 
     private final String id;
     private final Map<String, Object> attribute;
 
-    public KakaoResponseDto(Map<String, Object> attribute) {
+    public KakaoResponse(Map<String, Object> attribute) {
         this.id = attribute.get("id").toString();
         this.attribute = (Map<String, Object>) attribute.get("kakao_account");
     }
