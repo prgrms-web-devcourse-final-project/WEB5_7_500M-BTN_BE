@@ -161,30 +161,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         """)
     void cancelReservationByIds(@Param("reservationIds") List<Long> reservationIds);
 
-
-    // 사장 요약 리스트 → 인터페이스 프로젝션
-    @Query("""
-        select
-            r.id as reservationId,
-            s.shopName as shopName,
-            r.reservedAt as reservedAt,
-            r.headCount as headCount,
-            u.phoneNumber as phoneNumber,
-            r.status as status
-        from Reservation r
-            join r.shop s
-            join r.user u
-        where r.deleted = false
-          and s.user.id = :ownerId
-          and (:status is null or r.status = :status)
-          and (:cursor is null or r.id < :cursor)
-        order by r.id desc
-        """)
-    Slice<ReservationSummaryProjection> findOwnerSummariesWithCursor(
-        @Param("ownerId") Long ownerId,
-        @Param("status") ReservationStatus status,
-        @Param("cursor") Long cursor,
-        Pageable pageable
-    );
-
 }
