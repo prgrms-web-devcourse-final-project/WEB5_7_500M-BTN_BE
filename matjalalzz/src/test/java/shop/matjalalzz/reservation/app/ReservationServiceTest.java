@@ -35,10 +35,10 @@ import shop.matjalalzz.util.TestUtil;
 class ReservationServiceTest {
 
     @InjectMocks
-    private ReservationService reservationService;
+    private ReservationFacade reservationFacade;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private ReservationService reservationService;
 
     @Mock
     private ShopService shopService;
@@ -73,12 +73,12 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, CURSOR, pageable))
                 .willReturn(slice);
 
             // when
-            ReservationListResponse result = reservationService.getReservations(
+            ReservationListResponse result = reservationFacade.getReservations(
                 SHOP_ID, ReservationStatus.PENDING, owner.getId(), CURSOR, 10
             );
 
@@ -109,12 +109,12 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, null, pageable))
                 .willReturn(slice);
 
             // when
-            ReservationListResponse result = reservationService.getReservations(
+            ReservationListResponse result = reservationFacade.getReservations(
                 SHOP_ID, ReservationStatus.PENDING, owner.getId(), null, 10
             );
 
@@ -150,11 +150,11 @@ class ReservationServiceTest {
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
             given(
-                reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID, null, 3L, pageable))
+                reservationService.findByShopIdWithFilterAndCursor(SHOP_ID, null, 3L, pageable))
                 .willReturn(slice);
 
             // when
-            ReservationListResponse result = reservationService.getReservations(
+            ReservationListResponse result = reservationFacade.getReservations(
                 SHOP_ID, null, owner.getId(), 3L, 2
             );
 
@@ -188,12 +188,12 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationRepository.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
+            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
                 pageable))
                 .willReturn(slice);
 
             // when
-            ReservationListResponse result = reservationService.getReservations(
+            ReservationListResponse result = reservationFacade.getReservations(
                 SHOP_ID, null, owner.getId(), null, 2
             );
 
@@ -226,11 +226,11 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.findByOwnerId(owner.getId())).willReturn(List.of(shop1, shop2));
-            given(reservationRepository.findByShopIdsWithFilterAndCursor(
+            given(reservationService.findByShopIdsWithFilterAndCursor(
                 List.of(1L, 2L), null, null, pageable)).willReturn(slice);
 
             // when
-            ReservationListResponse result = reservationService.getReservations(
+            ReservationListResponse result = reservationFacade.getReservations(
                 null, null, owner.getId(), null, 10
             );
 
@@ -258,11 +258,10 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 1L);
                 reservation.changeStatus(ReservationStatus.PENDING);
 
-                given(reservationRepository.findById(1L)).willReturn(
-                    java.util.Optional.of(reservation));
+                given(reservationService.getReservationById(1L)).willReturn(reservation);
 
                 // when
-                reservationService.confirmReservation(reservation.getId(),
+                reservationFacade.confirmReservation(reservation.getId(),
                     user.getId());
 
                 // then
@@ -282,11 +281,10 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 2L);
                 reservation.changeStatus(ReservationStatus.PENDING);
 
-                given(reservationRepository.findById(2L)).willReturn(
-                    java.util.Optional.of(reservation));
+                given(reservationService.getReservationById(2L)).willReturn(reservation);
 
                 // when
-                reservationService.refuseReservation(reservation.getId(),
+                reservationFacade.refuseReservation(reservation.getId(),
                     user.getId());
 
                 // then
@@ -306,11 +304,11 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 3L);
                 reservation.changeStatus(ReservationStatus.CONFIRMED); // 이미 수락됨
 
-                given(reservationRepository.findById(3L)).willReturn(Optional.of(reservation));
+                given(reservationService.getReservationById(3L)).willReturn(reservation);
 
                 // when & then
                 assertThrows(BusinessException.class, () ->
-                    reservationService.confirmReservation(reservation.getId(),
+                    reservationFacade.confirmReservation(reservation.getId(),
                         user.getId())
                 );
             }
@@ -330,11 +328,11 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 4L);
                 reservation.changeStatus(ReservationStatus.REFUSED); // 이미 거절됨
 
-                given(reservationRepository.findById(4L)).willReturn(Optional.of(reservation));
+                given(reservationService.getReservationById(4L)).willReturn(reservation);
 
                 // when & then
                 assertThrows(BusinessException.class, () ->
-                    reservationService.refuseReservation(reservation.getId(),
+                    reservationFacade.refuseReservation(reservation.getId(),
                         user.getId())
                 );
             }

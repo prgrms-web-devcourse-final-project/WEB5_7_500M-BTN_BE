@@ -10,6 +10,7 @@ import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
@@ -81,6 +82,18 @@ public class ReservationMapper {
             .toList();
     }
 
+    public static MyReservationResponse toMyReservationResponse(MyReservationProjection view) {
+        return MyReservationResponse.builder()
+            .reservationId(view.getReservationId())
+            .shopName(view.getShopName())
+            .name(view.getName())
+            .reservationFee(view.getReservationFee())
+            .headCount(view.getHeadCount())
+            .reservedAt(view.getReservedAt())
+            .status(view.getStatus())
+            .build();
+    }
+
     public static MyReservationPageResponse toMyReservationPageResponse(Long nextCursor,
         Slice<MyReservationResponse> reservations) {
         return MyReservationPageResponse.builder()
@@ -120,5 +133,4 @@ public class ReservationMapper {
         }
         return out;
     }
-
 }

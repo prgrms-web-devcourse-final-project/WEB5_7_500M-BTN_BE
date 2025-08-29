@@ -1,8 +1,6 @@
 package shop.matjalalzz.reservation.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.app.ReservationFacade;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
@@ -35,7 +33,7 @@ import shop.matjalalzz.reservation.entity.ReservationStatus;
 @Tag(name = "예약 API", description = "예약 관련 API")
 public class ReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationFacade reservationFacade;
 
     @Operation(
         summary = "식당 예약 목록 조회",
@@ -56,27 +54,15 @@ public class ReservationController {
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
 
-//        ReservationListResponse response = reservationService.getReservations(shopId, filter,
-//            userInfo.getId(), cursor, size);
-
-        ReservationListResponse response = reservationService.getReservationsProjection(userInfo.getId(), filter,
-            cursor, size);
+        ReservationListResponse response = reservationFacade.getReservationsProjection(shopId, filter,
+            userInfo.getId(), cursor, size);
 
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
     @Operation(
         summary = "예약 생성",
-        description = "shopId에 해당하는 식당에 예약을 생성한다. 파티 예약인 경우 partyId를 쿼리 파라미터로 전달해야 한다.(Completed)",
-        parameters = {
-            @Parameter(
-                name = "partyId",
-                description = "파티 ID (선택값). 파티 예약일 경우 전달.",
-                in = ParameterIn.QUERY,
-                required = false,
-                example = "3"
-            )
-        },
+        description = "shopId에 해당하는 식당에 예약을 생성한다.(Completed)",
         responses = {
             @ApiResponse(responseCode = "201", description = "예약 생성 성공",
                 content = @Content(schema = @Schema(implementation = CreateReservationResponse.class)))
@@ -90,7 +76,7 @@ public class ReservationController {
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
 
-        CreateReservationResponse response = reservationService.createReservation(userInfo.getId(),
+        CreateReservationResponse response = reservationFacade.createReservation(userInfo.getId(),
             shopId, request);
 
         return BaseResponse.ok(response, BaseStatus.CREATED);
@@ -109,7 +95,7 @@ public class ReservationController {
     public BaseResponse<Void> confirmReservation(
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.confirmReservation(reservationId, principal.getId());
+        reservationFacade.confirmReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }
@@ -126,7 +112,7 @@ public class ReservationController {
     public BaseResponse<Void> refuseReservation(
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.refuseReservation(reservationId, principal.getId());
+        reservationFacade.refuseReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }
@@ -143,7 +129,7 @@ public class ReservationController {
     public BaseResponse<Void> cancelReservation(
         @PathVariable Long reservationId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        reservationService.cancelReservation(reservationId, principal.getId());
+        reservationFacade.cancelReservation(reservationId, principal.getId());
 
         return BaseResponse.ok(BaseStatus.OK);
     }

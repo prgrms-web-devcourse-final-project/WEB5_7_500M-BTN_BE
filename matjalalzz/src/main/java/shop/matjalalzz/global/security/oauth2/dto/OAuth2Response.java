@@ -1,6 +1,6 @@
 package shop.matjalalzz.global.security.oauth2.dto;
 
-public interface OAuth2ResponseDto {
+public interface OAuth2Response {
     // 제공자 (Ex. naver, google, ...)
     String getProvider();
 
