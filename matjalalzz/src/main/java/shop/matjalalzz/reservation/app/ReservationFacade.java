@@ -63,10 +63,6 @@ public class ReservationFacade {
                 shopId, status, cursor, pageable
             );
 
-//            Slice<Reservation> slice = reservationService.findByShopIdWithFilterAndCursorQdsl(
-//                shopId, status, cursor, pageable
-//            );
-
             return reservationResponse(slice);
         }
 
@@ -83,20 +79,23 @@ public class ReservationFacade {
             shopIds, status, cursor, pageable
         );
 
-//        Slice<Reservation> slice = reservationService.findByShopIdsWithFilterAndCursorQdsl(
-//            shopIds, status, cursor, pageable
-//        );
-
         return reservationResponse(slice);
     }
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status,
-        Long cursor, int size) {
+    public ReservationListResponse getReservationsProjection(Long shopId, ReservationStatus status,
+        Long ownerId, Long cursor, int size) {
+
+        if (shopId != null) {
+            Shop shop = shopService.shopFind(shopId);
+            if (!shop.getUser().getId().equals(ownerId)) {
+                throw new BusinessException(FORBIDDEN_ACCESS);
+            }
+        }
+
         int sizePlusOne = size + 1;
         Pageable pageable = PageRequest.of(0, sizePlusOne, Sort.by(Sort.Direction.DESC, "id"));
 
-        // A안: 오너 기준 (ShopService 호출 제거)
         List<ReservationSummaryDto> rows =
             reservationService.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
 
@@ -243,11 +242,6 @@ public class ReservationFacade {
             ReservationStatus.CONFIRMED, threshold
         );
 
-//        List<Reservation> toTerminate = reservationService
-//            .findAllByStatusAndReservedAtBeforeQdsl(
-//                ReservationStatus.CONFIRMED,
-//                threshold
-//            );
 
         for (Reservation r : toTerminate) {
             r.changeStatus(ReservationStatus.TERMINATED);
