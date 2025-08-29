@@ -10,13 +10,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
-import shop.matjalalzz.reservation.dto.view.MyReservationView;
-import shop.matjalalzz.reservation.dto.view.ReservationRowView;
-import shop.matjalalzz.reservation.dto.view.ReservationSummaryView;
+import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>,
+    ReservationRepositoryCustom {
 
     @Query("""
         SELECT r FROM Reservation r
@@ -36,34 +35,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
 
 
     @Query("""
-        select
-            r.id as reservationId,
-            s.id as shopId,
-            s.shopName as shopName,
-            u.id as userId,
-            u.name as userName,
-            r.reservedAt as reservedAt,
-            r.headCount as headCount,
-            r.reservationFee as reservationFee,
-            r.status as status
-        from Reservation r
-            join r.shop s
-            join r.user u
-        where s.id = :shopId
-          and (:status is null or r.status = :status)
-          and (:cursor is null or r.id < :cursor)
-        order by r.id desc
-        """)
-    Slice<ReservationRowView> findRowsByShopIdWithFilterAndCursor(
-        @Param("shopId") Long shopId,
-        @Param("status") ReservationStatus status,
-        @Param("cursor") Long cursor,
-        Pageable pageable
-    );
-
-
-
-    @Query("""
         SELECT r FROM Reservation r
         JOIN FETCH r.shop s
         JOIN FETCH r.user u
@@ -73,32 +44,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         ORDER BY r.id DESC
         """)
     Slice<Reservation> findByShopIdsWithFilterAndCursor(
-        @Param("shopIds") List<Long> shopIds,
-        @Param("status") ReservationStatus status,
-        @Param("cursor") Long cursor,
-        Pageable pageable
-    );
-
-    @Query("""
-        select
-            r.id as reservationId,
-            s.id as shopId,
-            s.shopName as shopName,
-            u.id as userId,
-            u.name as userName,
-            r.reservedAt as reservedAt,
-            r.headCount as headCount,
-            r.reservationFee as reservationFee,
-            r.status as status
-        from Reservation r
-            join r.shop s
-            join r.user u
-        where s.id in :shopIds
-          and (:status is null or r.status = :status)
-          and (:cursor is null or r.id < :cursor)
-        order by r.id desc
-        """)
-    Slice<ReservationRowView> findRowsByShopIdsWithFilterAndCursor(
         @Param("shopIds") List<Long> shopIds,
         @Param("status") ReservationStatus status,
         @Param("cursor") Long cursor,
@@ -140,35 +85,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Param("cursor") Long cursor,
         Pageable pageable);
 
-    // "내 예약" (직접예약 + 참여파티) → 인터페이스 프로젝션
-    @Query("""
-        select
-            r.id as reservationId,
-            s.shopName as shopName,
-            u.name as name,
-            r.reservedAt as reservedAt,
-            r.headCount as headCount,
-            r.reservationFee as reservationFee,
-            r.status as status
-        from Reservation r
-            join r.shop  s
-            join r.user  u
-        where (:cursor is null or r.id < :cursor)
-          and (
-                r.user.id = :userId
-                or exists (
-                    select 1 from PartyUser pu
-                    where pu.party = r.party
-                      and pu.user.id = :userId
-                )
-          )
-        order by r.id desc
-        """)
-    Slice<MyReservationView> findMyRowsByUserIdAndCursor(
-        @Param("userId") Long userId,
-        @Param("cursor") Long cursor,
-        Pageable pageable
-    );
 
     @Query("""
         SELECT r FROM Reservation r
@@ -201,7 +117,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         and (:status is null or r.status = :status)
         and (:cursor is null or r.id < :cursor)
         order by r.id desc
-            """)
+        """)
     List<ReservationSummaryDto> findSummariesByOwnerWithCursor(
         @Param("ownerId") Long ownerId,
         @Param("status") ReservationStatus status,
@@ -227,7 +143,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
           and (:cursor is null or r.id < :cursor)
         order by r.id desc
         """)
-    Slice<ReservationSummaryView> findOwnerSummariesWithCursor(
+    Slice<ReservationSummaryProjection> findOwnerSummariesWithCursor(
         @Param("ownerId") Long ownerId,
         @Param("status") ReservationStatus status,
         @Param("cursor") Long cursor,

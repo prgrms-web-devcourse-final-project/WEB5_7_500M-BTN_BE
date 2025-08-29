@@ -27,9 +27,7 @@ import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
-import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
-import shop.matjalalzz.reservation.dto.view.MyReservationView;
-import shop.matjalalzz.reservation.dto.view.ReservationSummaryView;
+import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -69,7 +67,6 @@ public class ReservationService {
             return reservationResponse(slice);
         }
 
-
         List<Shop> shops = shopService.findByOwnerId(ownerId);
         if (shops == null) {
             throw new BusinessException(SHOP_NOT_FOUND);
@@ -83,18 +80,15 @@ public class ReservationService {
             shopIds, status, cursor, pageable
         );
 
-//        Slice<Reservation> slice = reservationRepository.findByShopIdsWithFilterAndCursorQdsl(
-//            shopIds, status, cursor, pageable
-//        );
-
         return reservationResponse(slice);
     }
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status, Long cursor, int size) {
+    public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status,
+        Long cursor, int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
-        Slice<ReservationSummaryView> slice =
+        Slice<ReservationSummaryProjection> slice =
             reservationRepository.findOwnerSummariesWithCursor(ownerId, status, cursor, pageable);
 
         Long nextCursor = slice.hasNext()
@@ -127,10 +121,6 @@ public class ReservationService {
             userId, cursor,
             PageRequest.of(0, size));
 
-//        Slice<MyReservationResponse> reservations = reservationRepository.findByUserIdAndCursorQdsl(
-//            userId, cursor,
-//            PageRequest.of(0, size));
-
         Long nextCursor = null;
         if (reservations.hasNext()) {
             nextCursor = reservations.getContent().getLast().reservationId();
@@ -139,21 +129,6 @@ public class ReservationService {
         return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
     }
 
-    @Transactional(readOnly = true)
-    public MyReservationPageResponse findMyReservationPageProjection(Long userId, Long cursor, int size) {
-
-        Slice<MyReservationView> views = reservationRepository.findMyRowsByUserIdAndCursor(
-            userId, cursor, PageRequest.of(0, size)
-        );
-
-        Slice<MyReservationResponse> reservations = views.map(ReservationMapper::toMyReservationResponse);
-
-        Long nextCursor = reservations.hasNext()
-            ? reservations.getContent().getLast().reservationId()
-            : null;
-
-        return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
-    }
 
     @Transactional
     public CreateReservationResponse createReservation(Long userId, Long shopId,
@@ -262,12 +237,6 @@ public class ReservationService {
                 ReservationStatus.CONFIRMED,
                 threshold
             );
-
-//        List<Reservation> toTerminate = reservationRepository
-//            .findAllByStatusAndReservedAtBeforeQdsl(
-//                ReservationStatus.CONFIRMED,
-//                threshold
-//            );
 
         for (Reservation r : toTerminate) {
             r.changeStatus(ReservationStatus.TERMINATED);
