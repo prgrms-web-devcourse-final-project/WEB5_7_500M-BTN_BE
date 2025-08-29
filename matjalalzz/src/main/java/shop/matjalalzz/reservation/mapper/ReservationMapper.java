@@ -13,8 +13,7 @@ import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
-import shop.matjalalzz.reservation.dto.view.MyReservationView;                // ★ 추가
-import shop.matjalalzz.reservation.dto.view.ReservationSummaryView;          // ★ 추가
+import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.Shop;
@@ -90,7 +89,8 @@ public class ReservationMapper {
             .build();
     }
 
-    public static List<ReservationContent> toReservationProjectionContent(List<ReservationSummaryDto> rows) {
+    public static List<ReservationContent> toReservationProjectionContent(
+        List<ReservationSummaryDto> rows) {
         var out = new java.util.ArrayList<ReservationContent>(rows.size());
         for (var r : rows) {
             out.add(ReservationContent.builder()
@@ -105,19 +105,8 @@ public class ReservationMapper {
         return out;
     }
 
-    public static MyReservationResponse toMyReservationResponse(MyReservationView v) {
-        return new MyReservationResponse(
-            v.getReservationId(),
-            v.getShopName(),
-            v.getName(),
-            v.getReservedAt(),
-            v.getHeadCount(),
-            v.getReservationFee(),
-            v.getStatus()
-        );
-    }
-
-    public static List<ReservationContent> toReservationProjectionContentFromView(List<ReservationSummaryView> views) {
+    public static List<ReservationContent> toReservationProjectionContentFromView(
+        List<ReservationSummaryProjection> views) {
         var out = new java.util.ArrayList<ReservationContent>(views.size());
         for (var v : views) {
             out.add(ReservationContent.builder()
