@@ -3,7 +3,7 @@ package shop.matjalalzz.global.security.jwt.dto;
 import lombok.Builder;
 
 @Builder
-public record LoginTokenResponseDto(
+public record LoginTokenResponse(
     String accessToken,
     String refreshToken) {
 

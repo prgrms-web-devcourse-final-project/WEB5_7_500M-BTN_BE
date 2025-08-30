@@ -6,6 +6,7 @@ import static shop.matjalalzz.global.exception.domain.ErrorCode.SHOP_NOT_FOUND;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,8 @@ import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
+import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -60,6 +63,10 @@ public class ReservationFacade {
                 shopId, status, cursor, pageable
             );
 
+//            Slice<Reservation> slice = reservationService.findByShopIdWithFilterAndCursorQdsl(
+//                shopId, status, cursor, pageable
+//            );
+
             return reservationResponse(slice);
         }
 
@@ -76,7 +83,33 @@ public class ReservationFacade {
             shopIds, status, cursor, pageable
         );
 
+//        Slice<Reservation> slice = reservationService.findByShopIdsWithFilterAndCursorQdsl(
+//            shopIds, status, cursor, pageable
+//        );
+
         return reservationResponse(slice);
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationListResponse getReservationsProjection(Long ownerId, ReservationStatus status,
+        Long cursor, int size) {
+        int sizePlusOne = size + 1;
+        Pageable pageable = PageRequest.of(0, sizePlusOne, Sort.by(Sort.Direction.DESC, "id"));
+
+        // A안: 오너 기준 (ShopService 호출 제거)
+        List<ReservationSummaryDto> rows =
+            reservationService.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
+
+        boolean hasNext = rows.size() > size;
+        if (hasNext) {
+            rows = rows.subList(0, size);
+        }
+        Long nextCursor = hasNext ? rows.get(rows.size() - 1).reservationId() : null;
+
+        List<ReservationListResponse.ReservationContent> content =
+            ReservationMapper.toReservationProjectionContent(rows);
+
+        return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
 
     private ReservationListResponse reservationResponse(Slice<Reservation> slice) {
@@ -151,6 +184,8 @@ public class ReservationFacade {
     @Transactional
     public void cancelReservation(Long reservationId, Long userId) {
         Reservation reservation = reservationService.getReservationById(reservationId);
+        log.info("[CANCEL] reservationId={}, reservationUserId={}, callerUserId={}",
+            reservationId, reservation.getUser().getId(), userId);
 
         // 예약한 본인인지 확인
         if (!reservation.getUser().getId().equals(userId)) {
@@ -185,16 +220,19 @@ public class ReservationFacade {
     @Transactional
     public void cancelReservationForWithdraw(User user) {
         // 회원 탈퇴시에 회원 단독으로 진행한 예약 중 취소 가능한 예약 조회
-        List<Reservation> reservations = reservationService.findAllMyReservationByUserIdForWithdraw(
-            user.getId());
+        List<CancelReservationProjection> reservations = reservationService.
+            findAllMyReservationByUserIdForWithdraw(user.getId());
 
-        for (Reservation reservation : reservations) {
-            // 예약금 환불
-            reservation.getUser().increasePoint(reservation.getReservationFee());
+        AtomicInteger totalReservationFee = new AtomicInteger();
 
-            // 예약 취소
-            reservation.changeStatus(ReservationStatus.CANCELLED);
-        }
+        List<Long> reservationIds = reservations.stream().map(r -> {
+            totalReservationFee.addAndGet(r.getReservationFee());
+            return r.getReservationId();
+        }).toList();
+
+        reservationService.cancelReservations(reservationIds);
+
+        user.increasePoint(totalReservationFee.get());
     }
 
     @Transactional
@@ -204,6 +242,12 @@ public class ReservationFacade {
         List<Reservation> toTerminate = reservationService.findAllByStatusAndReservedAtBefore(
             ReservationStatus.CONFIRMED, threshold
         );
+
+//        List<Reservation> toTerminate = reservationService
+//            .findAllByStatusAndReservedAtBeforeQdsl(
+//                ReservationStatus.CONFIRMED,
+//                threshold
+//            );
 
         for (Reservation r : toTerminate) {
             r.changeStatus(ReservationStatus.TERMINATED);

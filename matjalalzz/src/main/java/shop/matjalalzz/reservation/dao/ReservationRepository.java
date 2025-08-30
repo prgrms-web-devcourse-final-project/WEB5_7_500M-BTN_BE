@@ -8,14 +8,18 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
+import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
 
     @Query("""
         SELECT r FROM Reservation r
+        JOIN FETCH r.shop s
+        JOIN FETCH r.user u
         WHERE r.shop.id = :shopId
           AND (:status IS NULL OR r.status = :status)
           AND (:cursor IS NULL OR r.id < :cursor)
@@ -30,6 +34,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
         SELECT r FROM Reservation r
+        JOIN FETCH r.shop s
+        JOIN FETCH r.user u
         WHERE r.shop.id IN :shopIds
           AND (:status IS NULL OR r.status = :status)
           AND (:cursor IS NULL OR r.id < :cursor)
@@ -55,9 +61,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     // 회원이 진행한 예약과 회원이 속한 파티가 진행한 예약을 조회
     @Query("""
-        select new shop.matjalalzz.reservation.dto.MyReservationResponse(
-                r.id, s.shopName, u.name, r.reservedAt, r.headCount, r.reservationFee, r.status
-        )
+        SELECT r.id as reservationId, s.shopName as shopName, u.name as name,
+               r.reservedAt as reservedAt, r.headCount as headCount,
+               r.reservationFee as reservationFee, r.status as status
         from Reservation r
             join r.shop  s
             join r.user  u
@@ -72,7 +78,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             )
         order by r.id desc
         """)
-    Slice<MyReservationResponse> findByUserIdAndCursor(
+    Slice<MyReservationProjection> findByUserIdAndCursor(
         @Param("userId") Long userId,
         @Param("cursor") Long cursor,
         Pageable pageable);
@@ -87,19 +93,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         @Param("threshold") LocalDateTime threshold);
 
     @Query("""
-        SELECT r
+        SELECT r.id AS reservationId, r.reservationFee AS reservationFee
         FROM Reservation r
         WHERE r.user.id = :userId
             AND r.party IS NULL
             AND (
                 r.status = "PENDING"
                 OR (
-                     r.status = "CONFIRMED"
-                     AND r.reservedAt >= :threshold
+                    r.status = "CONFIRMED"
+                    AND r.reservedAt >= :threshold
                 )
             )
         """)
-    List<Reservation> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
+    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
         @Param("threshold") LocalDateTime threshold);
 
     @Modifying
@@ -122,4 +128,32 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         """)
     void refundPartyReservationFee(@Param("partyId") Long partyId,
         @Param("refundAmount") int refundAmount);
+
+    @Query("""
+        select new shop.matjalalzz.reservation.dto.ReservationSummaryDto(
+        r.id, s.shopName, r.reservedAt, r.headCount, u.phoneNumber, r.status
+        )
+        from Reservation r
+        join r.shop s
+        join r.user u
+        where r.deleted = false
+        and s.user.id = :ownerId
+        and (:status is null or r.status = :status)
+        and (:cursor is null or r.id < :cursor)
+        order by r.id desc
+            """)
+    List<ReservationSummaryDto> findSummariesByOwnerWithCursor(
+        @Param("ownerId") Long ownerId,
+        @Param("status") ReservationStatus status,
+        @Param("cursor") Long cursor,
+        Pageable pageable
+    );
+
+    @Modifying
+    @Query("""
+        update Reservation r
+        set r.status = "CANCELLED"
+        where r.id in :reservationIds
+        """)
+    void cancelReservationByIds(@Param("reservationIds") List<Long> reservationIds);
 }

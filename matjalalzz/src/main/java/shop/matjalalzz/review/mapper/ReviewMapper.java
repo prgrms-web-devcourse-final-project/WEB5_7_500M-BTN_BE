@@ -1,12 +1,14 @@
 package shop.matjalalzz.review.mapper;
 
 import java.util.List;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Slice;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
+import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
@@ -36,12 +38,26 @@ public class ReviewMapper {
             .build();
     }
 
+    public static MyReviewResponse toMyReviewResponse(MyReviewProjection view, List<String> reviewImages) {
+        return MyReviewResponse.builder()
+            .reviewId(view.getReviewId())
+            .shopName(view.getShopName())
+            .rating(view.getRating())
+            .content(view.getContent())
+            .createdAt(view.getCreatedAt())
+            .images(reviewImages)
+            .build();
+    }
+
     public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
-        Slice<MyReviewResponse> reviews) {
+        Slice<MyReviewProjection> reviews, Map<Long, List<String>> reviewImageMap) {
+        List<MyReviewResponse> responses = reviews.stream()
+            .map(v -> toMyReviewResponse(v, reviewImageMap.get(v.getReviewId())))
+            .toList();
 
         return MyReviewPageResponse.builder()
             .nextCursor(nextCursor)
-            .content(reviews.getContent())
+            .content(responses)
             .build();
     }
 

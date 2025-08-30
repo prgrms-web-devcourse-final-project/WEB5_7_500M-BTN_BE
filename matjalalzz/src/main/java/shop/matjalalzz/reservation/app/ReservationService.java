@@ -13,6 +13,9 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
+import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
+import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -47,16 +50,32 @@ public class ReservationService {
         reservationRepository.settleReservationFee(shopId, reservationFee);
     }
 
+    @Transactional
+    public void cancelReservations(List<Long> reservationIds) {
+        reservationRepository.cancelReservationByIds(reservationIds);
+    }
+
     @Transactional(readOnly = true)
     public Slice<MyReservationResponse> findByUserIdAndCursor(
         Long userId, Long cursor, Pageable pageable) {
-        return reservationRepository.findByUserIdAndCursor(userId, cursor, pageable);
+        Slice<MyReservationProjection> views = reservationRepository.findByUserIdAndCursor(
+            userId, cursor, pageable);
+
+        return views.map(ReservationMapper::toMyReservationResponse);
     }
 
     @Transactional(readOnly = true)
     public Slice<Reservation> findByShopIdsWithFilterAndCursor(
         List<Long> shopIds, ReservationStatus status, Long cursor, Pageable pageable) {
         return reservationRepository.findByShopIdsWithFilterAndCursor(
+            shopIds, status, cursor, pageable
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<Reservation> findByShopIdsWithFilterAndCursorQdsl(
+        List<Long> shopIds, ReservationStatus status, Long cursor, Pageable pageable) {
+        return reservationRepository.findByShopIdsWithFilterAndCursorQdsl(
             shopIds, status, cursor, pageable
         );
     }
@@ -70,7 +89,15 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllMyReservationByUserIdForWithdraw(Long userId) {
+    public Slice<Reservation> findByShopIdWithFilterAndCursorQdsl(
+        Long shopId, ReservationStatus status, Long cursor, Pageable pageable) {
+        return reservationRepository.findByShopIdWithFilterAndCursorQdsl(
+            shopId, status, cursor, pageable
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(Long userId) {
         LocalDateTime threshold = LocalDateTime.now().plusDays(1);
 
         // 회원 단독으로 진행한 예약 중 대기 상태이거나 예약일로부터 하루 이상 남은 예약 조회
@@ -86,6 +113,16 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status, LocalDateTime threshold) {
         return reservationRepository.findAllByStatusAndReservedAtBefore(status, threshold);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> findAllByStatusAndReservedAtBeforeQdsl(ReservationStatus status, LocalDateTime threshold) {
+        return reservationRepository.findAllByStatusAndReservedAtBeforeQdsl(status, threshold);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationSummaryDto> findSummariesByOwnerWithCursor(Long ownerId, ReservationStatus status, Long cursor, Pageable pageable) {
+        return reservationRepository.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
     }
 }
 

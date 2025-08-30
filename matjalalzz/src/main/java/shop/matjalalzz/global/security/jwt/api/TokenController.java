@@ -19,7 +19,7 @@ import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
-import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponseDto;
+import shop.matjalalzz.global.security.jwt.dto.AccessTokenResponse;
 
 @Tag(name = "사용자 API", description = "사용자 관련 API")
 @RestController
@@ -35,7 +35,7 @@ public class TokenController {
     )
     @PostMapping("/reissue-token")
     @ResponseStatus(HttpStatus.CREATED)
-    public BaseResponse<AccessTokenResponseDto> refreshToken(
+    public BaseResponse<AccessTokenResponse> refreshToken(
         @Parameter(hidden = true)
         @CookieValue(name = "refreshToken") String refreshToken) {
         return BaseResponse.ok(tokenService.refreshAccessToken(refreshToken), BaseStatus.OK);
