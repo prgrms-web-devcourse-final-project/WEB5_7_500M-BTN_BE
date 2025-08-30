@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.1'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'idea'
 }
 
 dependencyManagement {
@@ -28,6 +29,35 @@ configurations {
 repositories {
     mavenCentral()
 }
+
+
+// QueryDSL 설정
+def qdslMainDir = "$buildDir/generated/querydsl/main"
+def qdslTestDir = "$buildDir/generated/querydsl/test"
+
+def queryDslVersion = "7.0" // 25년 7월 기준 가장 최신
+def querydslSrcDir  = layout.buildDirectory.dir("generated/querydsl").get().asFile // build/generated/querydsl
+
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslSrcDir))
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += qdslMainDir
+        }
+    }
+    test {
+        java {
+            srcDirs += qdslTestDir
+        }
+    }
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+//
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -70,16 +100,14 @@ dependencies {
 
     implementation('net.dv8tion:JDA:5.0.0-beta.20') {
         exclude module: 'opus-java'
-        exclude module: 'tink'
-    }
+        exclude module: 'tink'}
 
-//    implementation("io.github.openfeign.querydsl:querydsl-core:7.0") //핵심 api
-    implementation("io.github.openfeign.querydsl:querydsl-jpa:7.0")  //jpa용 확장
-    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:7.0:jpa") //Q클래스 생성
+    implementation "net.ttddyy:datasource-proxy:1.10"
+    implementation "com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.9.2"
 
-    implementation 'net.ttddyy:datasource-proxy:1.10'
-    implementation 'com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.9.2'
-
+    //Querydsl 추가
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion")
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
 
 }
 

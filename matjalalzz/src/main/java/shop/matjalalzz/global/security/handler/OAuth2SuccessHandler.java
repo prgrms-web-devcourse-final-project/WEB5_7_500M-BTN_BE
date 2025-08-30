@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.global.security.jwt.app.TokenService;
-import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
+import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
 import shop.matjalalzz.global.util.CookieUtils;
 
 @Slf4j
@@ -34,7 +34,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         PrincipalUser userInfo = (PrincipalUser) authentication.getPrincipal();
 
-        LoginTokenResponseDto dto = tokenService.oauthLogin(userInfo.getUsername());
+        LoginTokenResponse dto = tokenService.oauthLogin(userInfo.getUsername());
 
         CookieUtils.setRefreshTokenCookie(response, dto.refreshToken(), refreshTokenValidityTime);
 

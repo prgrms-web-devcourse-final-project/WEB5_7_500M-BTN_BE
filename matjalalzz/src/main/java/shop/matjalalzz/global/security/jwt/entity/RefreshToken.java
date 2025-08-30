@@ -6,10 +6,10 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +18,7 @@ import shop.matjalalzz.user.entity.User;
 
 @Getter
 @Entity
-@Table(name = "refresh_tokens", indexes = @Index(name = "idx_user_id", columnList = "user_id"))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = "user_id"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RefreshToken {
 
@@ -28,6 +28,7 @@ public class RefreshToken {
 
     @Column(nullable = false, length = 500)
     private String refreshToken;
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

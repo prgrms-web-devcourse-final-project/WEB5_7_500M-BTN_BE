@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.image.dao.ImageRepository;
 import shop.matjalalzz.image.entity.Image;
+import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,14 @@ public class ImageService {
                 Image::getShopId,
                 image -> BASE_URL + image.getS3Key(),
                 (exist, dup) -> exist // 중복 키 발생 시 기존값 유지
+            ));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, List<String>> findReviewImagesById(List<Long> reviewIds) {
+        return imageRepository.findImageKeyByReviewIds(reviewIds).stream().collect(
+            Collectors.groupingBy(ReviewImageProjection::getReviewId,
+                Collectors.mapping(v -> BASE_URL + v.getS3Key(), Collectors.toList())
             ));
     }
 }

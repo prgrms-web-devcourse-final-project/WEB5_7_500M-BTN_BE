@@ -1,18 +1,13 @@
 package shop.matjalalzz.global.security.jwt.mapper;
 
-import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponseDto;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import shop.matjalalzz.global.security.jwt.dto.LoginTokenResponse;
 import shop.matjalalzz.global.security.jwt.dto.TokenBodyDto;
-import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
-import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TokenMapper {
-    public static RefreshToken toRefreshToken(String refreshToken, User user) {
-        return RefreshToken.builder()
-                .refreshToken(refreshToken)
-                .user(user)
-                .build();
-    }
 
     public static TokenBodyDto toTokenBodyDto(Long userId, String email, Role role) {
         return TokenBodyDto.builder()
@@ -22,9 +17,9 @@ public class TokenMapper {
                 .build();
     }
 
-    public static LoginTokenResponseDto toLoginTokenResponseDto(
+    public static LoginTokenResponse toLoginTokenResponseDto(
             String accessToken, String refreshToken) {
-        return LoginTokenResponseDto.builder()
+        return LoginTokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
