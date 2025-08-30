@@ -54,7 +54,7 @@ public class ReservationController {
         @AuthenticationPrincipal PrincipalUser userInfo
     ) {
 
-        ReservationListResponse response = reservationFacade.getReservations(shopId, filter,
+        ReservationListResponse response = reservationFacade.getReservationsProjection(shopId, filter,
             userInfo.getId(), cursor, size);
 
         return BaseResponse.ok(response, BaseStatus.OK);

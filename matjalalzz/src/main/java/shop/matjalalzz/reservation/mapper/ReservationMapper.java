@@ -14,6 +14,7 @@ import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.Shop;
@@ -101,7 +102,8 @@ public class ReservationMapper {
             .build();
     }
 
-    public static List<ReservationContent> toReservationProjectionContent(List<ReservationSummaryDto> rows) {
+    public static List<ReservationContent> toReservationProjectionContent(
+        List<ReservationSummaryDto> rows) {
         var out = new java.util.ArrayList<ReservationContent>(rows.size());
         for (var r : rows) {
             out.add(ReservationContent.builder()
@@ -115,4 +117,5 @@ public class ReservationMapper {
         }
         return out;
     }
+
 }
