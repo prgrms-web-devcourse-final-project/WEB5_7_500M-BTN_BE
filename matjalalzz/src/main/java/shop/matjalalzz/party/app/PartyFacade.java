@@ -234,7 +234,7 @@ public class PartyFacade {
             user.getId());
 
         // 탈퇴할 파티가 없을 경우 바로 리턴
-        if (participatingPartyUsers == null || participatingPartyUsers.isEmpty()) {
+        if (participatingPartyUsers.isEmpty()) {
             return;
         }
 
