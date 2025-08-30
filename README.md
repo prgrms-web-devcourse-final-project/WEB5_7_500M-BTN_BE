@@ -1,4 +1,4 @@
-# 🚀 5억년 버튼 (500 Million Years Button) - 백엔드
+# 🚀 5억년 버튼 (500 Million Year Button) - 백엔드
 
 <div align="center">
 
