@@ -1,17 +1,16 @@
 package shop.matjalalzz.review.mapper;
 
 import java.util.List;
-import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Slice;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
 import shop.matjalalzz.review.dto.MyReviewResponse;
-import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
+import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
@@ -30,6 +29,18 @@ public class ReviewMapper {
             .build();
     }
 
+    public static ReviewResponse toReviewResponseFromProjection(ReviewProjection review,
+        String baseURL) {
+        return ReviewResponse.builder()
+            .reviewId(review.getReviewId())
+            .userNickname(review.getUserNickname())
+            .rating(review.getRating())
+            .content(review.getContent())
+            .createdAt(review.getCreatedAt())
+            .images(review.getImages().stream().map(i -> baseURL + i).toList())
+            .build();
+    }
+
     public static ReviewPageResponse toReviewPageResponse(Long nextCursor, List<Review> reviews,
         String baseURL) {
         return ReviewPageResponse.builder()
@@ -38,26 +49,21 @@ public class ReviewMapper {
             .build();
     }
 
-    public static MyReviewResponse toMyReviewResponse(MyReviewProjection view, List<String> reviewImages) {
-        return MyReviewResponse.builder()
-            .reviewId(view.getReviewId())
-            .shopName(view.getShopName())
-            .rating(view.getRating())
-            .content(view.getContent())
-            .createdAt(view.getCreatedAt())
-            .images(reviewImages)
+    public static ReviewPageResponse toReviewPageResponseFromProjection(Long nextCursor,
+        List<ReviewProjection> reviews,
+        String baseURL) {
+        return ReviewPageResponse.builder()
+            .nextCursor(nextCursor)
+            .content(reviews.stream().map(r -> toReviewResponseFromProjection(r, baseURL)).toList())
             .build();
     }
 
     public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
-        Slice<MyReviewProjection> reviews, Map<Long, List<String>> reviewImageMap) {
-        List<MyReviewResponse> responses = reviews.stream()
-            .map(v -> toMyReviewResponse(v, reviewImageMap.get(v.getReviewId())))
-            .toList();
+        Slice<MyReviewResponse> reviews) {
 
         return MyReviewPageResponse.builder()
             .nextCursor(nextCursor)
-            .content(responses)
+            .content(reviews.getContent())
             .build();
     }
 

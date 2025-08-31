@@ -2,6 +2,7 @@ package shop.matjalalzz.image.dao;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +10,10 @@ import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
 import shop.matjalalzz.image.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
+
+    @Query(" select i.s3Key from Image i where i.shopId = :shopId order by i.imageIndex asc, i.id asc")
+    List<String> findS3Keys(@Param("shopId") Long shopId, Pageable pageable);
+
 
     List<Image> findByShopIdOrderByImageIndexAsc(long shopId);
 
@@ -19,6 +24,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     List<String> findByInquiryImage(@Param("inquiryId") long inquiryId);
 
     List<Image> findByShopId(Long id);
+
+    Optional<Image> findFirstByShopId(Long id);
 
     void deleteByS3Key(String s3Key);
 

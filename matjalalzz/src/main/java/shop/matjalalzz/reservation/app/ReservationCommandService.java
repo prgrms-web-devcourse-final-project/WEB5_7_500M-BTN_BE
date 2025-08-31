@@ -1,4 +1,4 @@
-package shop.matjalalzz.reservation.app.command;
+package shop.matjalalzz.reservation.app;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +11,6 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
-import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
@@ -118,7 +117,9 @@ public class ReservationCommandService {
         for (Reservation r : toTerminate) {
             r.changeStatus(ReservationStatus.TERMINATED);
             Party party = r.getParty();
-            if (party != null) partyService.terminateParty(party);
+            if (party != null) {
+                partyService.terminateParty(party);
+            }
 
             // 예약금 정산
             reservationService.settleReservationFee(r.getShop().getId(), r.getReservationFee());

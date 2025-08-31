@@ -1,13 +1,15 @@
-package shop.matjalalzz.reservation.app.query;
+package shop.matjalalzz.reservation.app;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
@@ -44,7 +46,9 @@ public class ReservationQueryService {
         }
 
         List<Shop> shops = shopService.findByOwnerId(ownerId);
-        if (shops == null) throw new BusinessException(ErrorCode.SHOP_NOT_FOUND);
+        if (shops == null) {
+            throw new BusinessException(ErrorCode.SHOP_NOT_FOUND);
+        }
 
         List<Long> shopIds = shops.stream().map(Shop::getId).toList();
         Slice<Reservation> slice = reservationService.findByShopIdsWithFilterAndCursor(
@@ -70,7 +74,9 @@ public class ReservationQueryService {
             reservationService.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
 
         boolean hasNext = rows.size() > size;
-        if (hasNext) rows = rows.subList(0, size);
+        if (hasNext) {
+            rows = rows.subList(0, size);
+        }
         Long nextCursor = hasNext ? rows.get(rows.size() - 1).reservationId() : null;
 
         List<ReservationContent> content = ReservationMapper.toReservationProjectionContent(rows);

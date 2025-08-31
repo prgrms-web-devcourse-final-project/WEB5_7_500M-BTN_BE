@@ -3,8 +3,6 @@ package shop.matjalalzz.reservation.app;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.matjalalzz.reservation.app.command.ReservationCommandService;
-import shop.matjalalzz.reservation.app.query.ReservationQueryService;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
