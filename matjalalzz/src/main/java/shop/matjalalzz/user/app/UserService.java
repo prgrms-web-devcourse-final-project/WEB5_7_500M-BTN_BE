@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.entity.User;
 
 @Slf4j
@@ -21,6 +22,12 @@ public class UserService {
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
             .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public LoginUserProjection getUserByEmailForLogin(String email) {
+        return userRepository.findByEmailForLogin(email)
+            .orElseThrow(() -> new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)

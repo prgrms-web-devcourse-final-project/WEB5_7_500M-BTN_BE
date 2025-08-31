@@ -10,8 +10,11 @@ import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
+import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
+import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.Shop;
@@ -79,6 +82,18 @@ public class ReservationMapper {
             .toList();
     }
 
+    public static MyReservationResponse toMyReservationResponse(MyReservationProjection view) {
+        return MyReservationResponse.builder()
+            .reservationId(view.getReservationId())
+            .shopName(view.getShopName())
+            .name(view.getName())
+            .reservationFee(view.getReservationFee())
+            .headCount(view.getHeadCount())
+            .reservedAt(view.getReservedAt())
+            .status(view.getStatus())
+            .build();
+    }
+
     public static MyReservationPageResponse toMyReservationPageResponse(Long nextCursor,
         Slice<MyReservationResponse> reservations) {
         return MyReservationPageResponse.builder()
@@ -86,4 +101,21 @@ public class ReservationMapper {
             .content(reservations.getContent())
             .build();
     }
+
+    public static List<ReservationContent> toReservationProjectionContent(
+        List<ReservationSummaryDto> rows) {
+        var out = new java.util.ArrayList<ReservationContent>(rows.size());
+        for (var r : rows) {
+            out.add(ReservationContent.builder()
+                .reservationId(r.reservationId())
+                .shopName(r.shopName())
+                .reservedAt(r.reservedAt())
+                .headCount(r.headCount())
+                .phoneNumber(r.phoneNumber())
+                .status(r.status())
+                .build());
+        }
+        return out;
+    }
+
 }

@@ -11,10 +11,10 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.OAuth2Exception;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.global.security.oauth2.dto.GoogleResponseDto;
-import shop.matjalalzz.global.security.oauth2.dto.KakaoResponseDto;
-import shop.matjalalzz.global.security.oauth2.dto.NaverResponseDto;
-import shop.matjalalzz.global.security.oauth2.dto.OAuth2ResponseDto;
+import shop.matjalalzz.global.security.oauth2.dto.GoogleResponse;
+import shop.matjalalzz.global.security.oauth2.dto.KakaoResponse;
+import shop.matjalalzz.global.security.oauth2.dto.NaverResponse;
+import shop.matjalalzz.global.security.oauth2.dto.OAuth2Response;
 import shop.matjalalzz.global.security.oauth2.mapper.OAuth2Mapper;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
@@ -36,35 +36,35 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         String provider = userRequest.getClientRegistration().getRegistrationId();
 
-        OAuth2ResponseDto oAuth2ResponseDto = null;
+        OAuth2Response oAuth2Response = null;
 
         switch (provider) {
             case "google":
-                oAuth2ResponseDto = new GoogleResponseDto(oAuth2User.getAttributes());
+                oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
                 break;
             case "naver":
-                oAuth2ResponseDto = new NaverResponseDto(oAuth2User.getAttributes());
+                oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
                 break;
             case "kakao":
-                oAuth2ResponseDto = new KakaoResponseDto(oAuth2User.getAttributes());
+                oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
                 break;
             default:
                 throw new BusinessException(ErrorCode.INVALID_PROVIDER);
         }
 
         // providerId로 사용자 찾기
-        String oauthId = oAuth2ResponseDto.getProvider() + "_" + oAuth2ResponseDto.getProviderId();
+        String oauthId = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
         Optional<User> found = userRepository.findByOauthId(oauthId);
         if (found.isPresent()) {
             return OAuth2Mapper.toPrincipalUser(found.get());
         }
 
-        String email = oAuth2ResponseDto.getEmail();
+        String email = oAuth2Response.getEmail();
         userRepository.findByEmail(email).ifPresent(user -> {
             throw new OAuth2Exception(ErrorCode.EMAIL_ALREADY_EXISTS);
         });
 
-        User newUser = userRepository.save(OAuth2Mapper.toUser(oAuth2ResponseDto));
+        User newUser = userRepository.save(OAuth2Mapper.toUser(oAuth2Response));
 
         return OAuth2Mapper.toPrincipalUser(newUser);
     }
