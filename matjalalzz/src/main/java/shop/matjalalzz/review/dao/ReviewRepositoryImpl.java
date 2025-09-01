@@ -5,8 +5,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -52,48 +50,6 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
             .fetch();
 
         boolean hasNext = processPage(pageable, reviewProjections);
-
-        if (!reviewProjections.isEmpty()) {
-            List<Long> reviewIds = reviewProjections.stream()
-                .map(ReviewProjection::getReviewId)
-                .toList();
-
-            List<Long> writerIds = reviewProjections.stream()
-                .map(ReviewProjection::getWriterId)
-                .distinct()
-                .toList();
-
-            // TODO: 사용자 정보 조회 분리
-            Map<Long, String> userMap = queryFactory
-                .select(user.id, user.nickname)
-                .from(user)
-                .where(user.id.in(writerIds))
-                .stream()
-                .collect(Collectors.toMap(
-                        t -> t.get(user.id),
-                        t -> t.get(user.nickname)
-                    )
-                );
-
-            // TODO: 이미지 정보 조회 분리
-            Map<Long, List<String>> imageMap = queryFactory
-                .select(image.reviewId, image.s3Key)
-                .from(image)
-                .where(image.reviewId.in(reviewIds))
-                .fetch()
-                .stream()
-                .collect(Collectors.groupingBy(
-                    t -> t.get(image.reviewId),
-                    Collectors.mapping(t -> t.get(image.s3Key), Collectors.toList())
-                ));
-
-            // 4. 최종 ReviewResponse 생성
-            reviewProjections.stream()
-                .forEach(r -> {
-                    r.setUserNickname(userMap.get(r.getWriterId()));
-                    r.setImages(imageMap.get(r.getReviewId()));
-                });
-        }
 
         return new SliceImpl<>(reviewProjections, pageable, hasNext);
     }

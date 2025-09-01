@@ -1,6 +1,7 @@
 package shop.matjalalzz.review.app;
 
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
@@ -10,6 +11,7 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.image.app.ImageService;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -33,6 +35,7 @@ import shop.matjalalzz.user.entity.User;
 public class ReviewFacade {
 
     private final UserService userService;
+    private final ImageService imageService;
     private final ReservationService reservationService;
     private final PartyService partyService;
     private final ShopService shopService;
@@ -80,11 +83,22 @@ public class ReviewFacade {
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
         Slice<ReviewProjection> reviews = reviewQueryService.findReviewPageByShop(shopId, cursor,
             size);
+        List<Long> reviewIds = reviews.stream()
+            .map(ReviewProjection::getReviewId)
+            .toList();
+
+        List<Long> writerIds = reviews.stream()
+            .map(ReviewProjection::getWriterId)
+            .distinct()
+            .toList();
+        Map<Long, String> userNicknames = userService.getUsersNickname(writerIds);
+        Map<Long, List<String>> reviewImages = imageService.findReviewImagesById(reviewIds);
         Long nextCursor = null;
         if (reviews.hasNext()) {
             nextCursor = reviews.getContent().getLast().getReviewId();
         }
         return ReviewMapper.toReviewPageResponseFromProjection(nextCursor, reviews.getContent(),
+            userNicknames, reviewImages,
             BASE_URL);
     }
 

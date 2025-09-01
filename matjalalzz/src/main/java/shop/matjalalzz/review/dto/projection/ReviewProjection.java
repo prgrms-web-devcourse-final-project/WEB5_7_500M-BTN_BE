@@ -1,7 +1,6 @@
 package shop.matjalalzz.review.dto.projection;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Data;
 
 @Data
@@ -12,8 +11,6 @@ public class ReviewProjection {
     private Double rating;
     private String content;
     private LocalDateTime createdAt;
-    private String userNickname;
-    private List<String> images;
 
 }
 

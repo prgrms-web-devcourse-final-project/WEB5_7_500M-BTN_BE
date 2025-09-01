@@ -1,5 +1,7 @@
 package shop.matjalalzz.user.app;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,5 +46,10 @@ public class UserService {
     @Transactional
     public User saveUser(User user) {
         return userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, String> getUsersNickname(List<Long> userIds) {
+        return userRepository.getUsersNickname(userIds);
     }
 }
