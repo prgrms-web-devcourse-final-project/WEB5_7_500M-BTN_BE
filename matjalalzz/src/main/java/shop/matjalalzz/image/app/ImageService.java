@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.image.dao.ImageRepository;
+import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
 
 @Service
@@ -24,6 +25,16 @@ public class ImageService {
         return imageRepository.findByShopIdAndImageIndex(shopId, 0)
             .map(image -> BASE_URL + image.getS3Key())
             .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, String> getShopThumbnails(List<Long> shopIds) {
+        return imageRepository.findThumbnailByShopIds(shopIds).stream()
+            .collect(Collectors.toMap(
+                Image::getShopId,
+                image -> BASE_URL + image.getS3Key(),
+                (exist, dup) -> exist // 중복 키 발생 시 기존값 유지
+            ));
     }
 
     @Transactional(readOnly = true)

@@ -18,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.SQLRestriction;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.party.entity.Party;
@@ -64,9 +66,10 @@ public class Reservation extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "party_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Party party;
 
-    public void changeStatus(ReservationStatus status){
+    public void changeStatus(ReservationStatus status) {
         this.status = status;
     }
 
