@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import shop.matjalalzz.shop.dao.ShopRepository.OwnerShopRow;
 import shop.matjalalzz.shop.dto.AdminFindShopInfo;
 import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
@@ -235,5 +236,16 @@ public class ShopMapper {
     }
 
 
-
+    public static OwnerShopItem ownerRowToItem(OwnerShopRow ownerShopRow, String baseUrl) {
+       return OwnerShopItem.builder()
+            .shopId(ownerShopRow.getShopId())
+            .shopName(ownerShopRow.getShopName())
+            .category(ownerShopRow.getFoodCategory())
+            .roadAddress(ownerShopRow.getRoadAddress())
+            .detailAddress(ownerShopRow.getDetailAddress())
+            .rating(ownerShopRow.getRating())
+            .approve(ownerShopRow.getApprove())
+            .thumbnailUrl(baseUrl +ownerShopRow.getFirstS3Key())
+            .build();
+    }
 }

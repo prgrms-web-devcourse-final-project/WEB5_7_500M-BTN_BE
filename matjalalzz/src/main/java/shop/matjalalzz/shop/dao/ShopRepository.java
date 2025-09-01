@@ -64,4 +64,38 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
     Optional<Shop> findByIdAndUserId(Long id, Long userId);
 
     User user(User user);
+
+    // 목록 화면에 필요한 필드만 골라 받는 프로젝션
+    interface OwnerShopRow {
+        Long getShopId();
+        String getShopName();
+        FoodCategory getFoodCategory();
+        String getRoadAddress();
+        String getDetailAddress();
+        double getRating();
+        Approve getApprove();
+        String getFirstS3Key(); // 대표 이미지(없으면 null)
+    }
+
+    @Query(value = """
+        SELECT
+            s.shop_id      AS shopId,
+            s.shop_name    AS shopName,
+            s.category AS foodCategory,
+            s.road_address AS roadAddress,
+            s.detail_address AS detailAddress,
+            s.rating        AS rating,
+            s.approve       AS approve,
+            (
+              SELECT i.s3key                          
+              FROM image i
+              WHERE i.shop_id = s.shop_id
+              ORDER BY i.image_index ASC, i.image_id ASC
+              LIMIT 1
+            ) AS firstS3Key
+        FROM shop s
+        WHERE s.user_id = :userId
+        """, nativeQuery = true)
+    List<OwnerShopRow> findOwnerShopsWithFirstImage(@Param("userId") Long userId);
+
 }

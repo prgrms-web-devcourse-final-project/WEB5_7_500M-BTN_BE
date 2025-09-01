@@ -149,27 +149,37 @@ public class ShopService {
     public OwnerShopsList getOwnerShopList(Long userId) {
 
         // 승인 된 자신의 식당들 리스트를 가져옴
-        List<Shop> shopList = shopRepository.findByUserId(userId);
 
-        List<OwnerShopItem> shops = shopList.stream().map(shop ->
-            {
-
-                String image = imageRepository.findS3Keys(shop.getId(), PageRequest.of(0, 1)).stream()
-                    .findFirst().orElse(null);
-                if (image != null) {
-                    image = BASE_URL + image;
-                }
-
-//                List<Image> getImage = imageRepository.findByShopId(shop.getId());
-//                if (getImage != null) {
-//                    imageUrl = BASE_URL + getImage.getFirst().getS3Key();
+//        기본 jpa 방식으로 상점 하나를 조회하고 식당 이미지들 중 첫번째 image를 찾아 총 2번에 쿼리가 날라감
+//        List<Shop> shopList = shopRepository.findByUserId(userId);
+//
+//        List<OwnerShopItem> shops = shopList.stream().map(shop ->
+//            {
+//
+//                String image = imageRepository.findS3Keys(shop.getId(), PageRequest.of(0, 1)).stream()
+//                    .findFirst().orElse(null);
+//                if (image != null) {
+//                    image = BASE_URL + image;
 //                }
+//                return ShopMapper.shopToOwnerShopItem(shop, image);
+//            }
+//        ).toList();
+//
+//        return new OwnerShopsList(shops);
 
-                return ShopMapper.shopToOwnerShopItem(shop, image);
-            }
-        ).toList();
 
-        return new OwnerShopsList(shops);
+        // shop과 image 한번에 조회하는 native 방식
+        var rows = shopRepository.findOwnerShopsWithFirstImage(userId);
+
+        var items = rows.stream()
+            .map(r -> {
+                return ShopMapper.ownerRowToItem(r,BASE_URL);
+            })
+            .toList();
+
+        return new OwnerShopsList(items);
+
+
     }
 
 
