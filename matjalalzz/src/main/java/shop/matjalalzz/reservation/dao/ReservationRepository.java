@@ -14,8 +14,7 @@ import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long>,
-    ReservationRepositoryCustom {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
 
     @Query("""
         SELECT r FROM Reservation r
@@ -106,8 +105,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                 )
             )
         """)
-    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(
-        @Param("userId") Long userId,
+    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
         @Param("threshold") LocalDateTime threshold);
 
     @Modifying
@@ -158,7 +156,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         where r.id in :reservationIds
         """)
     void cancelReservationByIds(@Param("reservationIds") List<Long> reservationIds);
-
 
     Reservation findByPartyId(Long partyId);
 
