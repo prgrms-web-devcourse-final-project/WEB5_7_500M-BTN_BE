@@ -38,9 +38,6 @@ class ReservationServiceTest {
     private ReservationFacade reservationFacade;
 
     @Mock
-    private ReservationService reservationService;
-
-    @Mock
     private ShopService shopService;
 
     private final Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
@@ -73,7 +70,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, CURSOR, pageable))
                 .willReturn(slice);
 
@@ -109,7 +106,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, null, pageable))
                 .willReturn(slice);
 
@@ -150,7 +147,7 @@ class ReservationServiceTest {
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
             given(
-                reservationService.findByShopIdWithFilterAndCursor(SHOP_ID, null, 3L, pageable))
+                reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID, null, 3L, pageable))
                 .willReturn(slice);
 
             // when
@@ -188,7 +185,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
+            given(reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
                 pageable))
                 .willReturn(slice);
 
@@ -226,7 +223,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopService.findByOwnerId(owner.getId())).willReturn(List.of(shop1, shop2));
-            given(reservationService.findByShopIdsWithFilterAndCursor(
+            given(reservationFacade.findByShopIdsWithFilterAndCursor(
                 List.of(1L, 2L), null, null, pageable)).willReturn(slice);
 
             // when
@@ -258,7 +255,7 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 1L);
                 reservation.changeStatus(ReservationStatus.PENDING);
 
-                given(reservationService.getReservationById(1L)).willReturn(reservation);
+                given(reservationFacade.getReservationById(1L)).willReturn(reservation);
 
                 // when
                 reservationFacade.confirmReservation(reservation.getId(),
@@ -281,7 +278,7 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 2L);
                 reservation.changeStatus(ReservationStatus.PENDING);
 
-                given(reservationService.getReservationById(2L)).willReturn(reservation);
+                given(reservationFacade.getReservationById(2L)).willReturn(reservation);
 
                 // when
                 reservationFacade.refuseReservation(reservation.getId(),
@@ -304,7 +301,7 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 3L);
                 reservation.changeStatus(ReservationStatus.CONFIRMED); // 이미 수락됨
 
-                given(reservationService.getReservationById(3L)).willReturn(reservation);
+                given(reservationFacade.getReservationById(3L)).willReturn(reservation);
 
                 // when & then
                 assertThrows(BusinessException.class, () ->
@@ -328,7 +325,7 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 4L);
                 reservation.changeStatus(ReservationStatus.REFUSED); // 이미 거절됨
 
-                given(reservationService.getReservationById(4L)).willReturn(reservation);
+                given(reservationFacade.getReservationById(4L)).willReturn(reservation);
 
                 // when & then
                 assertThrows(BusinessException.class, () ->
