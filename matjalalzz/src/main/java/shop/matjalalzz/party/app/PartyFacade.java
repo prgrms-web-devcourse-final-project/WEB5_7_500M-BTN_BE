@@ -34,7 +34,7 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
-import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.app.ReservationFacade;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.app.ShopService;
@@ -51,9 +51,9 @@ public class PartyFacade {
     private final PartyService partyService;
     private final ShopService shopService;
     private final UserService userService;
-    private final ReservationService reservationService;
     private final PartyChatService partyChatService;
     private final ImageService imageService;
+    private final ReservationFacade reservationFacade;
 
     private final String MAX_ATTEMPTS = "${custom.retry.max-attempts}";
     private final String MAX_DELAY = "${custom.retry.max-delay}";
@@ -244,7 +244,7 @@ public class PartyFacade {
         if (party.getStatus() == PartyStatus.COMPLETED
             && party.getMinCount() > party.getCurrentCount() - 1) {
 
-            reservationService.refundPartyReservationFee(party);
+            reservationFacade.refundPartyReservationFee(party);
 
             if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
@@ -303,7 +303,7 @@ public class PartyFacade {
         if (party.getStatus() == PartyStatus.COMPLETED
             && party.getMinCount() > party.getCurrentCount() - 1) {
 
-            reservationService.refundPartyReservationFee(party);
+            reservationFacade.refundPartyReservationFee(party);
 
             partyService.breakParty(party);
             return;
@@ -341,7 +341,7 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_D_DAY);
         }
 
-        reservationService.refundPartyReservationFee(party);
+        reservationFacade.refundPartyReservationFee(party);
 
         if (reservation != null) {
             reservation.changeStatus(ReservationStatus.CANCELLED);
@@ -357,7 +357,7 @@ public class PartyFacade {
 
         for (Party party : parties) {
             // 예약금을 지불한 파티원에게 예약금 환불
-            reservationService.refundPartyReservationFee(party);
+            reservationFacade.refundPartyReservationFee(party);
 
             // 예약이 진행 중일 때, 예약을 취소
             Reservation reservation = party.getReservation();
@@ -437,7 +437,7 @@ public class PartyFacade {
         boolean allPaid = party.getPartyUsers().stream().allMatch(PartyUser::isPaymentCompleted);
         if (allPaid) {
             User host = partyService.findPartyHost(party);
-            reservationService.createPartyReservation(party, host);
+            reservationFacade.createPartyReservation(party, host);
             partyChatService.noticeReservationComplete(host, party);
         }
     }
