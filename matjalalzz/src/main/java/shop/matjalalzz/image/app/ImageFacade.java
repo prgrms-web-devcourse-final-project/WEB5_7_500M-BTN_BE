@@ -1,0 +1,58 @@
+package shop.matjalalzz.image.app;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import shop.matjalalzz.image.app.commend.ImageCommendService;
+import shop.matjalalzz.image.app.query.ImageQueryService;
+import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
+import shop.matjalalzz.image.entity.Image;
+
+@Service
+@RequiredArgsConstructor
+public class ImageFacade {
+    private final ImageQueryService imageQueryService;
+    private final ImageCommendService imageCommendService;
+
+    @Value("${aws.credentials.AWS_BASE_URL}")
+    private String BASE_URL;
+
+
+    public List<String> findByInquiryImage(long inquiryId) {
+        return imageQueryService.findByInquiryImage(inquiryId);
+    }
+
+    // 해당 식당에 thumbnail
+    public String findByShopThumbnail(long shopId) {
+        Optional<Image> optionalImage = imageQueryService.getShopThumbnail(shopId);
+       return optionalImage.map(image -> BASE_URL + image.getS3Key()).orElse(null);
+    }
+
+    public Map<Long, List<String>> findReviewImagesById(List<Long> reviewIds){
+        return imageQueryService.findReviewImagesById(reviewIds).stream().collect(
+            Collectors.groupingBy(ReviewImageProjection::getReviewId,
+                Collectors.mapping(v -> BASE_URL + v.getS3Key(), Collectors.toList())
+            ));
+    }
+
+    // 이미지들 객체 조회
+    public List<Image> findByShopAndImage(long shopId){
+        return imageQueryService.findByShopAndImage(shopId);
+    }
+
+    // 이미지들 key 조회
+    public List<String> findByShopAndImageKey(long shopId){
+        return imageQueryService.findByShopAndImageKey(shopId);
+    }
+
+    public void deleteAllImages(List<Image> images){
+        imageCommendService.deleteAllImages(images);
+    }
+
+
+
+}

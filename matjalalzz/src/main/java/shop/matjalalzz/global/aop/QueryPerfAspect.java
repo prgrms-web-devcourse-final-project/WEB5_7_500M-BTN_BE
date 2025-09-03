@@ -1,11 +1,13 @@
 package shop.matjalalzz.global.aop;
 
+import static shop.matjalalzz.global.config.DsProxyLoggingConfig.JDBC_NS;
+
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import static shop.matjalalzz.global.config.DsProxyLoggingConfig.JDBC_NS;
 
 
 @Slf4j

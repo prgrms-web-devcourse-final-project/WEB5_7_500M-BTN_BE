@@ -6,7 +6,6 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import shop.matjalalzz.inquiry.entity.Inquiry;
 import shop.matjalalzz.shop.entity.Shop;
 
 @Aspect

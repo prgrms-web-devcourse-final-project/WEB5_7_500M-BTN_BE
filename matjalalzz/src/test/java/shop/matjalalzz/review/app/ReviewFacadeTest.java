@@ -42,6 +42,7 @@ import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
+import shop.matjalalzz.shop.app.ShopFacade;
 import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
@@ -60,7 +61,7 @@ class ReviewFacadeTest {
     private PartyService partyService;
 
     @Mock
-    private ShopService shopService;
+    private ShopFacade shopFacade;
 
     @Mock
     private PreSignedProvider preSignedProvider;
@@ -119,7 +120,7 @@ class ReviewFacadeTest {
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
-            when(shopService.shopFind(shopId)).thenReturn(shop);
+            when(shopFacade.findShop(shopId)).thenReturn(shop);
             doNothing().when(reviewCommandService).addShopRating(shop, rating);
             when(reviewCommandService.save(any(Review.class))).thenReturn(review);
             when(preSignedProvider.createReviewUploadUrls(anyInt(), anyLong(),
@@ -246,7 +247,7 @@ class ReviewFacadeTest {
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
-            when(shopService.shopFind(shopId)).thenThrow(
+            when(shopFacade.findShop(shopId)).thenThrow(
                 new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
@@ -439,7 +440,7 @@ class ReviewFacadeTest {
             when(userService.getUserById(writerId)).thenReturn(writer);
             when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
             when(partyService.getPartyUsers(partyId)).thenReturn(partyUsers);
-            when(shopService.shopFind(shopId)).thenReturn(shop);
+            when(shopFacade.findShop(shopId)).thenReturn(shop);
             doNothing().when(reviewCommandService).addShopRating(shop, rating);
             when(reviewCommandService.save(any(Review.class))).thenReturn(review);
             when(preSignedProvider.createReviewUploadUrls(anyInt(), anyLong(),

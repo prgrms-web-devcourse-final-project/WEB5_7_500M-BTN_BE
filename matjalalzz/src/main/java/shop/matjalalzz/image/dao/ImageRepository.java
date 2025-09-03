@@ -18,7 +18,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     List<Image> findByShopIdOrderByImageIndexAsc(long shopId);
 
     @Query("select i.s3Key from Image i where i.shopId =:shopId")
-    List<String> findByShopImage(@Param("shopId") long shopId);
+    List<String> findByShopImageKey(@Param("shopId") long shopId);
 
     @Query("select i.s3Key from Image i where i.inquiryId =:inquiryId")
     List<String> findByInquiryImage(@Param("inquiryId") long inquiryId);

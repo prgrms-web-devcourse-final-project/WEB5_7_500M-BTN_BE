@@ -7,12 +7,13 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import shop.matjalalzz.shop.dto.projection.OwnerShopProjection;
 import shop.matjalalzz.shop.entity.Approve;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 
-public interface ShopRepository extends JpaRepository<Shop, Long> {
+public interface ShopRepository extends JpaRepository<Shop, Long>, ShopRepositoryCustom {
 
     List<Shop> findByApprove(Approve approve);
 
@@ -65,17 +66,7 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
 
     User user(User user);
 
-    // 목록 화면에 필요한 필드만 골라 받는 프로젝션
-    interface OwnerShopRow {
-        Long getShopId();
-        String getShopName();
-        FoodCategory getFoodCategory();
-        String getRoadAddress();
-        String getDetailAddress();
-        double getRating();
-        Approve getApprove();
-        String getFirstS3Key(); // 대표 이미지(없으면 null)
-    }
+
 
     @Query(value = """
         SELECT
@@ -90,12 +81,12 @@ public interface ShopRepository extends JpaRepository<Shop, Long> {
               SELECT i.s3key                          
               FROM image i
               WHERE i.shop_id = s.shop_id
-              ORDER BY i.image_index ASC, i.image_id ASC
+              ORDER BY i.image_index ASC
               LIMIT 1
             ) AS firstS3Key
         FROM shop s
         WHERE s.user_id = :userId
         """, nativeQuery = true)
-    List<OwnerShopRow> findOwnerShopsWithFirstImage(@Param("userId") Long userId);
+    List<OwnerShopProjection> findOwnerShopsWithFirstImage(@Param("userId") Long userId);
 
 }

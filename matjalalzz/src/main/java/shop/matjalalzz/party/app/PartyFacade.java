@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.image.app.ImageService;
+import shop.matjalalzz.image.app.ImageFacade;
 import shop.matjalalzz.party.dao.PartySpecification;
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.party.dto.MyPartyResponse;
@@ -37,7 +37,7 @@ import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.ShopFacade;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -49,11 +49,11 @@ public class PartyFacade {
 
     private final PartySchedulerService partySchedulerService;
     private final PartyService partyService;
-    private final ShopService shopService;
+    private final ShopFacade shopFacade;
     private final UserService userService;
     private final ReservationService reservationService;
     private final PartyChatService partyChatService;
-    private final ImageService imageService;
+    private final ImageFacade imageFacade;
 
     private final String MAX_ATTEMPTS = "${custom.retry.max-attempts}";
     private final String MAX_DELAY = "${custom.retry.max-delay}";
@@ -73,7 +73,7 @@ public class PartyFacade {
         }
 
         User user = userService.getUserById(userId);
-        Shop shop = shopService.shopFind(request.shopId());
+        Shop shop = shopFacade.findShop(request.shopId());
         Party party = PartyMapper.toEntity(request, shop);
 
         PartyUser host = PartyUser.createHost(party, user);
@@ -91,7 +91,7 @@ public class PartyFacade {
 
         List<PartyMemberResponse> members = partyService.findAllByPartyIdToDto(partyId);
 
-        String thumbnailUrl = imageService.getShopThumbnail(party.getShop().getId());
+        String thumbnailUrl = imageFacade.findByShopThumbnail(party.getShop().getId());
 
         return PartyMapper.toDetailResponse(party, thumbnailUrl, members);
     }
@@ -115,7 +115,7 @@ public class PartyFacade {
 
         List<PartyListResponse> content = partyList.stream()
             .map(party -> PartyMapper.toListResponse
-                (party, imageService.getShopThumbnail(party.getShop().getId()))
+                (party, imageFacade.findByShopThumbnail(party.getShop().getId()))
             )
             .toList();
 

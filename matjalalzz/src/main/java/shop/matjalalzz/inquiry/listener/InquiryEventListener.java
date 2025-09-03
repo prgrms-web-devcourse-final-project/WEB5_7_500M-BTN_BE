@@ -7,8 +7,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import shop.matjalalzz.global.discord.api.DiscordService;
-import shop.matjalalzz.inquiry.app.InquiryService;
-import shop.matjalalzz.inquiry.dao.InquiryRepository;
 import shop.matjalalzz.inquiry.entity.Inquiry;
 
 @Component

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import shop.matjalalzz.shop.dao.ShopRepository.OwnerShopRow;
 import shop.matjalalzz.shop.dto.AdminFindShopInfo;
 import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
@@ -15,12 +13,13 @@ import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
-import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse.ShopElementResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsItem;
+import shop.matjalalzz.shop.dto.projection.OwnerShopProjection;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.user.entity.User;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -236,16 +235,16 @@ public class ShopMapper {
     }
 
 
-    public static OwnerShopItem ownerRowToItem(OwnerShopRow ownerShopRow, String baseUrl) {
+    public static OwnerShopItem ownerRowToItem(OwnerShopProjection ownerShop, String baseUrl) {
        return OwnerShopItem.builder()
-            .shopId(ownerShopRow.getShopId())
-            .shopName(ownerShopRow.getShopName())
-            .category(ownerShopRow.getFoodCategory())
-            .roadAddress(ownerShopRow.getRoadAddress())
-            .detailAddress(ownerShopRow.getDetailAddress())
-            .rating(ownerShopRow.getRating())
-            .approve(ownerShopRow.getApprove())
-            .thumbnailUrl(baseUrl +ownerShopRow.getFirstS3Key())
+            .shopId(ownerShop.getShopId())
+            .shopName(ownerShop.getShopName())
+            .category(ownerShop.getFoodCategory())
+            .roadAddress(ownerShop.getRoadAddress())
+            .detailAddress(ownerShop.getDetailAddress())
+            .rating(ownerShop.getRating())
+            .approve(ownerShop.getApprove())
+            .thumbnailUrl(baseUrl +ownerShop.getFirstS3Key())
             .build();
     }
 }

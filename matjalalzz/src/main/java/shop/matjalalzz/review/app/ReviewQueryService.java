@@ -43,4 +43,9 @@ public class ReviewQueryService {
             throw new BusinessException(ErrorCode.DUPLICATE_DATA);
         }
     }
+
+    public int findReviewCountByShop(long shopId) {
+        return reviewRepository.findReviewCount(shopId);
+    }
+
 }
