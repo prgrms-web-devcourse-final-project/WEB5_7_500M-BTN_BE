@@ -41,6 +41,7 @@ public class ImageQueryService {
         return imageRepository.findByShopImageKey(shopId);
     }
 
+    @Transactional(readOnly = true)
     public List<Image> findShopThumbnails(List<Long> shopIds) {
         return imageRepository.findThumbnailByShopIds(shopIds);
     }

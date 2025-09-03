@@ -18,7 +18,7 @@ import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.shop.app.ShopFacade;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 
 @Service
@@ -27,7 +27,7 @@ import shop.matjalalzz.shop.entity.Shop;
 public class ReservationQueryService {
 
     private final ReservationService reservationService;
-    private final ShopFacade shopFacade;
+    private final ShopQueryService shopQueryService;
 
     public ReservationListResponse getReservations(
         Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
@@ -35,7 +35,7 @@ public class ReservationQueryService {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
 
         if (shopId != null) {
-            Shop shop = shopFacade.findShop(shopId); // 검증
+            Shop shop = shopQueryService.findShop(shopId); // 검증
             if (!shop.getUser().getId().equals(ownerId)) {
                 throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
             }
@@ -45,7 +45,7 @@ public class ReservationQueryService {
             return toReservationListResponse(slice);
         }
 
-        List<Shop> shops = shopFacade.findByOwnerId(ownerId);
+        List<Shop> shops = shopQueryService.findByOwnerId(ownerId);
         if (shops == null) {
             throw new BusinessException(ErrorCode.SHOP_NOT_FOUND);
         }
@@ -61,7 +61,7 @@ public class ReservationQueryService {
         Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
     ) {
         if (shopId != null) {
-            Shop shop = shopFacade.findShop(shopId);
+            Shop shop = shopQueryService.findShop(shopId);
             if (!shop.getUser().getId().equals(ownerId)) {
                 throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
             }

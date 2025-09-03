@@ -1,4 +1,4 @@
-package shop.matjalalzz.shop.app;
+package shop.matjalalzz.shop.app.commend;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -18,8 +18,12 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.app.ImageFacade;
+import shop.matjalalzz.image.app.commend.ImageCommendService;
+import shop.matjalalzz.image.app.query.ImageQueryService;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.app.ReviewQueryService;
+import shop.matjalalzz.shop.app.commend.ShopCommendService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.dto.AdminFindShopInfo;
 import shop.matjalalzz.shop.dto.ApproveRequest;
 import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
@@ -52,9 +56,10 @@ public class ShopFacade {
     private final ShopCommendService shopCommendService;
     private final ShopQueryService shopQueryService;
     private final PreSignedProvider preSignedProvider;
-    private final ImageFacade imageFacade;
     private final ReviewQueryService reviewQueryService;
     private final UserService userService;
+    private final ImageQueryService imageQueryService;
+    private final ImageCommendService imageCommendService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -106,7 +111,7 @@ public class ShopFacade {
     public ShopDetailResponse findShopDetail(long shopId) {
         Shop shop = shopQueryService.findOneShop(shopId).orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
         log.info("상점 상세 조회 shopId = {}, shopName = {}", shopId, shop.getShopName());
-        List<String> imageUrllList = Optional.ofNullable(imageFacade.findByShopAndImage(shop.getId()))
+        List<String> imageUrllList = Optional.ofNullable(imageQueryService.findByShopAndImage(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -119,7 +124,7 @@ public class ShopFacade {
     public ShopOwnerDetailResponse findOwnerShopDetail(long shopId, long ownerId) {
         Shop shop = shopQueryService.findOwnerShop(shopId, ownerId);
         List<String> imageUrlList = Optional.ofNullable(
-                imageFacade.findByShopAndImage(shop.getId()))
+                imageQueryService.findByShopAndImage(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -134,9 +139,7 @@ public class ShopFacade {
     public OwnerShopsList findOwnerShopList(long userId) {
         List<OwnerShopProjection> rows = shopQueryService.findOwnerShopList(userId);
         List<OwnerShopItem> shopItems = rows.stream()
-            .map(r -> {
-                return ShopMapper.ownerRowToItem(r, BASE_URL);
-            }).toList();
+            .map(r -> ShopMapper.ownerRowToItem(r, BASE_URL)).toList();
         return new OwnerShopsList(shopItems);
     }
 
@@ -150,12 +153,12 @@ public class ShopFacade {
         shopCommendService.editShop(shop,shopUpdateVo,user);
 
         // 기존 이미지들 가져와서 다 지우고 다시 받게 프리사이드 URL 발급
-        List<String> imageKeys = imageFacade.findByShopAndImageKey(shop.getId());
+        List<String> imageKeys = imageQueryService.findByShopAndImageKey(shop.getId());
         if (!imageKeys.isEmpty()) {
             preSignedProvider.deleteObjects(imageKeys);
             //db에 내용도 다 날리게
-            List<Image> imagesDB = imageFacade.findByShopAndImage(shop.getId());
-            imageFacade.deleteAllImages(imagesDB);
+            List<Image> imagesDB = imageQueryService.findByShopAndImage(shop.getId());
+            imageCommendService.deleteAllImages(imagesDB);
         }
         //새롭게 프리사이드 URL 발급
         return preSignedProvider.createShopUploadUrls(updateRequest.imageCount(), shop.getId());
@@ -176,9 +179,10 @@ public class ShopFacade {
         //이미지만 또 따로 필요하므로 재조합을 해줘야 함
 
         List<ShopsItem> shopsItemStream = allShopItems.stream().map(item -> {
-            String thumbnail = imageFacade.findByShopThumbnail(item.shopId());
+                Optional<Image> shopThumbnail = imageQueryService.findShopThumbnail(item.shopId());
+                String thumbnail = shopThumbnail.map(image -> BASE_URL + image.getS3Key()).orElse(null);
 
-            return new ShopsItem(
+                return new ShopsItem(
                 item.shopId(),
                 item.shopName(),
                 item.category(),

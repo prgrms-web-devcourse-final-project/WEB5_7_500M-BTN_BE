@@ -1,4 +1,4 @@
-package shop.matjalalzz.shop.app;
+package shop.matjalalzz.shop.app.query;
 
 import java.util.List;
 import java.util.Optional;

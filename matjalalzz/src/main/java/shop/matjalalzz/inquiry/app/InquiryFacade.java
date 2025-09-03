@@ -12,6 +12,7 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.app.ImageFacade;
+import shop.matjalalzz.image.app.query.ImageQueryService;
 import shop.matjalalzz.inquiry.app.command.InquiryCommandService;
 import shop.matjalalzz.inquiry.app.query.InquiryQueryService;
 import shop.matjalalzz.inquiry.dto.InquiryAllGetResponse;
@@ -30,9 +31,9 @@ public class InquiryFacade {
     private final InquiryCommandService inquiryCommandService;
     private final InquiryQueryService inquiryQueryService;
     private final PreSignedProvider preSignedProvider;
-    private final ImageFacade imageFacade;
     private final CommentRepository commentRepository;
     private final UserService userService;
+    private final ImageQueryService imageQueryService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -76,7 +77,7 @@ public class InquiryFacade {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
-        List<String> imagesUrl = imageFacade.findByInquiryImage(inquiry.getId());
+        List<String> imagesUrl = imageQueryService.findByInquiryImage(inquiry.getId());
         List<String> imagesPathUrl = imagesUrl.stream().map(path-> BASE_URL  + path ).toList();
         return InquiryMapper.fromInquiry(inquiry, imagesPathUrl);
 
