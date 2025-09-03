@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.image.app.commend.ImageCommendService;
 import shop.matjalalzz.image.app.query.ImageQueryService;
 import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
@@ -49,6 +50,7 @@ public class ImageFacade {
         return imageQueryService.findByShopAndImageKey(shopId);
     }
 
+    @Transactional
     public void deleteAllImages(List<Image> images){
         imageCommendService.deleteAllImages(images);
     }

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.comment.dao.CommentRepository;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
@@ -19,7 +20,7 @@ import shop.matjalalzz.inquiry.dto.InquiryItem;
 import shop.matjalalzz.inquiry.dto.InquiryOneGetResponse;
 import shop.matjalalzz.inquiry.entity.Inquiry;
 import shop.matjalalzz.inquiry.mapper.InquiryMapper;
-import shop.matjalalzz.user.dao.UserRepository;
+import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 
@@ -31,16 +32,17 @@ public class InquiryFacade {
     private final PreSignedProvider preSignedProvider;
     private final ImageFacade imageFacade;
     private final CommentRepository commentRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
 
     // 문의글 생성
+    @Transactional
     public PreSignedUrlListResponse createNewInquiry(long userId, InquiryCreateRequest request){
-        User user = userRepository.findById(userId).orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        User user = userService.getUserById(userId);
         Inquiry inquiry = InquiryMapper.toInquiry(request, user);
-        inquiryCommandService.createNewInquiry(inquiry, user);
+        inquiryCommandService.createNewInquiry(inquiry);
         return preSignedProvider.createInquiryUploadUrls(request.imageCount(), inquiry.getId());
     }
 
@@ -66,9 +68,8 @@ public class InquiryFacade {
     // 본인이 작성한 하나의 문의글 조회 (관리자도 조회 가능)
     public InquiryOneGetResponse getOneInquiry(long userId, Long inquiryId) {
         // 이것도 queryService 필요
-        User user = userRepository.findById(userId).get();
-        Inquiry inquiry = inquiryQueryService.getOneInquiry( inquiryId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
+        User user = userService.getUserById(userId);
+        Inquiry inquiry = inquiryQueryService.getOneInquiry(inquiryId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
 
         //관리자도 아니고 자신이 쓴 문의글이 아니면 조회 불가
         if (!user.getRole().equals(Role.ADMIN) && !inquiry.getUser().getId().equals(user.getId())) {

@@ -15,8 +15,7 @@ public class InquiryCommandService {
     private final UserRepository userRepository;
 
 
-    @Transactional
-    public long createNewInquiry(Inquiry inquiry, User user)  {
+    public long createNewInquiry(Inquiry inquiry)  {
         inquiryRepository.save(inquiry);
         return inquiry.getId();
     }
