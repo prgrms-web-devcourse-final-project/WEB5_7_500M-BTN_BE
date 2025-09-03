@@ -32,7 +32,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         Pageable pageable
     );
 
-
     @Query("""
         SELECT r FROM Reservation r
         JOIN FETCH r.shop s
@@ -158,4 +157,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         """)
     void cancelReservationByIds(@Param("reservationIds") List<Long> reservationIds);
 
+    Reservation findByPartyId(Long partyId);
+
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        WHERE r.party.id in :partyIds
+        """)
+    List<Reservation> findAllByPartyIds(@Param("partyIds") List<Long> partyIds);
 }

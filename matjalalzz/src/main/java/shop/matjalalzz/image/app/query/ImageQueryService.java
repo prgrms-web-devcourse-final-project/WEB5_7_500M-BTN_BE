@@ -1,5 +1,6 @@
 package shop.matjalalzz.image.app.query;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class ImageQueryService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Image> getShopThumbnail(Long shopId) {
+    public Optional<Image> findShopThumbnail(Long shopId) {
         return imageRepository.findByShopIdAndImageIndex(shopId, 0);
     }
 
@@ -38,5 +39,9 @@ public class ImageQueryService {
     @Transactional(readOnly = true)
     public List<String> findByShopAndImageKey(long shopId) {
         return imageRepository.findByShopImageKey(shopId);
+    }
+
+    public List<Image> findShopThumbnails(List<Long> shopIds) {
+        return imageRepository.findThumbnailByShopIds(shopIds);
     }
 }

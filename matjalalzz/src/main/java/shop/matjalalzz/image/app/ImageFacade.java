@@ -29,7 +29,7 @@ public class ImageFacade {
 
     // 해당 식당에 thumbnail
     public String findByShopThumbnail(long shopId) {
-        Optional<Image> optionalImage = imageQueryService.getShopThumbnail(shopId);
+        Optional<Image> optionalImage = imageQueryService.findShopThumbnail(shopId);
        return optionalImage.map(image -> BASE_URL + image.getS3Key()).orElse(null);
     }
 
@@ -37,6 +37,16 @@ public class ImageFacade {
         return imageQueryService.findReviewImagesById(reviewIds).stream().collect(
             Collectors.groupingBy(ReviewImageProjection::getReviewId,
                 Collectors.mapping(v -> BASE_URL + v.getS3Key(), Collectors.toList())
+            ));
+    }
+
+
+    public Map<Long, String> findByShopThumbnails(List<Long> shopIds) {
+        return imageQueryService.findShopThumbnails(shopIds).stream()
+            .collect(Collectors.toMap(
+                Image::getShopId,
+                image -> BASE_URL + image.getS3Key(),
+                (exist, dup) -> exist // 중복 키 발생 시 기존값 유지
             ));
     }
 

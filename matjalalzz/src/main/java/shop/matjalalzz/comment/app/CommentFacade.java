@@ -10,7 +10,10 @@ import shop.matjalalzz.comment.entity.Comment;
 import shop.matjalalzz.comment.mapper.CommentMapper;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.inquiry.app.InquiryFacade;
+import shop.matjalalzz.inquiry.app.query.InquiryQueryService;
 import shop.matjalalzz.inquiry.dao.InquiryRepository;
+import shop.matjalalzz.inquiry.dto.InquiryOneGetResponse;
 import shop.matjalalzz.inquiry.entity.Inquiry;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
@@ -23,7 +26,7 @@ import shop.matjalalzz.user.entity.enums.Role;
 public class CommentFacade {
 
     private final UserService userService;
-    private final InquiryRepository inquiryRepository;
+    private final InquiryQueryService inquiryQueryService;
     private final PartyService partyService;
     private final CommentQueryService commentQueryService;
     private final CommentCommandService commentCommandService;
@@ -50,10 +53,8 @@ public class CommentFacade {
     }
 
     @Transactional
-    public CommentResponse createInquiryComment(CommentCreateRequest request, Long inquiryId,
-        Long writerId) {
-        Inquiry inquiry = inquiryRepository.findById(inquiryId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
+    public CommentResponse createInquiryComment(CommentCreateRequest request, Long inquiryId, Long writerId) {
+        Inquiry inquiry = inquiryQueryService.getOneInquiry(inquiryId).orElseThrow(()->new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
         User user = userService.getUserById(writerId);
 
         // 관리자이거나 자신이 작성한 문의글인 경우 댓글 작성
@@ -63,8 +64,7 @@ public class CommentFacade {
         if (request.parentId() != null) {
             parent = commentQueryService.getComment(request.parentId());
         }
-        Comment comment = CommentMapper.fromInquiryCommentCreateRequest(request, parent, inquiry,
-            user);
+        Comment comment = CommentMapper.fromInquiryCommentCreateRequest(request, parent, inquiry, user);
         Comment result = commentCommandService.save(comment);
         return validateMap(result);
     }
@@ -72,8 +72,7 @@ public class CommentFacade {
     @Transactional(readOnly = true)
     public List<CommentResponse> findCommentsByInquiry(Long inquiryId, Long userId) {
         User user = userService.getUserById(userId);
-        Inquiry inquiry = inquiryRepository.findById(inquiryId)
-            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
+        Inquiry inquiry = inquiryQueryService.getOneInquiry(inquiryId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
 
         // 관리자이거나 자신이 작성한 문의글인 경우 댓글 조회
         adminOrWriter(user, inquiry);

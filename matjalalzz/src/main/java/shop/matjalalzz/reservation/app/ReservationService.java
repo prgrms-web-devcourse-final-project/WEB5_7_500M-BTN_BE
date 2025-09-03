@@ -2,6 +2,8 @@ package shop.matjalalzz.reservation.app;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -13,9 +15,9 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
 import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
+import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -106,5 +108,20 @@ public class ReservationService {
         return reservationRepository.findSummariesByOwnerWithCursor(ownerId, status, cursor,
             pageable);
     }
-}
 
+    @Transactional(readOnly = true)
+    public Reservation findByPartyId(Long partyId) {
+        return reservationRepository.findByPartyId(partyId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Reservation> getMapByPartyIds(List<Long> partyIds) {
+
+        return reservationRepository.findAllByPartyIds(partyIds)
+            .stream()
+            .collect(Collectors.toMap(
+                r -> r.getParty().getId(),
+                r -> r
+            ));
+    }
+}

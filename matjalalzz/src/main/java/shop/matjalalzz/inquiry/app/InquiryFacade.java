@@ -67,7 +67,7 @@ public class InquiryFacade {
 
     // 본인이 작성한 하나의 문의글 조회 (관리자도 조회 가능)
     public InquiryOneGetResponse getOneInquiry(long userId, Long inquiryId) {
-        // 이것도 queryService 필요
+        // 이것도 userQueryService 필요
         User user = userService.getUserById(userId);
         Inquiry inquiry = inquiryQueryService.getOneInquiry(inquiryId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
 
@@ -79,7 +79,6 @@ public class InquiryFacade {
         List<String> imagesUrl = imageFacade.findByInquiryImage(inquiry.getId());
         List<String> imagesPathUrl = imagesUrl.stream().map(path-> BASE_URL  + path ).toList();
         return InquiryMapper.fromInquiry(inquiry, imagesPathUrl);
-
 
     }
 
