@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ import shop.matjalalzz.shop.entity.Approve;
 import shop.matjalalzz.shop.entity.FoodCategory;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.shop.entity.ShopListSort;
+import shop.matjalalzz.shop.event.ShopCreatedEvent;
 import shop.matjalalzz.shop.mapper.ShopMapper;
 import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.user.app.UserService;
@@ -60,6 +62,7 @@ public class ShopFacade {
     private final UserService userService;
     private final ImageQueryService imageQueryService;
     private final ImageCommendService imageCommendService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -99,6 +102,8 @@ public class ShopFacade {
                     throw new BusinessException(ErrorCode.DUPLICATE_SHOP);
                 });
         shopCommendService.createNewShop(newShop);
+
+        eventPublisher.publishEvent(new ShopCreatedEvent(newShop));
 
         return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(), newShop.getId());
     }

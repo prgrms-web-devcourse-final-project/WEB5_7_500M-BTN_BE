@@ -72,7 +72,8 @@ public class CommentFacade {
     @Transactional(readOnly = true)
     public List<CommentResponse> findCommentsByInquiry(Long inquiryId, Long userId) {
         User user = userService.getUserById(userId);
-        Inquiry inquiry = inquiryQueryService.getOneInquiry(inquiryId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
+        Inquiry inquiry = inquiryQueryService.getOneInquiry(inquiryId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FIND_INQUIRY));
 
         // 관리자이거나 자신이 작성한 문의글인 경우 댓글 조회
         adminOrWriter(user, inquiry);

@@ -3,6 +3,7 @@ package shop.matjalalzz.inquiry.app;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import shop.matjalalzz.inquiry.dto.InquiryCreateRequest;
 import shop.matjalalzz.inquiry.dto.InquiryItem;
 import shop.matjalalzz.inquiry.dto.InquiryOneGetResponse;
 import shop.matjalalzz.inquiry.entity.Inquiry;
+import shop.matjalalzz.inquiry.event.InquiryCreateEvent;
 import shop.matjalalzz.inquiry.mapper.InquiryMapper;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -35,6 +37,7 @@ public class InquiryFacade {
     private final CommentQueryService commentQueryService;
     private final UserService userService;
     private final ImageQueryService imageQueryService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -45,6 +48,7 @@ public class InquiryFacade {
         User user = userService.getUserById(userId);
         Inquiry inquiry = InquiryMapper.toInquiry(request, user);
         inquiryCommandService.createNewInquiry(inquiry);
+        eventPublisher.publishEvent(new InquiryCreateEvent(inquiry));
         return preSignedProvider.createInquiryUploadUrls(request.imageCount(), inquiry.getId());
     }
 
