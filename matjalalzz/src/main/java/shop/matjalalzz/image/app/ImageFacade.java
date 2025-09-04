@@ -50,21 +50,4 @@ public class ImageFacade {
             ));
     }
 
-    // 이미지들 객체 조회
-    public List<Image> findByShopAndImage(long shopId){
-        return imageQueryService.findByShopAndImage(shopId);
-    }
-
-    // 이미지들 key 조회
-    public List<String> findByShopAndImageKey(long shopId){
-        return imageQueryService.findByShopAndImageKey(shopId);
-    }
-
-    @Transactional
-    public void deleteAllImages(List<Image> images){
-        imageCommendService.deleteAllImages(images);
-    }
-
-
-
 }
