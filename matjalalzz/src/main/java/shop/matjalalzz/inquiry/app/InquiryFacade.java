@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import shop.matjalalzz.comment.app.CommentQueryService;
 import shop.matjalalzz.comment.dao.CommentRepository;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
@@ -31,7 +32,7 @@ public class InquiryFacade {
     private final InquiryCommandService inquiryCommandService;
     private final InquiryQueryService inquiryQueryService;
     private final PreSignedProvider preSignedProvider;
-    private final CommentRepository commentRepository;
+    private final CommentQueryService commentQueryService;
     private final UserService userService;
     private final ImageQueryService imageQueryService;
 
@@ -57,8 +58,7 @@ public class InquiryFacade {
         }
         List<InquiryItem> inquiryItems =  inquirySlice.stream().map(inquiry ->
         {
-            // 댓글 갯수 조회도 commentQueryService에서 가져오는 형태로 바꿔야 함
-            int answerCount = commentRepository.findAllByInquiryId(inquiry.getId()).size();
+            int answerCount = commentQueryService.findCommentSize(inquiry.getId());
             return InquiryMapper.fromInquiryItem(inquiry, answerCount);
         }).toList();
 

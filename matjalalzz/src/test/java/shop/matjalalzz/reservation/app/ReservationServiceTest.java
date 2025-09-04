@@ -27,7 +27,6 @@ import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.app.ShopFacade;
-import shop.matjalalzz.shop.app.ShopService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.util.TestUtil;
