@@ -23,7 +23,7 @@ import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
-import shop.matjalalzz.shop.app.ShopFacade;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -35,7 +35,7 @@ public class ReviewFacade {
     private final UserService userService;
     private final ReservationService reservationService;
     private final PartyService partyService;
-    private final ShopFacade shopFacade;
+    private final ShopQueryService shopQueryService;
     private final PreSignedProvider preSignedProvider;
     private final ReviewQueryService reviewQueryService;
     private final ReviewCommandService reviewCommandService;
@@ -66,7 +66,7 @@ public class ReviewFacade {
 
         validateReservationPermission(reservation, writerId);
 
-        Shop shop = shopFacade.findShop(request.shopId());
+        Shop shop = shopQueryService.findShop(request.shopId());
 
         reviewCommandService.addShopRating(shop, request.rating());
 

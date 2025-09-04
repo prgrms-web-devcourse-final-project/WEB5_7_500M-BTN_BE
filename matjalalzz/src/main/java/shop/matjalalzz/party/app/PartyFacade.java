@@ -34,7 +34,7 @@ import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.shop.app.ShopFacade;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -46,7 +46,7 @@ public class PartyFacade {
 
     private final PartySchedulerService partySchedulerService;
     private final PartyService partyService;
-    private final ShopFacade shopFacade;
+    private final ShopQueryService shopQueryService;
     private final UserService userService;
     private final ReservationService reservationService;
     private final PartyChatService partyChatService;
@@ -70,7 +70,7 @@ public class PartyFacade {
         }
 
         User user = userService.getUserById(userId);
-        Shop shop = shopFacade.findShop(request.shopId());
+        Shop shop = shopQueryService.findShop(request.shopId());
         Party party = PartyMapper.toEntity(request, shop);
 
         PartyUser host = PartyUser.createHost(party, user);

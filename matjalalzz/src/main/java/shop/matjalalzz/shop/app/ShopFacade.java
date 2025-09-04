@@ -103,9 +103,6 @@ public class ShopFacade {
         return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(), newShop.getId());
     }
 
-    public Shop findShop(long shopId) {return shopQueryService.findShop(shopId);}
-
-    public List<Shop> findByOwnerId(long ownerId) {return shopQueryService.findByOwnerId(ownerId);}
 
     // 등록 된 상태인 식당에 상세 정보
     public ShopDetailResponse findShopDetail(long shopId) {
