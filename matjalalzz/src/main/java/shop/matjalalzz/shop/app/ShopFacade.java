@@ -18,12 +18,11 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
-import shop.matjalalzz.image.app.ImageFacade;
-import shop.matjalalzz.image.app.commend.ImageCommendService;
+import shop.matjalalzz.image.app.command.ImageCommandService;
 import shop.matjalalzz.image.app.query.ImageQueryService;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.review.app.ReviewQueryService;
-import shop.matjalalzz.shop.app.commend.ShopCommendService;
+import shop.matjalalzz.shop.app.command.ShopCommandService;
 import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.dto.AdminFindShopInfo;
 import shop.matjalalzz.shop.dto.ApproveRequest;
@@ -55,13 +54,13 @@ import shop.matjalalzz.user.entity.enums.Role;
 @RequiredArgsConstructor
 @Slf4j
 public class ShopFacade {
-    private final ShopCommendService shopCommendService;
+    private final ShopCommandService shopCommandService;
     private final ShopQueryService shopQueryService;
     private final PreSignedProvider preSignedProvider;
     private final ReviewQueryService reviewQueryService;
     private final UserService userService;
     private final ImageQueryService imageQueryService;
-    private final ImageCommendService imageCommendService;
+    private final ImageCommandService imageCommandService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
@@ -76,7 +75,7 @@ public class ShopFacade {
     // 식당 상태 변경
     @Transactional
     public void approveUpdate(long shopId, ApproveRequest approveRequest){
-        Shop shop = shopCommendService.approveUpdate(shopId, approveRequest);
+        Shop shop = shopCommandService.approveUpdate(shopId, approveRequest);
         // approved 시 사용자의 권한도 식당 사장인 OWNER로 바꿔줘야 함
         if (approveRequest.approve() == Approve.APPROVED) {
             User owner = shop.getUser();
@@ -101,7 +100,7 @@ public class ShopFacade {
             .ifPresent(shop -> {
                     throw new BusinessException(ErrorCode.DUPLICATE_SHOP);
                 });
-        shopCommendService.createNewShop(newShop);
+        shopCommandService.createNewShop(newShop);
 
         eventPublisher.publishEvent(new ShopCreatedEvent(newShop));
 
@@ -152,7 +151,7 @@ public class ShopFacade {
         Shop shop = shopQueryService.findOwnerShop(shopId, user.getId());
         ShopUpdateVo shopUpdateVo = ShopMapper.updateToShop(updateRequest);
 
-        shopCommendService.editShop(shop,shopUpdateVo,user);
+        shopCommandService.editShop(shop,shopUpdateVo,user);
 
         // 기존 이미지들 가져와서 다 지우고 다시 받게 프리사이드 URL 발급
         List<String> imageKeys = imageQueryService.findByShopAndImageKey(shop.getId());
@@ -160,7 +159,7 @@ public class ShopFacade {
             preSignedProvider.deleteObjects(imageKeys);
             //db에 내용도 다 날리게
             List<Image> imagesDB = imageQueryService.findByShopAndImage(shop.getId());
-            imageCommendService.deleteAllImages(imagesDB);
+            imageCommandService.deleteAllImages(imagesDB);
         }
         //새롭게 프리사이드 URL 발급
         return preSignedProvider.createShopUploadUrls(updateRequest.imageCount(), shop.getId());

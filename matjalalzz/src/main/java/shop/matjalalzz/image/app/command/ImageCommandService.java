@@ -1,4 +1,4 @@
-package shop.matjalalzz.image.app.commend;
+package shop.matjalalzz.image.app.command;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import shop.matjalalzz.image.entity.Image;
 
 @Service
 @RequiredArgsConstructor
-public class ImageCommendService {
+public class ImageCommandService {
 
     private final ImageRepository imageRepository;
 

@@ -1,4 +1,4 @@
-package shop.matjalalzz.shop.app.commend;
+package shop.matjalalzz.shop.app.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
-public class ShopCommendService {
+public class ShopCommandService {
 
     private final ShopRepository shopRepository;
 

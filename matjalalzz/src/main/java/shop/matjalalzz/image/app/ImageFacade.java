@@ -7,8 +7,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import shop.matjalalzz.image.app.commend.ImageCommendService;
+import shop.matjalalzz.image.app.command.ImageCommandService;
 import shop.matjalalzz.image.app.query.ImageQueryService;
 import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
 import shop.matjalalzz.image.entity.Image;
@@ -17,7 +16,7 @@ import shop.matjalalzz.image.entity.Image;
 @RequiredArgsConstructor
 public class ImageFacade {
     private final ImageQueryService imageQueryService;
-    private final ImageCommendService imageCommendService;
+    private final ImageCommandService imageCommandService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
