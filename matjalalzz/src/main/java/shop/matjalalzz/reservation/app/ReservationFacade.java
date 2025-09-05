@@ -36,32 +36,7 @@ public class ReservationFacade {
     private final ShopService shopService;
     private final UserService userService;
     private final PartyService partyService;
-
-    // -------------------- Query path --------------------
-
-    @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(
-        Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
-    ) {
-        if (shopId != null) {
-            Shop shop = shopService.shopFind(shopId);
-            if (!shop.getUser().getId().equals(ownerId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
-            var slice = query.findByShopIdWithFilterAndCursor(shopId, status, cursor, size);
-            return toReservationListResponse(slice.getContent(), slice.hasNext());
-        }
-
-        List<Shop> shops = shopService.findByOwnerId(ownerId);
-        if (shops == null || shops.isEmpty()) {
-            throw new BusinessException(ErrorCode.SHOP_NOT_FOUND);
-        }
-
-        List<Long> shopIds = shops.stream().map(Shop::getId).toList();
-        var slice = query.findByShopIdsWithFilterAndCursor(shopIds, status, cursor, size);
-        return toReservationListResponse(slice.getContent(), slice.hasNext());
-    }
-
+    
     @Transactional(readOnly = true)
     public ReservationListResponse getReservationsProjection(
         Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
