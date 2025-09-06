@@ -10,12 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
-import shop.matjalalzz.image.entity.QImage;
 import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.QReview;
 import shop.matjalalzz.shop.entity.QShop;
-import shop.matjalalzz.user.entity.QUser;
 
 @Repository
 @RequiredArgsConstructor
@@ -27,14 +25,11 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
     public Slice<ReviewProjection> findByShopIdAndCursor(Long shopId, Long cursor,
         Pageable pageable) {
         QReview review = QReview.review;
-        QImage image = QImage.image;
-        QUser user = QUser.user;
 
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(review.shop.id.eq(shopId));
         builder.and(cursorDescCondition(cursor));
 
-        // 1. 먼저 리뷰 정보를 중간 DTO로 조회
         List<ReviewProjection> reviewProjections = queryFactory
             .select(Projections.fields(ReviewProjection.class,
                 review.id.as("reviewId"),

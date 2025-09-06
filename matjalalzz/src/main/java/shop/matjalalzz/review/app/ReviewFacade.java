@@ -2,6 +2,7 @@ package shop.matjalalzz.review.app;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
@@ -11,7 +12,8 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
-import shop.matjalalzz.image.app.ImageService;
+import shop.matjalalzz.image.app.query.ImageQueryService;
+import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -35,7 +37,7 @@ import shop.matjalalzz.user.entity.User;
 public class ReviewFacade {
 
     private final UserService userService;
-    private final ImageService imageService;
+    private final ImageQueryService imageQueryService;
     private final ReservationService reservationService;
     private final PartyService partyService;
     private final ShopQueryService shopQueryService;
@@ -92,7 +94,9 @@ public class ReviewFacade {
             .distinct()
             .toList();
         Map<Long, String> userNicknames = userService.getUsersNickname(writerIds);
-        Map<Long, List<String>> reviewImages = imageService.findReviewImagesById(reviewIds);
+        Map<Long, List<String>> reviewImages = imageQueryService.findReviewImagesById(
+            reviewIds).stream().collect(Collectors.groupingBy(ReviewImageProjection::getReviewId,
+            Collectors.mapping(ReviewImageProjection::getS3Key, Collectors.toList())));
         Long nextCursor = null;
         if (reviews.hasNext()) {
             nextCursor = reviews.getContent().getLast().getReviewId();
@@ -128,7 +132,6 @@ public class ReviewFacade {
 
     private void validateReservationPermission(Reservation reservation, Long actorId) {
         if (reservation.getParty() != null) {
-            // Party 프록시를 초기화시키지 않고 PartyUsers조회 -> 쿼리 1개 감소
             List<PartyUser> partyUsers = partyService.getPartyUsers(reservation.getParty().getId());
             List<Long> partyUserIds = partyUsers.stream().map(pu ->
                 pu.getUser().getId()).toList();
