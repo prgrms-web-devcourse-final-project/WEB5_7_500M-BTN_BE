@@ -1,6 +1,5 @@
 package shop.matjalalzz.image.app.query;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

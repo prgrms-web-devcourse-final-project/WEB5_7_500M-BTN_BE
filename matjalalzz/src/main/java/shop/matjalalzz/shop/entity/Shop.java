@@ -20,7 +20,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import shop.matjalalzz.global.common.BaseEntity;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.shop.vo.ShopUpdateVo;
@@ -89,7 +88,6 @@ public class Shop extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "shop_id")
-    @Setter
     private List<Image> images;
 
     @Builder

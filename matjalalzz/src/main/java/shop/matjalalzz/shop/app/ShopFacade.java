@@ -54,6 +54,7 @@ import shop.matjalalzz.user.entity.enums.Role;
 @RequiredArgsConstructor
 @Slf4j
 public class ShopFacade {
+
     private final ShopCommandService shopCommandService;
     private final ShopQueryService shopQueryService;
     private final PreSignedProvider preSignedProvider;
@@ -74,7 +75,7 @@ public class ShopFacade {
 
     // 식당 상태 변경
     @Transactional
-    public void approveUpdate(long shopId, ApproveRequest approveRequest){
+    public void approveUpdate(long shopId, ApproveRequest approveRequest) {
         Shop shop = shopCommandService.approveUpdate(shopId, approveRequest);
         // approved 시 사용자의 권한도 식당 사장인 OWNER로 바꿔줘야 함
         if (approveRequest.approve() == Approve.APPROVED) {
@@ -91,28 +92,33 @@ public class ShopFacade {
 
     // shop 생성
     @Transactional
-    public PreSignedUrlListResponse createNewShop(long userId, ShopCreateRequest shopCreateRequest) {
+    public PreSignedUrlListResponse createNewShop(long userId,
+        ShopCreateRequest shopCreateRequest) {
         //facade 방식 필요
         User user = userService.getUserById(userId);
         Shop newShop = ShopMapper.createToShop(shopCreateRequest, user);
 
-        shopQueryService.newShopCheck(newShop.getBusinessCode(), newShop.getRoadAddress(), newShop.getDetailAddress())
+        shopQueryService.newShopCheck(newShop.getBusinessCode(), newShop.getRoadAddress(),
+                newShop.getDetailAddress())
             .ifPresent(shop -> {
-                    throw new BusinessException(ErrorCode.DUPLICATE_SHOP);
-                });
+                throw new BusinessException(ErrorCode.DUPLICATE_SHOP);
+            });
         shopCommandService.createNewShop(newShop);
 
         eventPublisher.publishEvent(new ShopCreatedEvent(newShop));
 
-        return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(), newShop.getId());
+        return preSignedProvider.createShopUploadUrls(shopCreateRequest.imageCount(),
+            newShop.getId());
     }
 
 
     // 등록 된 상태인 식당에 상세 정보
     public ShopDetailResponse findShopDetail(long shopId) {
-        Shop shop = shopQueryService.findOneShop(shopId).orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
+        Shop shop = shopQueryService.findOneShop(shopId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
         log.info("상점 상세 조회 shopId = {}, shopName = {}", shopId, shop.getShopName());
-        List<String> imageUrllList = Optional.ofNullable(imageQueryService.findByShopAndImage(shop.getId()))
+        List<String> imageUrllList = Optional.ofNullable(
+                imageQueryService.findByShopAndImage(shop.getId()))
             .orElse(List.of())
             .stream()
             .map(image -> BASE_URL + image.getS3Key()).toList();
@@ -146,12 +152,13 @@ public class ShopFacade {
 
     // 식당 수정
     @Transactional
-    public PreSignedUrlListResponse editShop(Long shopId, long userId, ShopUpdateRequest updateRequest) {
+    public PreSignedUrlListResponse editShop(Long shopId, long userId,
+        ShopUpdateRequest updateRequest) {
         User user = userService.getUserById(userId);
         Shop shop = shopQueryService.findOwnerShop(shopId, user.getId());
         ShopUpdateVo shopUpdateVo = ShopMapper.updateToShop(updateRequest);
 
-        shopCommandService.editShop(shop,shopUpdateVo,user);
+        shopCommandService.editShop(shop, shopUpdateVo, user);
 
         // 기존 이미지들 가져와서 다 지우고 다시 받게 프리사이드 URL 발급
         List<String> imageKeys = imageQueryService.findByShopAndImageKey(shop.getId());
@@ -167,15 +174,18 @@ public class ShopFacade {
 
 
     // 거리나 별점순으로 사용자가 상점 조회
-    public ShopsResponse findDistanceOrRatingShops(ShopLocationSearchParam param, String sort, Double distanceOrRating, int size, Long shopId) {
+    public ShopsResponse findDistanceOrRatingShops(ShopLocationSearchParam param, String sort,
+        Double distanceOrRating, int size, Long shopId) {
         log.info("상점 목록 조회");
         double latitude = param.latitude() != null ? param.latitude() : 37.5724; // 기본 좌표값은 종로
         double longitude = param.longitude() != null ? param.longitude() : 126.9794;
         double radius = param.radius() != null ? param.radius() : 3000.0;  // 3km
-        List<FoodCategory> foodCategories = (param.category() != null && !param.category().isEmpty()) ? param.category() : List.of(FoodCategory.values());
+        List<FoodCategory> foodCategories =
+            (param.category() != null && !param.category().isEmpty()) ? param.category()
+                : List.of(FoodCategory.values());
 
-
-        List<ShopsItem> allShopItems = shopQueryService.findDistanceOrRatingShops(latitude, longitude, radius, foodCategories, distanceOrRating, size, sort, shopId);
+        List<ShopsItem> allShopItems = shopQueryService.findDistanceOrRatingShops(latitude,
+            longitude, radius, foodCategories, distanceOrRating, size, sort, shopId);
 
         //이미지만 또 따로 필요하므로 재조합을 해줘야 함
 
@@ -184,18 +194,18 @@ public class ShopFacade {
                 String thumbnail = shopThumbnail.map(image -> BASE_URL + image.getS3Key()).orElse(null);
 
                 return new ShopsItem(
-                item.shopId(),
-                item.shopName(),
-                item.category(),
-                item.roadAddress(),
-                item.detailAddress(),
-                item.latitude(),
-                item.longitude(),
-                item.rating(),
-                thumbnail,
-                item.distance() //마지막 거리 차이값을 cursor 용도로 쓰기 위해
-            );
-        }
+                    item.shopId(),
+                    item.shopName(),
+                    item.category(),
+                    item.roadAddress(),
+                    item.detailAddress(),
+                    item.latitude(),
+                    item.longitude(),
+                    item.rating(),
+                    thumbnail,
+                    item.distance() //마지막 거리 차이값을 cursor 용도로 쓰기 위해
+                );
+            }
         ).collect(Collectors.toCollection(ArrayList::new));
 
         boolean next = shopsItemStream.size() > size;
@@ -235,7 +245,6 @@ public class ShopFacade {
     }
 
 
-
     private ShopPageResponse getShopListByRating(String query, String cursor, int size) {
         Double ratingCursor = null;
         if (cursor != null) {
@@ -247,13 +256,15 @@ public class ShopFacade {
             }
         }
 
-        Slice<Shop> result = shopQueryService.findShopCursorList(ratingCursor, query, Approve.APPROVED, PageRequest.of(0, size), ShopListSort.RATING);
+        Slice<Shop> result = shopQueryService.findShopCursorList(ratingCursor, query,
+            Approve.APPROVED, PageRequest.of(0, size), ShopListSort.RATING);
+        List<Long> shopIds = result.stream().map(Shop::getId).collect(Collectors.toList());
+        List<Image> images = imageQueryService.findShopThumbnails(shopIds);
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getRating());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            List<Image> images = s.getImages();
             if (images.isEmpty()) {
                 return null;
             }
@@ -262,7 +273,6 @@ public class ShopFacade {
         }).toList();
         return ShopMapper.toShopPageResponse(nextCursor, result.getContent(), thumbnailList);
     }
-
 
 
     private ShopPageResponse getShopListByCreatedAt(String query, String cursor, int size) {
@@ -276,13 +286,15 @@ public class ShopFacade {
             }
         }
 
-        Slice<Shop> result = shopQueryService.findShopCursorList(timeCursor, query, Approve.APPROVED, PageRequest.of(0, size), ShopListSort.CREATED_AT);
+        Slice<Shop> result = shopQueryService.findShopCursorList(timeCursor, query,
+            Approve.APPROVED, PageRequest.of(0, size), ShopListSort.CREATED_AT);
+        List<Long> shopIds = result.stream().map(Shop::getId).collect(Collectors.toList());
+        List<Image> images = imageQueryService.findShopThumbnails(shopIds);
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getCreatedAt());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            List<Image> images = s.getImages();
             if (images.isEmpty()) {
                 return null;
             }
@@ -293,15 +305,16 @@ public class ShopFacade {
     }
 
 
-
     private ShopPageResponse getShopListByName(String query, String cursor, int size) {
-        Slice<Shop> result = shopQueryService.findShopCursorList(cursor, query, Approve.APPROVED, PageRequest.of(0, size), ShopListSort.NAME);
+        Slice<Shop> result = shopQueryService.findShopCursorList(cursor, query, Approve.APPROVED,
+            PageRequest.of(0, size), ShopListSort.NAME);
+        List<Long> shopIds = result.stream().map(Shop::getId).collect(Collectors.toList());
+        List<Image> images = imageQueryService.findShopThumbnails(shopIds);
         String nextCursor = null;
         if (result.hasNext()) {
             nextCursor = String.valueOf(result.getContent().getLast().getShopName());
         }
         List<String> thumbnailList = result.getContent().stream().map(s -> {
-            List<Image> images = s.getImages();
             if (images.isEmpty()) {
                 return null;
             }
@@ -310,11 +323,6 @@ public class ShopFacade {
         }).toList();
         return ShopMapper.toShopPageResponse(nextCursor, result.getContent(), thumbnailList);
     }
-
-
-
-
-
 
 
 }

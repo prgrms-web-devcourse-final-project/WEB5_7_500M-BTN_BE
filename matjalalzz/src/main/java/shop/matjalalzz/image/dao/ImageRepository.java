@@ -46,4 +46,5 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
         ORDER BY i.reviewId ASC, i.imageIndex ASC
         """)
     List<ReviewImageProjection> findImageKeyByReviewIds(@Param("reviewIds") List<Long> reviewIds);
+
 }
