@@ -3,7 +3,6 @@ package shop.matjalalzz.tosspay.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record TossPaymentConfirmRequest(
     @NotBlank(message = "결제 키(paymentKey)는 필수 입력값입니다.") @Schema(description = "결제 성공 시 토스에서 쿼리 파라미터로 반환해주는 paymentKey") String paymentKey,

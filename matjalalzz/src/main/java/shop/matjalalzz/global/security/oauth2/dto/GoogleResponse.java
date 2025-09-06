@@ -1,8 +1,7 @@
 package shop.matjalalzz.global.security.oauth2.dto;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GoogleResponse implements OAuth2Response {

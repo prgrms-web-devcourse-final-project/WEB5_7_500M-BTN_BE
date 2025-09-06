@@ -18,7 +18,7 @@ import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.inquiry.app.InquiryService;
+import shop.matjalalzz.inquiry.app.InquiryFacade;
 import shop.matjalalzz.inquiry.dto.InquiryAllGetResponse;
 import shop.matjalalzz.inquiry.dto.InquiryCreateRequest;
 import shop.matjalalzz.inquiry.dto.InquiryOneGetResponse;
@@ -28,7 +28,7 @@ import shop.matjalalzz.inquiry.dto.InquiryOneGetResponse;
 @Tag(name = "고객센터 API", description = "고객센터 관련 API")
 public class InquiryController {
 
-    private final InquiryService inquiryService;
+    private final InquiryFacade inquiryFacade;
 
     @Operation( summary = "고객센터의 문의글 작성", description = """
     제목과 내용을 작성하여 문의글을 작성합니다
@@ -42,7 +42,7 @@ public class InquiryController {
     @PostMapping("/inquiry")
     public BaseResponse<PreSignedUrlListResponse> newInquiry(@AuthenticationPrincipal PrincipalUser principal,
         @RequestBody @Valid InquiryCreateRequest request) {
-        return BaseResponse.ok(inquiryService.newInquiry(principal.getId(), request), BaseStatus.OK);
+        return BaseResponse.ok(inquiryFacade.createNewInquiry(principal.getId(), request), BaseStatus.OK);
     }
 
 
@@ -52,7 +52,7 @@ public class InquiryController {
     public BaseResponse<InquiryAllGetResponse> getAllInquiry(
         @RequestParam(required = false) Long cursor,
         @RequestParam(defaultValue = "10", required = false) int size) {
-        return BaseResponse.ok(inquiryService.getAllInquiry(cursor,size), BaseStatus.OK);
+        return BaseResponse.ok(inquiryFacade.getAllInquiry(cursor,size), BaseStatus.OK);
     }
 
 
@@ -62,7 +62,7 @@ public class InquiryController {
     @GetMapping("/inquiry/{inquiryId}")
     public BaseResponse<InquiryOneGetResponse> getOneInquiry(@AuthenticationPrincipal PrincipalUser principal,
         @PathVariable Long inquiryId) {
-        return BaseResponse.ok(inquiryService.getOneInquiry(principal.getId(),  inquiryId), BaseStatus.OK);
+        return BaseResponse.ok(inquiryFacade.getOneInquiry(principal.getId(),  inquiryId), BaseStatus.OK);
     }
 
 
