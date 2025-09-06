@@ -4,8 +4,6 @@ package shop.matjalalzz.inquiry.mapper;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Slice;
-import shop.matjalalzz.inquiry.dto.InquiryAllGetResponse;
 import shop.matjalalzz.inquiry.dto.InquiryCreateRequest;
 import shop.matjalalzz.inquiry.dto.InquiryItem;
 import shop.matjalalzz.inquiry.dto.InquiryOneGetResponse;

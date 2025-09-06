@@ -16,7 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.image.app.ImageService;
+import shop.matjalalzz.image.app.ImageFacade;
+
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
@@ -33,7 +34,7 @@ import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -45,11 +46,11 @@ public class PartyFacade {
 
     private final PartySchedulerService partySchedulerService;
     private final PartyService partyService;
-    private final ShopService shopService;
+    private final ShopQueryService shopQueryService;
     private final UserService userService;
     private final ReservationService reservationService;
     private final PartyChatService partyChatService;
-    private final ImageService imageService;
+    private final ImageFacade imageFacade;
 
     private final String MAX_ATTEMPTS = "${custom.retry.max-attempts}";
     private final String MAX_DELAY = "${custom.retry.max-delay}";
@@ -69,7 +70,7 @@ public class PartyFacade {
         }
 
         User user = userService.getUserById(userId);
-        Shop shop = shopService.shopFind(request.shopId());
+        Shop shop = shopQueryService.findShop(request.shopId());
         Party party = PartyMapper.toEntity(request, shop);
 
         PartyUser host = PartyUser.createHost(party, user);
@@ -85,7 +86,7 @@ public class PartyFacade {
     public PartyDetailResponse getPartyDetail(Long partyId) {
         Party party = partyService.findByIdWithShop(partyId);
         List<PartyMemberResponse> members = partyService.findMembersByPartyId(partyId);
-        String thumbnailUrl = imageService.getShopThumbnail(party.getShop().getId());
+        String thumbnailUrl = imageFacade.findByShopThumbnail(party.getShop().getId());
 
         return PartyMapper.toDetailResponse(party, thumbnailUrl, members);
     }
@@ -111,7 +112,7 @@ public class PartyFacade {
             .toList();
 
         // 썸네일 이미지 한꺼번에 조회
-        Map<Long, String> thumbMap = imageService.getShopThumbnails(shopIds);
+        Map<Long, String> thumbMap = imageFacade.findByShopThumbnails(shopIds);
 
         List<PartyListResponse> content = parties.stream()
             .map(party -> PartyMapper.toListResponse

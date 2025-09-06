@@ -32,14 +32,13 @@ public interface CommentControllerSpec {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteComment(Long commentId, PrincipalUser principal);
 
-    @Operation(summary = "고객센터 댓글 조회", description = "특정 모임의 댓글 목록을 조회합니다.(Completed)")
+    @Operation(summary = "고객센터 댓글 조회", description = "고객센터의 댓글 목록을 조회합니다.(Completed)")
     @GetMapping("/inquiry/{inquiryId}/comments")
     @ResponseStatus(HttpStatus.OK)
     BaseResponse<List<CommentResponse>> getInquiryComments(Long inquiryId, PrincipalUser principal);
 
-    @Operation(summary = "고객센터 댓글 작성", description = "특정 모임에 댓글을 작성합니다.(Completed)")
+    @Operation(summary = "고객센터 댓글 작성", description = "고객센터에 댓글을 작성합니다.(Completed)")
     @PostMapping("/inquiry/{inquiryId}/comments")
     @ResponseStatus(HttpStatus.CREATED)
-    BaseResponse<Void> createInquiryComment(Long inquiryId, CommentCreateRequest request,
-        PrincipalUser principal);
+    BaseResponse<Void> createInquiryComment(Long inquiryId, CommentCreateRequest request, PrincipalUser principal);
 }

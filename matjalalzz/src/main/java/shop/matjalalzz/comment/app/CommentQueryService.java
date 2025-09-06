@@ -28,4 +28,8 @@ public class CommentQueryService {
     public List<Comment> findCommentsByInquiry(Long inquiryId) {
         return commentRepository.findAllByInquiryId(inquiryId);
     }
+
+    public int findCommentSize(long inquiryId){
+        return commentRepository.findAllByInquiryId(inquiryId).size();
+    }
 }
