@@ -78,4 +78,11 @@ public class ReservationQueryService {
     public boolean existsByShopIdAndReservationAt(Long shopId, LocalDateTime reservedAt) {
         return reservationRepository.existsByShopIdAndReservationAt(shopId, reservedAt);
     }
+
+    public Reservation getByIdWithShopAndOwner(Long reservationId) {
+        return reservationRepository.findByIdWithShopAndOwner(reservationId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+
 }

@@ -78,25 +78,13 @@ public class ReservationFacade {
 
     @Transactional
     public void confirmReservation(Long reservationId, Long ownerId) {
-        Reservation r = reservationQueryService.getReservationById(reservationId);
-        if (!r.getShop().getUser().getId().equals(ownerId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-        if (r.getStatus() != ReservationStatus.PENDING) {
-            throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
-        }
+        Reservation r = validShopAndOwner(reservationId, ownerId);
         reservationCommandService.changeStatus(r, ReservationStatus.CONFIRMED);
     }
 
     @Transactional
     public void refuseReservation(Long reservationId, Long ownerId) {
-        Reservation r = reservationQueryService.getReservationById(reservationId);
-        if (!r.getShop().getUser().getId().equals(ownerId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-        if (r.getStatus() != ReservationStatus.PENDING) {
-            throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
-        }
+        Reservation r = validShopAndOwner(reservationId, ownerId);
         Party party = r.getParty();
         if (party != null) {
             refundPartyReservationFee(party);
@@ -109,7 +97,7 @@ public class ReservationFacade {
 
     @Transactional
     public void cancelReservation(Long reservationId, Long userId) {
-        Reservation r = reservationQueryService.getReservationById(reservationId);
+        Reservation r = reservationQueryService.getByIdWithShopAndOwner(reservationId);
         if (!r.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
@@ -183,6 +171,17 @@ public class ReservationFacade {
     public void refundPartyReservationFee(Party party) {
         int fee = party.getShop().getReservationFee();
         reservationCommandService.refundPartyReservationFee(party.getId(), fee);
+    }
+
+    private Reservation validShopAndOwner(Long reservationId, Long ownerId) {
+        Reservation r = reservationQueryService.getByIdWithShopAndOwner(reservationId);
+        if (!r.getShop().getUser().getId().equals(ownerId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+        if (r.getStatus() != ReservationStatus.PENDING) {
+            throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
+        }
+        return r;
     }
 
 }

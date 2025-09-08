@@ -2,6 +2,7 @@ package shop.matjalalzz.reservation.dao;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -159,5 +160,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         where r.id in :reservationIds
         """)
     void cancelReservationByIds(@Param("reservationIds") List<Long> reservationIds);
+
+    @Query("""
+select r from Reservation r
+join fetch r.shop s
+join fetch s.user u
+where r.id = :reservationId
+""")
+    Optional<Reservation> findByIdWithShopAndOwner(@Param("reservationId") Long reservationId);
 
 }
