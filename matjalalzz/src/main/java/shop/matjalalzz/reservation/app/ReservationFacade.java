@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
@@ -14,11 +14,9 @@ import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.reservation.dto.CreateReservationRequest;
 import shop.matjalalzz.reservation.dto.CreateReservationResponse;
-import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
-import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
-import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
+import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
@@ -36,7 +34,7 @@ public class ReservationFacade {
     private final ShopService shopService;
     private final UserService userService;
     private final PartyService partyService;
-    
+
     @Transactional(readOnly = true)
     public ReservationListResponse getReservationsProjection(
         Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
@@ -49,19 +47,15 @@ public class ReservationFacade {
         }
 
         int sizePlusOne = size + 1;
-        List<ReservationSummaryDto> rows =
-            reservationQueryService.findSummariesByOwnerWithCursor(ownerId, status, cursor, sizePlusOne);
+        Slice<ReservationSummaryProjection> slice =
+            reservationQueryService.findSummariesByOwnerWithCursor(ownerId, status, cursor,
+                sizePlusOne);
 
-        boolean hasNext = rows.size() > size;
-        if (hasNext) {
-            rows = rows.subList(0, size);
-        }
-        Long nextCursor = hasNext ? rows.get(rows.size() - 1).reservationId() : null;
+        Long nextCursor = slice.hasNext() ? slice.getContent().getLast().getReservationId() : null;
 
-        List<ReservationContent> content = ReservationMapper.toReservationProjectionContent(rows);
+        List<ReservationContent> content = ReservationMapper.toReservationProjectionContent(slice);
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
-
 
 
     @Transactional
@@ -146,14 +140,16 @@ public class ReservationFacade {
     public int terminateExpiredReservations() {
         var threshold = LocalDateTime.now().minusDays(1);
         List<Reservation> list =
-            reservationQueryService.findAllByStatusAndReservedAtBefore(ReservationStatus.CONFIRMED, threshold);
+            reservationQueryService.findAllByStatusAndReservedAtBefore(ReservationStatus.CONFIRMED,
+                threshold);
 
         for (Reservation r : list) {
             reservationCommandService.changeStatus(r, ReservationStatus.TERMINATED);
             if (r.getParty() != null) {
                 partyService.terminateParty(r.getParty());
             }
-            reservationCommandService.settleReservationFee(r.getShop().getId(), r.getReservationFee());
+            reservationCommandService.settleReservationFee(r.getShop().getId(),
+                r.getReservationFee());
         }
         return list.size();
     }
@@ -162,7 +158,8 @@ public class ReservationFacade {
     public int refuseExpiredPendingReservations() {
         var threshold = LocalDateTime.now().minusHours(1);
         List<Reservation> list =
-            reservationQueryService.findAllByStatusAndReservedAtBefore(ReservationStatus.PENDING, threshold);
+            reservationQueryService.findAllByStatusAndReservedAtBefore(ReservationStatus.PENDING,
+                threshold);
 
         for (Reservation r : list) {
             if (r.getStatus() == ReservationStatus.PENDING) {

@@ -8,16 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
 import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
-import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>,
+    ReservationRepositoryCustom {
 
     @Query("""
         SELECT r FROM Reservation r
@@ -109,7 +107,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                 )
             )
         """)
-    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
+    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(
+        @Param("userId") Long userId,
         @Param("threshold") LocalDateTime threshold);
 
     @Modifying
@@ -145,8 +144,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         and (:status is null or r.status = :status)
         and (:cursor is null or r.id < :cursor)
         order by r.id desc
-            """)
-    List<ReservationSummaryDto> findSummariesByOwnerWithCursor(
+        """)
+    Slice<ReservationSummaryProjection> findSummariesByOwnerWithCursor(
         @Param("ownerId") Long ownerId,
         @Param("status") ReservationStatus status,
         @Param("cursor") Long cursor,
