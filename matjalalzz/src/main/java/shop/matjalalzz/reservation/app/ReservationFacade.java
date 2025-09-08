@@ -31,8 +31,8 @@ import shop.matjalalzz.user.entity.User;
 @RequiredArgsConstructor
 public class ReservationFacade {
 
-    private final ReservationQueryService query;
-    private final ReservationCommandService command;
+    private final ReservationQueryService reservationQueryService;
+    private final ReservationCommandService reservationCommandService;
     private final ShopService shopService;
     private final UserService userService;
     private final PartyService partyService;
@@ -50,7 +50,7 @@ public class ReservationFacade {
 
         int sizePlusOne = size + 1;
         List<ReservationSummaryDto> rows =
-            query.findSummariesByOwnerWithCursor(ownerId, status, cursor, sizePlusOne);
+            reservationQueryService.findSummariesByOwnerWithCursor(ownerId, status, cursor, sizePlusOne);
 
         boolean hasNext = rows.size() > size;
         if (hasNext) {
@@ -62,12 +62,7 @@ public class ReservationFacade {
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
 
-    @Transactional(readOnly = true)
-    public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
-        var slice = query.findMyReservations(userId, cursor, size); // Slice<MyReservationResponse>
-        Long nextCursor = slice.hasNext() ? slice.getContent().getLast().reservationId() : null;
-        return ReservationMapper.toMyReservationPageResponse(nextCursor, slice);
-    }
+
 
     @Transactional
     public CreateReservationResponse createReservation(Long userId, Long shopId,
@@ -85,7 +80,7 @@ public class ReservationFacade {
         );
         Reservation reservation = ReservationMapper.toEntity(request, reservedAt, shop, user);
 
-        Reservation saved = command.save(reservation);
+        Reservation saved = reservationCommandService.save(reservation);
         user.decreasePoint(reservationFee);
 
         return ReservationMapper.toCreateReservationResponse(saved);
@@ -93,19 +88,19 @@ public class ReservationFacade {
 
     @Transactional
     public void confirmReservation(Long reservationId, Long ownerId) {
-        Reservation r = query.getReservationById(reservationId);
+        Reservation r = reservationQueryService.getReservationById(reservationId);
         if (!r.getShop().getUser().getId().equals(ownerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
         if (r.getStatus() != ReservationStatus.PENDING) {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
         }
-        command.changeStatus(r, ReservationStatus.CONFIRMED);
+        reservationCommandService.changeStatus(r, ReservationStatus.CONFIRMED);
     }
 
     @Transactional
     public void refuseReservation(Long reservationId, Long ownerId) {
-        Reservation r = query.getReservationById(reservationId);
+        Reservation r = reservationQueryService.getReservationById(reservationId);
         if (!r.getShop().getUser().getId().equals(ownerId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
@@ -119,12 +114,12 @@ public class ReservationFacade {
         } else {
             r.getUser().increasePoint(r.getReservationFee());
         }
-        command.changeStatus(r, ReservationStatus.REFUSED);
+        reservationCommandService.changeStatus(r, ReservationStatus.REFUSED);
     }
 
     @Transactional
     public void cancelReservation(Long reservationId, Long userId) {
-        Reservation r = query.getReservationById(reservationId);
+        Reservation r = reservationQueryService.getReservationById(reservationId);
         if (!r.getUser().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
@@ -144,36 +139,21 @@ public class ReservationFacade {
         } else {
             r.getUser().increasePoint(r.getReservationFee());
         }
-        command.changeStatus(r, ReservationStatus.CANCELLED);
-    }
-
-    @Transactional
-    public void cancelReservationForWithdraw(User user) {
-        List<CancelReservationProjection> reservations =
-            query.findAllMyReservationByUserIdForWithdraw(user.getId());
-
-        AtomicInteger total = new AtomicInteger();
-        List<Long> ids = reservations.stream().map(row -> {
-            total.addAndGet(row.getReservationFee());
-            return row.getReservationId();
-        }).toList();
-
-        command.cancelReservations(ids);
-        user.increasePoint(total.get());
+        reservationCommandService.changeStatus(r, ReservationStatus.CANCELLED);
     }
 
     @Transactional
     public int terminateExpiredReservations() {
         var threshold = LocalDateTime.now().minusDays(1);
         List<Reservation> list =
-            query.findAllByStatusAndReservedAtBefore(ReservationStatus.CONFIRMED, threshold);
+            reservationQueryService.findAllByStatusAndReservedAtBefore(ReservationStatus.CONFIRMED, threshold);
 
         for (Reservation r : list) {
-            command.changeStatus(r, ReservationStatus.TERMINATED);
+            reservationCommandService.changeStatus(r, ReservationStatus.TERMINATED);
             if (r.getParty() != null) {
                 partyService.terminateParty(r.getParty());
             }
-            command.settleReservationFee(r.getShop().getId(), r.getReservationFee());
+            reservationCommandService.settleReservationFee(r.getShop().getId(), r.getReservationFee());
         }
         return list.size();
     }
@@ -182,7 +162,7 @@ public class ReservationFacade {
     public int refuseExpiredPendingReservations() {
         var threshold = LocalDateTime.now().minusHours(1);
         List<Reservation> list =
-            query.findAllByStatusAndReservedAtBefore(ReservationStatus.PENDING, threshold);
+            reservationQueryService.findAllByStatusAndReservedAtBefore(ReservationStatus.PENDING, threshold);
 
         for (Reservation r : list) {
             if (r.getStatus() == ReservationStatus.PENDING) {
@@ -193,7 +173,7 @@ public class ReservationFacade {
                 } else {
                     r.getUser().increasePoint(r.getReservationFee());
                 }
-                command.changeStatus(r, ReservationStatus.REFUSED);
+                reservationCommandService.changeStatus(r, ReservationStatus.REFUSED);
             }
         }
         return list.size();
@@ -206,21 +186,10 @@ public class ReservationFacade {
         return ReservationMapper.toReservationListResponse(content, nextCursor);
     }
 
-
-    public Reservation getReservationById(Long id) {
-        Reservation reservation = query.getReservationById(id);
-        return reservation;
-    }
-
     @Transactional
     public void refundPartyReservationFee(Party party) {
         int fee = party.getShop().getReservationFee();
-        command.refundPartyReservationFee(party.getId(), fee);
+        reservationCommandService.refundPartyReservationFee(party.getId(), fee);
     }
 
-    @Transactional
-    public void createPartyReservation(Party party, User host) {
-        Reservation reservation = ReservationMapper.toEntity(party, host);
-        command.save(reservation);
-    }
 }

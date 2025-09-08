@@ -37,6 +37,9 @@ class ReservationServiceTest {
     @InjectMocks
     private ReservationFacade reservationFacade;
 
+    @InjectMocks
+    private ReservationService reservationService;
+
     @Mock
     private ShopService shopService;
 
@@ -255,7 +258,7 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 1L);
                 reservation.changeStatus(ReservationStatus.PENDING);
 
-                given(reservationFacade.getReservationById(1L)).willReturn(reservation);
+                given(reservationService.getReservationById(1L)).willReturn(reservation);
 
                 // when
                 reservationFacade.confirmReservation(reservation.getId(),
