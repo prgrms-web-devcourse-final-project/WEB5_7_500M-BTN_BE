@@ -39,12 +39,8 @@ public class ReservationFacade {
     public ReservationListResponse getReservationsProjection(
         Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
     ) {
-        if (shopId != null) {
-            Shop shop = shopService.shopFind(shopId);
-            if (!shop.getUser().getId().equals(ownerId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
-        }
+
+        shopService.validShop(shopId, ownerId);
 
         int sizePlusOne = size + 1;
         Slice<ReservationSummaryProjection> slice =
