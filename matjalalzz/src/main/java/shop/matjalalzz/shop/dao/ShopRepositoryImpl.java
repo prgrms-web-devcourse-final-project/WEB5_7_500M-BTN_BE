@@ -31,7 +31,7 @@ import shop.matjalalzz.user.entity.QUser;
 
 @Repository
 @RequiredArgsConstructor
-public class ShopQueryDslRepository {
+public class ShopRepositoryImpl implements ShopRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
     QShop shop = QShop.shop;
@@ -39,7 +39,8 @@ public class ShopQueryDslRepository {
     QImage image = QImage.image;
 
 
-    public List<ShopsItem> findAllShops(double latitude, double longitude, double radius
+    @Override
+    public List<ShopsItem> findDistanceOrRatingShopsQdsl(double latitude, double longitude, double radius
         , List<FoodCategory> foodCategories, Double distanceOrRating, int size, String sort,
         Long shopId) {
 
@@ -112,7 +113,7 @@ public class ShopQueryDslRepository {
             .fetch(); // 쿼리를 실행하고 결과를 즉시 리스트(List)로 반환 (List<ShopsItem>로)
     }
 
-
+    @Override
     public AdminFindShopInfo adminFindShop(long shopId) {
 
         Tuple result = queryFactory
@@ -141,7 +142,8 @@ public class ShopQueryDslRepository {
 
     }
 
-    public Slice<Shop> findCursorList(Object cursor, String query, Approve approve,
+    @Override
+    public Slice<Shop> findShopCursorList(Object cursor, String query, Approve approve,
         Pageable pageable, ShopListSort sort) {
         BooleanBuilder condition = new BooleanBuilder();
         JPAQuery<Shop> q = queryFactory.selectFrom(shop);

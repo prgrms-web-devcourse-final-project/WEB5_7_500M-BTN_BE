@@ -17,7 +17,7 @@ import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -29,14 +29,14 @@ import shop.matjalalzz.user.entity.User;
 public class ReservationCommandService {
 
     private final ReservationService reservationService;
-    private final ShopService shopService;
+    private final ShopQueryService shopQueryService;
     private final UserService userService;
     private final PartyService partyService;
 
     public CreateReservationResponse createReservation(
         Long userId, Long shopId, CreateReservationRequest request
     ) {
-        Shop reservationShop = shopService.shopFind(shopId);
+        Shop reservationShop = shopQueryService.findShop(shopId);
         User reservationUser = userService.getUserById(userId);
 
         int reservationFee = reservationShop.getReservationFee() * request.headCount();

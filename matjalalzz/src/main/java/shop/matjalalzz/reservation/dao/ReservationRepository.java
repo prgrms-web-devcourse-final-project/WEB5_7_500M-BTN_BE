@@ -11,9 +11,6 @@ import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
 import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
-import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
-import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
@@ -34,7 +31,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         @Param("cursor") Long cursor,
         Pageable pageable
     );
-
 
     @Query("""
         SELECT r FROM Reservation r
@@ -161,4 +157,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         """)
     void cancelReservationByIds(@Param("reservationIds") List<Long> reservationIds);
 
+    Reservation findByPartyId(Long partyId);
+
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        WHERE r.party.id in :partyIds
+        """)
+    List<Reservation> findAllByPartyIds(@Param("partyIds") List<Long> partyIds);
 }

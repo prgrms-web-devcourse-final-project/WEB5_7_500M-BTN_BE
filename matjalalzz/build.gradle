@@ -98,17 +98,14 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
 
-
     implementation('net.dv8tion:JDA:5.0.0-beta.20') {
         exclude module: 'opus-java'
         exclude module: 'tink'}
 
     implementation "net.ttddyy:datasource-proxy:1.10"
-
     implementation "com.github.gavlyukovskiy:datasource-proxy-spring-boot-starter:1.9.2"
 
     //Querydsl 추가
-    implementation("io.github.openfeign.querydsl:querydsl-core:${queryDslVersion}")
     implementation("io.github.openfeign.querydsl:querydsl-jpa:$queryDslVersion")
     annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:$queryDslVersion:jpa")
 
