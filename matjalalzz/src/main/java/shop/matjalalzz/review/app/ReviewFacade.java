@@ -1,6 +1,7 @@
 package shop.matjalalzz.review.app;
 
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
@@ -10,6 +11,7 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
+import shop.matjalalzz.image.app.query.ImageQueryService;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -17,9 +19,9 @@ import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
-import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
+import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
@@ -39,6 +41,7 @@ public class ReviewFacade {
     private final PreSignedProvider preSignedProvider;
     private final ReviewQueryService reviewQueryService;
     private final ReviewCommandService reviewCommandService;
+    private final ImageQueryService imageQueryService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -90,15 +93,21 @@ public class ReviewFacade {
 
     @Transactional(readOnly = true)
     public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
-        Slice<MyReviewResponse> reviews = reviewQueryService.findReviewPageByUser(userId, cursor,
+        Slice<MyReviewProjection> reviews = reviewQueryService.findReviewPageByUser(userId, cursor,
             size);
 
         Long nextCursor = null;
         if (reviews.hasNext()) {
-            nextCursor = reviews.getContent().getLast().reviewId();
+            nextCursor = reviews.getContent().getLast().getReviewId();
         }
 
-        return ReviewMapper.toMyReviewPageResponse(nextCursor, reviews);
+        List<Long> reviewIds = reviews.getContent().stream().map(MyReviewProjection::getReviewId)
+            .toList();
+
+        Map<Long, List<String>> reviewImages = imageQueryService.findReviewImagesById(
+            reviewIds);
+
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, reviews, reviewImages);
     }
 
     @Transactional(readOnly = true)
