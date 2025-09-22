@@ -40,7 +40,9 @@ public class ReservationFacade {
         Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
     ) {
 
-        shopService.validShop(shopId, ownerId);
+        if(shopId != null){
+            shopService.validShop(shopId, ownerId);
+        }
 
         int sizePlusOne = size + 1;
         Slice<ReservationSummaryProjection> slice =
@@ -169,8 +171,7 @@ public class ReservationFacade {
 
     @Transactional
     public void refundPartyReservationFee(Party party) {
-        int fee = party.getShop().getReservationFee();
-        reservationCommandService.refundPartyReservationFee(party.getId(), fee);
+        reservationCommandService.refundPartyReservationFee(party);
     }
 
     private Reservation validShopAndOwner(Long reservationId, Long ownerId) {

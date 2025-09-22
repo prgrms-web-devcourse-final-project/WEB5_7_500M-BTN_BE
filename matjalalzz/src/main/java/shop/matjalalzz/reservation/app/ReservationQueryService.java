@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
+import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
 import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
@@ -26,22 +27,6 @@ import shop.matjalalzz.reservation.mapper.ReservationMapper;
 public class ReservationQueryService {
 
     private final ReservationRepository reservationRepository;
-
-    public Slice<Reservation> findByShopIdWithFilterAndCursor(
-        Long shopId, ReservationStatus status, Long cursor, int size
-    ) {
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
-        return reservationRepository.findByShopIdWithFilterAndCursor(shopId, status, cursor,
-            pageable);
-    }
-
-    public Slice<Reservation> findByShopIdsWithFilterAndCursor(
-        List<Long> shopIds, ReservationStatus status, Long cursor, int size
-    ) {
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
-        return reservationRepository.findByShopIdsWithFilterAndCursor(shopIds, status, cursor,
-            pageable);
-    }
 
     public Slice<ReservationSummaryProjection> findSummariesByOwnerWithCursor(
         Long ownerId, ReservationStatus status, Long cursor, int sizePlusOne
@@ -74,15 +59,15 @@ public class ReservationQueryService {
         return reservationRepository.findAllMyReservationByUserIdForWithdraw(userId, threshold);
     }
 
-    // 필요 시: 특정 시간대 중복 예약 체크
-    public boolean existsByShopIdAndReservationAt(Long shopId, LocalDateTime reservedAt) {
-        return reservationRepository.existsByShopIdAndReservationAt(shopId, reservedAt);
-    }
-
     public Reservation getByIdWithShopAndOwner(Long reservationId) {
         return reservationRepository.findByIdWithShopAndOwner(reservationId)
             .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 
+    public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
+        Slice<MyReservationResponse> slice = findMyReservations(userId, cursor, size); // Slice<MyReservationResponse>
+        Long nextCursor = slice.hasNext() ? slice.getContent().getLast().reservationId() : null;
+        return ReservationMapper.toMyReservationPageResponse(nextCursor, slice);
+    }
 
 }
