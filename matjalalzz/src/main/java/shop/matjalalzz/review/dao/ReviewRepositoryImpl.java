@@ -13,10 +13,8 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 import shop.matjalalzz.image.entity.QImage;
-import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.QReview;
-import shop.matjalalzz.shop.entity.QShop;
 import shop.matjalalzz.user.entity.QUser;
 
 @Repository
@@ -112,41 +110,6 @@ public class ReviewRepositoryImpl implements CustomReviewRepository {
         } else {
             return null;
         }
-    }
-
-    //TODO: 병합 이후 제거
-    @Override
-    public Slice<MyReviewResponse> findByUserIdAndCursor(Long userId, Long cursor,
-        Pageable pageable) {
-        QReview review = QReview.review;
-        QShop shop = QShop.shop;
-
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(review.writer.id.eq(userId));
-        builder.and(cursorDescCondition(cursor));
-
-        List<MyReviewResponse> reviews = queryFactory
-            .select(Projections.constructor(MyReviewResponse.class,
-                review.id,
-                shop.shopName,
-                review.rating,
-                review.content,
-                review.createdAt,
-                null
-            ))
-            .from(review)
-            .join(review.shop, shop)
-            .where(builder)
-            .orderBy(review.id.desc())
-            .limit(pageable.getPageSize() + 1)
-            .fetch();
-
-        boolean hasNext = reviews.size() > pageable.getPageSize();
-        if (hasNext) {
-            reviews.removeLast();
-        }
-
-        return new SliceImpl<>(reviews, pageable, hasNext);
     }
 
 }

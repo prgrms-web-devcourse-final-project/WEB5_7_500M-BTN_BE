@@ -9,6 +9,7 @@ import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.review.dao.ReviewRepository;
 import shop.matjalalzz.review.dto.MyReviewResponse;
+import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 
@@ -26,10 +27,9 @@ public class ReviewQueryService {
         return reviews;
     }
 
-    public Slice<MyReviewResponse> findReviewPageByUser(Long userId, Long cursor, int size) {
-        Slice<MyReviewResponse> reviews = reviewRepository.findByUserIdAndCursor(userId, cursor,
+    public Slice<MyReviewProjection> findReviewPageByUser(Long userId, Long cursor, int size) {
+        return reviewRepository.findByUserIdAndCursor(userId, cursor,
             PageRequest.of(0, size));
-        return reviews;
     }
 
     public Review getReview(Long reviewId) {
