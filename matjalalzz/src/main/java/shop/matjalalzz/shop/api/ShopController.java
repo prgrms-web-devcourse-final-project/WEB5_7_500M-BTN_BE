@@ -19,7 +19,7 @@ import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.ShopFacade;
 import shop.matjalalzz.shop.dto.ApproveRequest;
 import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopsList;
@@ -38,13 +38,13 @@ import shop.matjalalzz.shop.entity.ShopListSort;
 @Tag(name = "식당 API", description = "식당 관련 API")
 public class ShopController {
 
-    private final ShopService shopService;
+    private final ShopFacade shopFacade;
 
     @Operation(summary = "관리자가 pending 상태인 식당들 리스트를 가져옴", description = "관리자는 등록을 원하는 식당 리스트를 볼 수 있습니다. (Completed)")
     @GetMapping("/admin/shops")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<GetAllPendingShopListResponse> getPendingShop() {
-        return BaseResponse.ok(shopService.adminGetAllPendingShop(), BaseStatus.OK);
+        return BaseResponse.ok(shopFacade.adminFindAllPendingShop(), BaseStatus.OK);
     }
 
     @Operation(summary = "관리자가 식당 등록에 대한 요청을 승인 또는 거절 ", description = "APPROVED(승인) 또는 REJECTED(거절) (Completed)")
@@ -52,7 +52,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public void getPendingShop(@PathVariable Long shopId,
         @RequestBody @Valid ApproveRequest approveRequest) {
-        shopService.approve(shopId, approveRequest);
+        shopFacade.approveUpdate(shopId, approveRequest);
     }
 
 
@@ -60,7 +60,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/admin/shops/{shopId}")
     public BaseResponse<ShopAdminDetailResponse> getShopAdminDetail(@PathVariable Long shopId) {
-        return BaseResponse.ok(shopService.adminGetShop(shopId), BaseStatus.OK);
+        return BaseResponse.ok(shopFacade.adminGetShop(shopId), BaseStatus.OK);
     }
 
     @Operation(summary = "식당 생성", description = """
@@ -75,8 +75,7 @@ public class ShopController {
     public BaseResponse<PreSignedUrlListResponse> createShop(
         @RequestBody @Valid ShopCreateRequest request,
         @AuthenticationPrincipal PrincipalUser principal) {
-        PreSignedUrlListResponse preSignedUrlListResponse = shopService.newShop(principal.getId(),
-            request);
+        PreSignedUrlListResponse preSignedUrlListResponse = shopFacade.createNewShop(principal.getId(), request);
         return BaseResponse.ok(preSignedUrlListResponse, BaseStatus.CREATED);
     }
 
@@ -85,7 +84,7 @@ public class ShopController {
     @GetMapping("/shops/{shopId}")
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopDetailResponse> getDetailShop(@PathVariable Long shopId) {
-        ShopDetailResponse response = shopService.getShop(shopId);
+        ShopDetailResponse response = shopFacade.findShopDetail(shopId);
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
@@ -95,7 +94,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<OwnerShopsList> getOwnerShops(
         @AuthenticationPrincipal PrincipalUser principal) {
-        OwnerShopsList response = shopService.getOwnerShopList(principal.getId());
+        OwnerShopsList response = shopFacade.findOwnerShopList(principal.getId());
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
@@ -105,7 +104,7 @@ public class ShopController {
     @ResponseStatus(HttpStatus.OK)
     public BaseResponse<ShopOwnerDetailResponse> getDetailShopOwner(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal) {
-        ShopOwnerDetailResponse response = shopService.getOwnerShop(shopId, principal.getId());
+        ShopOwnerDetailResponse response = shopFacade.findOwnerShopDetail(shopId, principal.getId());
         return BaseResponse.ok(response, BaseStatus.OK);
     }
 
@@ -116,8 +115,7 @@ public class ShopController {
     public BaseResponse<PreSignedUrlListResponse> updateShop(@PathVariable Long shopId,
         @AuthenticationPrincipal PrincipalUser principal,
         @RequestBody @Valid ShopUpdateRequest shopUpdateRequest) {
-        PreSignedUrlListResponse urlResponse = shopService.editShop(shopId, principal.getId(),
-            shopUpdateRequest);
+        PreSignedUrlListResponse urlResponse = shopFacade.editShop(shopId, principal.getId(), shopUpdateRequest);
         return BaseResponse.ok(urlResponse, BaseStatus.OK);
     }
 
@@ -144,10 +142,11 @@ public class ShopController {
     public BaseResponse<ShopsResponse> getShops(
         @ParameterObject ShopLocationSearchParam param,
         @RequestParam(defaultValue = "distance") String sort, //정렬 기준(근처순, 평점순) (근처순이 기본(distance))
-        @RequestParam(required = false) Long cursor,
+        @RequestParam(required = false) Double distanceOrRating,
+        @RequestParam(required = false) Long shopId,
         @RequestParam(defaultValue = "10") int size) {
 
-        ShopsResponse shops = shopService.getShops(param, sort, cursor, size);
+        ShopsResponse shops = shopFacade.findDistanceOrRatingShops(param, sort, distanceOrRating, size, shopId);
         return BaseResponse.ok(shops, BaseStatus.OK);
     }
 
@@ -161,7 +160,7 @@ public class ShopController {
         @RequestParam(defaultValue = "CREATED_AT") ShopListSort sort,
         @RequestParam(required = false) String cursor,
         @RequestParam(defaultValue = "10") int size) {
-        return BaseResponse.ok(shopService.getShopList(query, sort, cursor, size), BaseStatus.OK);
+        return BaseResponse.ok(shopFacade.getShopList(query, sort, cursor, size), BaseStatus.OK);
     }
 
 

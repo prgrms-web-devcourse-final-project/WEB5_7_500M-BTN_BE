@@ -6,9 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,11 +17,11 @@ import shop.matjalalzz.global.common.BaseResponse;
 import shop.matjalalzz.global.common.BaseStatus;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.tosspay.app.OrderService;
+import shop.matjalalzz.tosspay.app.PaymentService;
 import shop.matjalalzz.tosspay.dto.OrderSaveRequest;
 import shop.matjalalzz.tosspay.dto.PaymentScrollResponse;
 import shop.matjalalzz.tosspay.dto.PaymentSuccessResponse;
 import shop.matjalalzz.tosspay.dto.TossPaymentConfirmRequest;
-import shop.matjalalzz.tosspay.app.PaymentService;
 
 @RestController
 @RequestMapping("/payment")

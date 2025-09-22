@@ -2,6 +2,8 @@ package shop.matjalalzz.reservation.app;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -73,25 +75,9 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public Slice<Reservation> findByShopIdsWithFilterAndCursorQdsl(
-        List<Long> shopIds, ReservationStatus status, Long cursor, Pageable pageable) {
-        return reservationRepository.findByShopIdsWithFilterAndCursorQdsl(
-            shopIds, status, cursor, pageable
-        );
-    }
-
-    @Transactional(readOnly = true)
     public Slice<Reservation> findByShopIdWithFilterAndCursor(
         Long shopId, ReservationStatus status, Long cursor, Pageable pageable) {
         return reservationRepository.findByShopIdWithFilterAndCursor(
-            shopId, status, cursor, pageable
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public Slice<Reservation> findByShopIdWithFilterAndCursorQdsl(
-        Long shopId, ReservationStatus status, Long cursor, Pageable pageable) {
-        return reservationRepository.findByShopIdWithFilterAndCursorQdsl(
             shopId, status, cursor, pageable
         );
     }
@@ -111,18 +97,31 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status, LocalDateTime threshold) {
+    public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status,
+        LocalDateTime threshold) {
         return reservationRepository.findAllByStatusAndReservedAtBefore(status, threshold);
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByStatusAndReservedAtBeforeQdsl(ReservationStatus status, LocalDateTime threshold) {
-        return reservationRepository.findAllByStatusAndReservedAtBeforeQdsl(status, threshold);
+    public List<ReservationSummaryDto> findSummariesByOwnerWithCursor(Long ownerId,
+        ReservationStatus status, Long cursor, Pageable pageable) {
+        return reservationRepository.findSummariesByOwnerWithCursor(ownerId, status, cursor,
+            pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationSummaryDto> findSummariesByOwnerWithCursor(Long ownerId, ReservationStatus status, Long cursor, Pageable pageable) {
-        return reservationRepository.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
+    public Reservation findByPartyId(Long partyId) {
+        return reservationRepository.findByPartyId(partyId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Reservation> getMapByPartyIds(List<Long> partyIds) {
+
+        return reservationRepository.findAllByPartyIds(partyIds)
+            .stream()
+            .collect(Collectors.toMap(
+                r -> r.getParty().getId(),
+                r -> r
+            ));
     }
 }
-

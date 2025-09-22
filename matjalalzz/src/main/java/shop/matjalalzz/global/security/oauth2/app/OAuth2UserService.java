@@ -1,6 +1,7 @@
 package shop.matjalalzz.global.security.oauth2.app;
 
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -18,8 +19,6 @@ import shop.matjalalzz.global.security.oauth2.dto.OAuth2Response;
 import shop.matjalalzz.global.security.oauth2.mapper.OAuth2Mapper;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
-
-import java.util.Optional;
 
 @Slf4j
 @Service

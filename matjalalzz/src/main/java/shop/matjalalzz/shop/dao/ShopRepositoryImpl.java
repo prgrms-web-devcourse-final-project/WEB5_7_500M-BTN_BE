@@ -1,0 +1,224 @@
+package shop.matjalalzz.shop.dao;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.stereotype.Repository;
+import shop.matjalalzz.image.entity.Image;
+import shop.matjalalzz.image.entity.QImage;
+import shop.matjalalzz.shop.dto.AdminFindShopInfo;
+import shop.matjalalzz.shop.dto.ShopsItem;
+import shop.matjalalzz.shop.entity.Approve;
+import shop.matjalalzz.shop.entity.FoodCategory;
+import shop.matjalalzz.shop.entity.QShop;
+import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.entity.ShopListSort;
+import shop.matjalalzz.user.entity.QUser;
+
+@Repository
+@RequiredArgsConstructor
+public class ShopRepositoryImpl implements ShopRepositoryCustom {
+
+    private final JPAQueryFactory queryFactory;
+    QShop shop = QShop.shop;
+    QUser user = QUser.user;
+    QImage image = QImage.image;
+
+
+    @Override
+    public List<ShopsItem> findDistanceOrRatingShopsQdsl(double latitude, double longitude, double radius
+        , List<FoodCategory> foodCategories, Double distanceOrRating, int size, String sort,
+        Long shopId) {
+
+        // 거리 계산 공식
+        NumberExpression<Double> distance = Expressions.numberTemplate(Double.class,
+            "ST_Distance_Sphere(POINT({0}, {1}), POINT({2}, {3}))",
+            longitude, latitude, shop.longitude, shop.latitude
+        );
+
+        // BooleanBuilder는 조건을 유동적으로 붙일 수 있는 객체
+        BooleanBuilder baseCondition = new BooleanBuilder();
+        baseCondition.and(shop.approve.eq(Approve.APPROVED)); // 식당 등록 상태가 APPROVED인 상점만 대상으로 함
+
+        double latDeg = radius / 111_320d; // 1도 ≈ 111.32km
+        double lonDeg = radius / (111_320d * Math.cos(Math.toRadians(latitude)));
+        baseCondition.and(shop.latitude.between(latitude - latDeg, latitude + latDeg));
+        baseCondition.and(shop.longitude.between(longitude - lonDeg, longitude + lonDeg));
+
+        baseCondition.and(distance.loe(radius)); // 반경 필터
+        baseCondition.and(shop.category.in(foodCategories)); // 카테고리들만 가져오기 (선택하지 않으몬 모든 카테고리)
+
+        //커서 조건 설정하는 부분
+        if (distanceOrRating != null && shopId != null) {
+            if ("distance".equals(sort)) {
+                baseCondition.and(distance.gt(
+                            distanceOrRating) //distance 값이 cursor보다 크다 (greater than로 이전 마지막 거리보다 먼 애들을 가져오기 위해)
+                        .or(distance.eq(distanceOrRating).and(shop.id.goe(shopId)))
+                    // 다음 거리거나, 같은 거리 안에서 뒤에 있는 상점만 가져오기
+                );
+            } else if ("rating".equals(sort)) {
+                baseCondition.and(shop.rating.lt(
+                        distanceOrRating) //rating 값이 cursor보다 작다 (작은 값을 기준으로 점점 내려가는 형태로)
+                    .or(shop.rating.eq(distanceOrRating).and(shop.id.gt(shopId)))
+                );
+            }
+        }
+
+        //정렬 조건 설정하는 부분
+        List<OrderSpecifier<?>> orderSpecifiers;
+        if ("rating".equals(sort)) {
+            orderSpecifiers = List.of(
+                shop.rating.desc().nullsLast(),
+                shop.id.asc()
+            );
+        } else {
+            orderSpecifiers = List.of(
+                distance.asc(),
+                shop.id.asc()
+            );
+        }
+
+        //쿼리 실행
+        return queryFactory
+            .select(Projections.constructor(ShopsItem.class,
+                shop.id,
+                shop.shopName,
+                shop.category,
+                shop.roadAddress,
+                shop.detailAddress,
+                shop.latitude,
+                shop.longitude,
+                shop.rating,
+                Expressions.constant(""), // thumbnailUrl이 이 시점에는 없으니 빈 문자열로
+                distance
+            ))
+            .from(shop)
+            .where(baseCondition)
+            .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]))
+            .limit(size + 1) // 다음 페이지 확인을 위한 size+1
+            .fetch(); // 쿼리를 실행하고 결과를 즉시 리스트(List)로 반환 (List<ShopsItem>로)
+    }
+
+    @Override
+    public AdminFindShopInfo adminFindShop(long shopId) {
+
+        Tuple result = queryFactory
+            .select(shop, user)
+            .from(shop)
+            .where(shop.id.eq(shopId))
+            .join(shop.user, user).fetchJoin()
+            .fetchOne();
+
+        if (result == null) {
+            return null;
+        }
+
+        List<String> images = queryFactory
+            .select(image.s3Key)
+            .from(image)
+            .where(image.shopId.eq(shopId))
+            .fetch();
+
+        return new AdminFindShopInfo(
+            result.get(shop),
+            result.get(user),
+            images
+        );
+
+
+    }
+
+    @Override
+    public Slice<Shop> findShopCursorList(Object cursor, String query, Approve approve,
+        Pageable pageable, ShopListSort sort) {
+        BooleanBuilder condition = new BooleanBuilder();
+        JPAQuery<Shop> q = queryFactory.selectFrom(shop);
+
+        processSorting(cursor, sort, condition, q);
+
+        condition.and(shop.approve.eq(approve));
+        condition.and(queryCondition(query));
+
+        List<Shop> shops = q
+            .where(condition)
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+
+        boolean hasNext = processPage(pageable, shops);
+
+        if (!shops.isEmpty()) {
+            List<Long> shopIds = shops.stream()
+                .map(Shop::getId)
+                .toList();
+
+            // TODO: 이미지 정보 조회 분리
+            Map<Long, List<Image>> imageMap = queryFactory
+                .selectFrom(image)
+                .where(image.shopId.in(shopIds))
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(Image::getShopId));
+
+            // Shop에 Image 매핑
+            shops.forEach(shop ->
+                shop.setImages(imageMap.getOrDefault(shop.getId(), List.of())));
+        }
+
+        return new SliceImpl<>(shops, pageable, hasNext);
+    }
+
+    private boolean processPage(Pageable pageable, List<Shop> shops) {
+        boolean hasNext = shops.size() > pageable.getPageSize();
+        if (hasNext) {
+            shops.removeLast();
+        }
+        return hasNext;
+    }
+
+    private BooleanExpression queryCondition(String query) {
+        if (query != null && !query.trim().isEmpty()) {
+            return shop.shopName.containsIgnoreCase(query)
+                .or(shop.description.containsIgnoreCase(query));
+        } else {
+            return null;
+        }
+    }
+
+    private void processSorting(Object cursor, ShopListSort sort, BooleanBuilder condition,
+        JPAQuery<Shop> q) {
+        switch (sort) {
+            case ShopListSort.RATING:
+                if (cursor != null) {
+                    condition.and(shop.rating.lt((Double) cursor));
+                }
+                q.orderBy(shop.rating.desc());
+                break;
+            case ShopListSort.CREATED_AT:
+                if (cursor != null) {
+                    condition.and(shop.createdAt.lt((LocalDateTime) cursor));
+                }
+                q.orderBy(shop.createdAt.desc());
+                break;
+            case ShopListSort.NAME:
+                if (cursor != null) {
+                    condition.and(shop.shopName.gt(cursor.toString()));
+                }
+                q.orderBy(shop.shopName.asc());
+                break;
+        }
+    }
+}

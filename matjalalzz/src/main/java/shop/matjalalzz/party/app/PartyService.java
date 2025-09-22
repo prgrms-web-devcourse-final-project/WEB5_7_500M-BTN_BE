@@ -1,6 +1,5 @@
 package shop.matjalalzz.party.app;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
@@ -18,9 +16,12 @@ import shop.matjalalzz.party.dao.PartyRepository;
 import shop.matjalalzz.party.dao.PartyUserRepository;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyMemberResponse;
+import shop.matjalalzz.party.dto.PartySearchParam;
+import shop.matjalalzz.party.dto.projection.MyPartyProjection;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
+import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.user.entity.User;
 
 @Service
@@ -59,23 +60,28 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<PartyUser> findByUserIdAndPartyId(Long userId, Long partyId) {
+    public Optional<Boolean> findByUserIdAndPartyId(Long userId, Long partyId) {
         return partyUserRepository.findByUserIdAndPartyId(userId, partyId);
     }
 
     @Transactional(readOnly = true)
     public Slice<MyPartyResponse> findByUserIdAndCursor(Long userId, Long cursor, PageRequest of) {
-        return partyRepository.findByUserIdAndCursor(userId, cursor, of);
+        Slice<MyPartyProjection> projections = partyRepository.findByUserIdAndCursor(userId,
+            cursor, of);
+
+        return projections.map(PartyMapper::toMyPartyResponse);
     }
 
     @Transactional(readOnly = true)
-    public Slice<Party> findAll(Specification<Party> spec, Pageable pageable) {
-        return partyRepository.findAll(spec, pageable);
+    public Slice<Party> searchParties(PartySearchParam cond, Pageable pageable) {
+        return partyRepository.searchWithCursor(cond, pageable);
     }
 
     @Transactional(readOnly = true)
-    public List<PartyMemberResponse> findAllByPartyIdToDto(long partyId) {
-        return partyUserRepository.findAllByPartyIdToDto(partyId, BASE_URL);
+    public List<PartyMemberResponse> findMembersByPartyId(long partyId) {
+        return partyUserRepository.findMembersByPartyId(partyId, BASE_URL).stream()
+            .map(PartyMapper::toPartyMemberResponse)
+            .toList();
     }
 
     @Transactional(readOnly = true)
@@ -93,17 +99,13 @@ public class PartyService {
     }
 
     @Transactional(readOnly = true)
-    public List<Party> findAllMyPartyByUserIdForWithdraw(long userId) {
-        LocalDateTime threshold = LocalDateTime.now().plusDays(1);
-
-        // 회원이 파티장이며, 파티가 종료되지 않았고, 파티의 예약이 없거나, 예약일로부터 하루 이상 남은 파티 조회
-        return partyRepository.findAllMyPartyByUserIdForWithdraw(userId, threshold);
+    public List<Party> findAllMyRecruitingParty(long userId) {
+        return partyRepository.findAllMyRecruitingParty(userId);
     }
 
     @Transactional(readOnly = true)
-    public List<Party> findAllParticipatingPartyByUserIdForWithdraw(long userId) {
-        // 회원이 파티원이며, 파티가 종료되지 않았고, 파티의 예약이 없거나 수락되지 않은 상태인 예약인 파티 조회
-        return partyRepository.findAllParticipatingPartyByUserIdForWithdraw(userId);
+    public List<PartyUser> findAllParticipatingParty(long userId) {
+        return partyUserRepository.findAllParticipatingParty(userId);
     }
 
     @Transactional(readOnly = true)
@@ -123,11 +125,17 @@ public class PartyService {
 
     @Transactional(readOnly = true)
     public List<PartyUser> getPartyUsers(Long partyId) {
-        return partyUserRepository.findAllByPartyId(partyId);
+        return partyUserRepository.findAllByPartyIdWithUser(partyId);
     }
 
     @Transactional(readOnly = true)
     public boolean isInParty(Long partyId, Long userId) {
         return partyUserRepository.existsByUserIdAndPartyId(userId, partyId);
+    }
+
+    @Transactional(readOnly = true)
+    public Party findByIdWithShop(Long partyId) {
+        return partyRepository.findByIdWithShop(partyId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 }

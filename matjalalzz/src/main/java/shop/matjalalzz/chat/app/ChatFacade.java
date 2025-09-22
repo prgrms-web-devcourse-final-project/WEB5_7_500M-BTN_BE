@@ -2,11 +2,9 @@ package shop.matjalalzz.chat.app;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import shop.matjalalzz.chat.dao.ChatMessageRepository;
 import shop.matjalalzz.chat.dto.ChatMessagePageResponse;
 import shop.matjalalzz.chat.dto.ChatMessageRequest;
 import shop.matjalalzz.chat.dto.ChatMessageResponse;
@@ -21,22 +19,21 @@ import shop.matjalalzz.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
-public class ChatService {
+public class ChatFacade {
 
-    private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
     private final PartyService partyService;
+    private final ChatCommandService chatCommandService;
+    private final ChatQueryService chatQueryService;
 
     @Transactional
     public ChatMessageResponse sendMessage(ChatMessageRequest request, Long userId) {
-        if (!partyService.isInParty(request.partyId(), userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
+        validateIsInParty(request.partyId(), userId);
 
         User user = userService.getUserById(userId);
         Party party = partyService.findById(request.partyId());
 
-        ChatMessage chatMessage = chatMessageRepository.save(
+        ChatMessage chatMessage = chatCommandService.save(
             ChatMapper.fromChatMessageRequest(request, user, party));
 
         return ChatMapper.toChatMessageResponse(chatMessage);
@@ -44,11 +41,8 @@ public class ChatService {
 
     @Transactional(readOnly = true)
     public ChatMessagePageResponse loadMessages(Long partyId, Long cursor, Long userId) {
-        if (!partyService.isInParty(partyId, userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-        Slice<ChatMessage> chatMessages = chatMessageRepository.findByPartyIdAndCursor(
-            partyId, cursor, PageRequest.of(0, 20));
+        validateIsInParty(partyId, userId);
+        Slice<ChatMessage> chatMessages = chatQueryService.findChatByPartyId(partyId, cursor);
         Long nextCursor = null;
 
         if (chatMessages.hasNext()) {
@@ -63,12 +57,16 @@ public class ChatService {
         if (!partyService.isInParty(partyId, userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
-        return chatMessageRepository.findAllByPartyIdOrderByIdDesc(partyId,
-                PageRequest.of(0, 30))
+        return chatQueryService.findLatestChatByPartyId(partyId)
             .stream()
             .map(ChatMapper::toChatMessageResponse)
             .toList().reversed();
     }
 
-}
+    private void validateIsInParty(Long partyId, Long userId) {
+        if (!partyService.isInParty(partyId, userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
 
+}

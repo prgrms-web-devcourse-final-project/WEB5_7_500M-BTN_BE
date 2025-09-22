@@ -1,5 +1,6 @@
 package shop.matjalalzz.reservation.dao;
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
@@ -10,9 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+import shop.matjalalzz.reservation.dto.MyReservationResponse;
 import shop.matjalalzz.reservation.entity.QReservation;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
+import shop.matjalalzz.shop.entity.QShop;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
 
     private final JPAQueryFactory query;
     private static final QReservation r = QReservation.reservation;
+    private static final QShop s = QShop.shop;
 
     @Override
     public Slice<Reservation> findByShopIdWithFilterAndCursorQdsl(Long shopId, ReservationStatus status, Long cursor, Pageable pageable) {
@@ -40,6 +44,28 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
             .limit(pageable.getPageSize() + 1)
             .fetch();
         return toSlice(list, pageable.getPageSize());
+    }
+
+    @Override
+    public Slice<MyReservationResponse> findByUserIdAndCursorQdsl(Long userId, Long cursor, Pageable pageable) {
+        var list = query
+            .select(Projections.constructor(MyReservationResponse.class,
+                r.id,
+                s.shopName,
+                r.reservedAt,
+                r.headCount,
+                r.reservationFee,
+                r.status
+            ))
+            .from(r)
+            .join(r.shop, s)
+            .where(r.user.id.eq(userId), ltCursor(cursor))
+            .orderBy(r.id.desc())
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+        boolean hasNext = list.size() > pageable.getPageSize();
+        if (hasNext) list = list.subList(0, pageable.getPageSize());
+        return new SliceImpl<>(list, pageable, hasNext);
     }
 
     @Override

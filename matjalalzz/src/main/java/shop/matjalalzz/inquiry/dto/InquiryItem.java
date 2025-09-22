@@ -1,7 +1,6 @@
 package shop.matjalalzz.inquiry.dto;
 
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
 

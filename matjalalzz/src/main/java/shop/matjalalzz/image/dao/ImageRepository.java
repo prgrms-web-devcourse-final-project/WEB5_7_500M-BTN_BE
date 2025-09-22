@@ -1,7 +1,9 @@
 package shop.matjalalzz.image.dao;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,19 +12,32 @@ import shop.matjalalzz.image.entity.Image;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
+    @Query(" select i.s3Key from Image i where i.shopId = :shopId order by i.imageIndex asc, i.id asc")
+    List<String> findS3Keys(@Param("shopId") Long shopId, Pageable pageable);
+
+
     List<Image> findByShopIdOrderByImageIndexAsc(long shopId);
 
     @Query("select i.s3Key from Image i where i.shopId =:shopId")
-    List<String> findByShopImage(@Param("shopId") long shopId);
+    List<String> findByShopImageKey(@Param("shopId") long shopId);
 
     @Query("select i.s3Key from Image i where i.inquiryId =:inquiryId")
     List<String> findByInquiryImage(@Param("inquiryId") long inquiryId);
 
     List<Image> findByShopId(Long id);
 
+    Optional<Image> findFirstByShopId(Long id);
+
     void deleteByS3Key(String s3Key);
 
     Optional<Image> findByShopIdAndImageIndex(Long shopId, long imageIndex);
+
+    @Query("""
+        select i
+        from Image i
+        where i.shopId in :shopIds and i.imageIndex=0
+        """)
+    List<Image> findThumbnailByShopIds(@Param("shopIds") Collection<Long> shopIds);
 
     @Query("""
         SELECT i.reviewId AS reviewId, i.s3Key AS s3Key

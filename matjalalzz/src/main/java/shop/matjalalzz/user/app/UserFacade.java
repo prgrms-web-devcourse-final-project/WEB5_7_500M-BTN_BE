@@ -18,12 +18,12 @@ import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.reservation.app.ReservationFacade;
-import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 import shop.matjalalzz.user.dto.OAuthSignUpRequest;
 import shop.matjalalzz.user.dto.SignUpRequest;
+import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.user.entity.enums.Role;
 import shop.matjalalzz.user.mapper.UserMapper;
@@ -126,8 +126,9 @@ public class UserFacade {
         User user = userService.getUserById(userId);
 
         String key = StringUtils.removeStart(request.profileKey(), baseUrl);
+        String previousKey = user.getProfileKey();
 
-        if (!key.equals(user.getProfileKey())) {
+        if (previousKey != null && !key.equals(previousKey)) {
             preSignedProvider.deleteObject(user.getProfileKey());
         }
 

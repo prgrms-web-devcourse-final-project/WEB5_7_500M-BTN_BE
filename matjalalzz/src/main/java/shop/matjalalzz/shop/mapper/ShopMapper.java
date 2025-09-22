@@ -2,8 +2,10 @@ package shop.matjalalzz.shop.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import shop.matjalalzz.shop.dto.AdminFindShopInfo;
 import shop.matjalalzz.shop.dto.GetAllPendingShopListResponse;
 import shop.matjalalzz.shop.dto.OwnerShopItem;
 import shop.matjalalzz.shop.dto.PendingShop;
@@ -11,12 +13,13 @@ import shop.matjalalzz.shop.dto.ShopAdminDetailResponse;
 import shop.matjalalzz.shop.dto.ShopCreateRequest;
 import shop.matjalalzz.shop.dto.ShopDetailResponse;
 import shop.matjalalzz.shop.dto.ShopOwnerDetailResponse;
-import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.shop.dto.ShopPageResponse;
 import shop.matjalalzz.shop.dto.ShopPageResponse.ShopElementResponse;
 import shop.matjalalzz.shop.dto.ShopUpdateRequest;
 import shop.matjalalzz.shop.dto.ShopsItem;
+import shop.matjalalzz.shop.dto.projection.OwnerShopProjection;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.vo.ShopUpdateVo;
 import shop.matjalalzz.user.entity.User;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -163,31 +166,54 @@ public class ShopMapper {
 
     }
 
-    public static ShopAdminDetailResponse shopToShopAdminDetailResponse (Shop shop, List<String> images, User user) {
+    public static ShopAdminDetailResponse shopToShopAdminDetailResponse (AdminFindShopInfo shopDetail, String baseUrl) {
         return ShopAdminDetailResponse.builder()
-            .userId(user.getId())
-            .name(user.getName())
-            .nickName(user.getName())
-            .shopId(shop.getId())
-            .shopName(shop.getShopName())
-            .latitude(shop.getLatitude())
-            .longitude(shop.getLongitude())
-            .category(shop.getCategory())
-            .description(shop.getDescription())
-            .roadAddress(shop.getRoadAddress())
-            .detailAddress(shop.getDetailAddress())
-            .tel(shop.getTel())
-            .openTime(shop.getOpenTime())
-            .closeTime(shop.getCloseTime())
-            .rating(shop.getRating())
-            .reservationFee(shop.getReservationFee())
-            .images(images)
-            .businessCode(shop.getBusinessCode())
-            .approve(shop.getApprove())
+            .userId(shopDetail.owner().getId())
+            .name(shopDetail.owner().getName())
+            .nickName(shopDetail.owner().getName())
+            .shopId(shopDetail.shop().getId())
+            .shopName(shopDetail.shop().getShopName())
+            .latitude(shopDetail.shop().getLatitude())
+            .longitude(shopDetail.shop().getLongitude())
+            .category(shopDetail.shop().getCategory())
+            .description(shopDetail.shop().getDescription())
+            .roadAddress(shopDetail.shop().getRoadAddress())
+            .detailAddress(shopDetail.shop().getDetailAddress())
+            .tel(shopDetail.shop().getTel())
+            .openTime(shopDetail.shop().getOpenTime())
+            .closeTime(shopDetail.shop().getCloseTime())
+            .rating(shopDetail.shop().getRating())
+            .reservationFee(shopDetail.shop().getReservationFee())
+            .images(Optional.ofNullable(shopDetail.images()).orElse(List.of()).stream().map(s -> baseUrl + s).toList())
+            .businessCode(shopDetail.shop().getBusinessCode())
+            .approve(shopDetail.shop().getApprove())
             .build();
-
-
     }
+
+//    public static ShopAdminDetailResponse shopToShopAdminDetailResponse (Shop shop, List<String> images, User user, String baseUrl) {
+//        return ShopAdminDetailResponse.builder()
+//            .userId(user.getId())
+//            .name(user.getName())
+//            .nickName(user.getName())
+//            .shopId(shop.getId())
+//            .shopName(shop.getShopName())
+//            .latitude(shop.getLatitude())
+//            .longitude(shop.getLongitude())
+//            .category(shop.getCategory())
+//            .description(shop.getDescription())
+//            .roadAddress(shop.getRoadAddress())
+//            .detailAddress(shop.getDetailAddress())
+//            .tel(shop.getTel())
+//            .openTime(shop.getOpenTime())
+//            .closeTime(shop.getCloseTime())
+//            .rating(shop.getRating())
+//            .reservationFee(shop.getReservationFee())
+//            .images(Optional.ofNullable(images).orElse(List.of()).stream().map(s -> baseUrl + s).toList())
+//            .businessCode(shop.getBusinessCode())
+//            .approve(shop.getApprove())
+//            .build();
+//
+//    }
 
     public static GetAllPendingShopListResponse getAllPendingShopResponse(List<Shop> shopList) {
         List<PendingShop> pendingShopList = shopList.stream().map(ShopMapper::shopToPendingShop).toList();
@@ -209,5 +235,16 @@ public class ShopMapper {
     }
 
 
-
+    public static OwnerShopItem ownerRowToItem(OwnerShopProjection ownerShop, String baseUrl) {
+       return OwnerShopItem.builder()
+            .shopId(ownerShop.getShopId())
+            .shopName(ownerShop.getShopName())
+            .category(ownerShop.getFoodCategory())
+            .roadAddress(ownerShop.getRoadAddress())
+            .detailAddress(ownerShop.getDetailAddress())
+            .rating(ownerShop.getRating())
+            .approve(ownerShop.getApprove())
+            .thumbnailUrl(baseUrl +ownerShop.getFirstS3Key())
+            .build();
+    }
 }
