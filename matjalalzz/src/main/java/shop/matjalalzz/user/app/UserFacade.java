@@ -17,7 +17,7 @@ import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.party.app.PartyFacade;
-import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.app.ReservationCommandService;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
@@ -39,7 +39,7 @@ public class UserFacade {
     private final PreSignedProvider preSignedProvider;
     private final TokenService tokenService;
     private final PartyFacade partyFacade;
-    private final ReservationService reservationService;
+    private final ReservationCommandService reservationCommandService;
 
     @Value("${custom.jwt.token-validity-time.refresh}")
     private int refreshTokenValiditySeconds;
@@ -153,7 +153,7 @@ public class UserFacade {
 
         partyFacade.deletePartyForWithdraw(user); // 본인이 파티장인 파티 중 해체 가능한 파티 처리
         partyFacade.quitPartyForWithdraw(user); // 본인이 파티참가자인 파티 중 탈퇴 가능한 파티 처리
-        reservationService.cancelReservationForWithdraw(user); // 취소 가능한 예약 처리
+        reservationCommandService.cancelReservationForWithdraw(user); // 취소 가능한 예약 처리
 
         tokenService.deleteRefreshToken(foundRefreshToken); // 리프레시 토큰 제거
 
