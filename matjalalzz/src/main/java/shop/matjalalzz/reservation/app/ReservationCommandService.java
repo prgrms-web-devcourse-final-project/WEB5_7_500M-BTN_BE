@@ -109,7 +109,7 @@ public class ReservationCommandService {
     }
 
     public int terminateExpiredReservations() {
-        LocalDateTime threshold = LocalDateTime.now().minusDays(1);
+        LocalDateTime threshold = LocalDateTime.now();
         List<Reservation> toTerminate = reservationService.findAllByStatusAndReservedAtBefore(
             ReservationStatus.CONFIRMED, threshold
         );
@@ -128,7 +128,7 @@ public class ReservationCommandService {
     }
 
     public int refuseExpiredPendingReservations() {
-        LocalDateTime threshold = LocalDateTime.now().minusHours(1);
+        LocalDateTime threshold = LocalDateTime.now();
         List<Reservation> toRefuse = reservationService
             .findAllByStatusAndReservedAtBefore(ReservationStatus.PENDING, threshold);
 
