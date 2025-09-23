@@ -69,7 +69,7 @@ public class ReviewFacade {
 
         validateReservationPermission(reservation, writerId);
 
-        Shop shop = shopQueryService.findShop(request.shopId());
+        Shop shop = reservation.getShop();
 
         reviewCommandService.addShopRating(shop, request.rating());
 
