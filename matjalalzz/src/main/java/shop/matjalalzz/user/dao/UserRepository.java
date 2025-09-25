@@ -7,9 +7,10 @@ import org.springframework.data.repository.query.Param;
 import shop.matjalalzz.user.dto.projection.LoginUserProjection;
 import shop.matjalalzz.user.entity.User;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, CustomUserRepository {
 
     Optional<User> findByOauthId(String oauthId);
+
     Optional<User> findByEmail(String email);
 
     @Query("""

@@ -2,6 +2,7 @@ package shop.matjalalzz.review.app;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Slice;
@@ -12,6 +13,7 @@ import shop.matjalalzz.global.exception.domain.ErrorCode;
 import shop.matjalalzz.global.s3.app.PreSignedProvider;
 import shop.matjalalzz.global.s3.dto.PreSignedUrlListResponse;
 import shop.matjalalzz.image.app.query.ImageQueryService;
+import shop.matjalalzz.image.dto.projection.ReviewImageProjection;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
@@ -19,9 +21,9 @@ import shop.matjalalzz.reservation.app.ReservationService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
+import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
-import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.review.mapper.ReviewMapper;
@@ -35,13 +37,13 @@ import shop.matjalalzz.user.entity.User;
 public class ReviewFacade {
 
     private final UserService userService;
+    private final ImageQueryService imageQueryService;
     private final ReservationService reservationService;
     private final PartyService partyService;
     private final ShopQueryService shopQueryService;
     private final PreSignedProvider preSignedProvider;
     private final ReviewQueryService reviewQueryService;
     private final ReviewCommandService reviewCommandService;
-    private final ImageQueryService imageQueryService;
 
     @Value("${aws.credentials.AWS_BASE_URL}")
     private String BASE_URL;
@@ -69,7 +71,7 @@ public class ReviewFacade {
 
         validateReservationPermission(reservation, writerId);
 
-        Shop shop = reservation.getShop();
+        Shop shop = shopQueryService.findShop(request.shopId());
 
         reviewCommandService.addShopRating(shop, request.rating());
 
@@ -83,31 +85,38 @@ public class ReviewFacade {
     public ReviewPageResponse findReviewPageByShop(Long shopId, Long cursor, int size) {
         Slice<ReviewProjection> reviews = reviewQueryService.findReviewPageByShop(shopId, cursor,
             size);
+        List<Long> reviewIds = reviews.stream()
+            .map(ReviewProjection::getReviewId)
+            .toList();
+
+        List<Long> writerIds = reviews.stream()
+            .map(ReviewProjection::getWriterId)
+            .distinct()
+            .toList();
+        Map<Long, String> userNicknames = userService.getUsersNickname(writerIds);
+        Map<Long, List<String>> reviewImages = imageQueryService.findReviewImagesById(
+            reviewIds).stream().collect(Collectors.groupingBy(ReviewImageProjection::getReviewId,
+            Collectors.mapping(ReviewImageProjection::getS3Key, Collectors.toList())));
         Long nextCursor = null;
         if (reviews.hasNext()) {
             nextCursor = reviews.getContent().getLast().getReviewId();
         }
         return ReviewMapper.toReviewPageResponseFromProjection(nextCursor, reviews.getContent(),
+            userNicknames, reviewImages,
             BASE_URL);
     }
 
     @Transactional(readOnly = true)
     public MyReviewPageResponse findMyReviewPage(Long userId, Long cursor, int size) {
-        Slice<MyReviewProjection> reviews = reviewQueryService.findReviewPageByUser(userId, cursor,
+        Slice<MyReviewResponse> reviews = reviewQueryService.findReviewPageByUser(userId, cursor,
             size);
 
         Long nextCursor = null;
         if (reviews.hasNext()) {
-            nextCursor = reviews.getContent().getLast().getReviewId();
+            nextCursor = reviews.getContent().getLast().reviewId();
         }
 
-        List<Long> reviewIds = reviews.getContent().stream().map(MyReviewProjection::getReviewId)
-            .toList();
-
-        Map<Long, List<String>> reviewImages = imageQueryService.findReviewImagesById(
-            reviewIds);
-
-        return ReviewMapper.toMyReviewPageResponse(nextCursor, reviews, reviewImages);
+        return ReviewMapper.toMyReviewPageResponse(nextCursor, reviews);
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +132,6 @@ public class ReviewFacade {
 
     private void validateReservationPermission(Reservation reservation, Long actorId) {
         if (reservation.getParty() != null) {
-            // Party 프록시를 초기화시키지 않고 PartyUsers조회 -> 쿼리 1개 감소
             List<PartyUser> partyUsers = partyService.getPartyUsers(reservation.getParty().getId());
             List<Long> partyUserIds = partyUsers.stream().map(pu ->
                 pu.getUser().getId()).toList();

@@ -11,14 +11,11 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
-import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.image.entity.QImage;
 import shop.matjalalzz.shop.dto.AdminFindShopInfo;
 import shop.matjalalzz.shop.dto.ShopsItem;
@@ -40,7 +37,8 @@ public class ShopRepositoryImpl implements ShopRepositoryCustom {
 
 
     @Override
-    public List<ShopsItem> findDistanceOrRatingShopsQdsl(double latitude, double longitude, double radius
+    public List<ShopsItem> findDistanceOrRatingShopsQdsl(double latitude, double longitude,
+        double radius
         , List<FoodCategory> foodCategories, Double distanceOrRating, int size, String sort,
         Long shopId) {
 
@@ -159,24 +157,6 @@ public class ShopRepositoryImpl implements ShopRepositoryCustom {
             .fetch();
 
         boolean hasNext = processPage(pageable, shops);
-
-        if (!shops.isEmpty()) {
-            List<Long> shopIds = shops.stream()
-                .map(Shop::getId)
-                .toList();
-
-            // TODO: 이미지 정보 조회 분리
-            Map<Long, List<Image>> imageMap = queryFactory
-                .selectFrom(image)
-                .where(image.shopId.in(shopIds))
-                .fetch()
-                .stream()
-                .collect(Collectors.groupingBy(Image::getShopId));
-
-            // Shop에 Image 매핑
-            shops.forEach(shop ->
-                shop.setImages(imageMap.getOrDefault(shop.getId(), List.of())));
-        }
 
         return new SliceImpl<>(shops, pageable, hasNext);
     }

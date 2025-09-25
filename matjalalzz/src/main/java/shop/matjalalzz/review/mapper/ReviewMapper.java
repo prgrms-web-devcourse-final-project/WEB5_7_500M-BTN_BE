@@ -32,14 +32,14 @@ public class ReviewMapper {
     }
 
     public static ReviewResponse toReviewResponseFromProjection(ReviewProjection review,
-        String baseURL) {
+        String nickname, List<String> images, String baseURL) {
         return ReviewResponse.builder()
             .reviewId(review.getReviewId())
-            .userNickname(review.getUserNickname())
+            .userNickname(nickname)
             .rating(review.getRating())
             .content(review.getContent())
             .createdAt(review.getCreatedAt())
-            .images(review.getImages().stream().map(i -> baseURL + i).toList())
+            .images(images.stream().map(i -> baseURL + i).toList())
             .build();
     }
 
@@ -52,11 +52,15 @@ public class ReviewMapper {
     }
 
     public static ReviewPageResponse toReviewPageResponseFromProjection(Long nextCursor,
-        List<ReviewProjection> reviews,
+        List<ReviewProjection> reviews, Map<Long, String> nicknames, Map<Long, List<String>> images,
         String baseURL) {
         return ReviewPageResponse.builder()
             .nextCursor(nextCursor)
-            .content(reviews.stream().map(r -> toReviewResponseFromProjection(r, baseURL)).toList())
+            .content(reviews.stream().map(r -> {
+                String nickname = nicknames.get(r.getReviewId());
+                List<String> imageList = images.get(r.getReviewId());
+                return toReviewResponseFromProjection(r, nickname, imageList, baseURL);
+            }).toList())
             .build();
     }
 
