@@ -11,6 +11,7 @@ import shop.matjalalzz.review.dto.MyReviewResponse;
 import shop.matjalalzz.review.dto.ReviewCreateRequest;
 import shop.matjalalzz.review.dto.ReviewPageResponse;
 import shop.matjalalzz.review.dto.ReviewResponse;
+import shop.matjalalzz.review.dto.projection.MyReviewProjection;
 import shop.matjalalzz.review.dto.projection.ReviewProjection;
 import shop.matjalalzz.review.entity.Review;
 import shop.matjalalzz.shop.entity.Shop;
@@ -63,12 +64,26 @@ public class ReviewMapper {
             .build();
     }
 
+    public static MyReviewResponse toMyReviewResponse(MyReviewProjection view, List<String> reviewImages) {
+        return MyReviewResponse.builder()
+            .reviewId(view.getReviewId())
+            .shopName(view.getShopName())
+            .rating(view.getRating())
+            .content(view.getContent())
+            .createdAt(view.getCreatedAt())
+            .images(reviewImages)
+            .build();
+    }
+
     public static MyReviewPageResponse toMyReviewPageResponse(Long nextCursor,
-        Slice<MyReviewResponse> reviews) {
+        Slice<MyReviewProjection> reviews, Map<Long, List<String>> reviewImages) {
+        List<MyReviewResponse> responses = reviews.stream()
+            .map(v -> toMyReviewResponse(v, reviewImages.get(v.getReviewId())))
+            .toList();
 
         return MyReviewPageResponse.builder()
             .nextCursor(nextCursor)
-            .content(reviews.getContent())
+            .content(responses)
             .build();
     }
 

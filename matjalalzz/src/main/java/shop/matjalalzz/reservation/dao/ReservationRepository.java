@@ -2,6 +2,7 @@ package shop.matjalalzz.reservation.dao;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +15,8 @@ import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
+public interface ReservationRepository extends JpaRepository<Reservation, Long>,
+    ReservationRepositoryCustom {
 
     @Query("""
         SELECT r FROM Reservation r
@@ -105,7 +107,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
                 )
             )
         """)
-    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(@Param("userId") Long userId,
+    List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(
+        @Param("userId") Long userId,
         @Param("threshold") LocalDateTime threshold);
 
     @Modifying
@@ -141,7 +144,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         and (:status is null or r.status = :status)
         and (:cursor is null or r.id < :cursor)
         order by r.id desc
-            """)
+        """)
     List<ReservationSummaryDto> findSummariesByOwnerWithCursor(
         @Param("ownerId") Long ownerId,
         @Param("status") ReservationStatus status,
@@ -165,4 +168,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         WHERE r.party.id in :partyIds
         """)
     List<Reservation> findAllByPartyIds(@Param("partyIds") List<Long> partyIds);
+
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        JOIN FETCH r.shop
+        WHERE r.id = :reservationId
+        """)
+    Optional<Reservation> findReservationWithShopById(@Param("reservationId") Long reservationId);
 }

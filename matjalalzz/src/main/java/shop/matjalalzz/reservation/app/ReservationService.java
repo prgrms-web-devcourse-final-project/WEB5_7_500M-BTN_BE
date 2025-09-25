@@ -97,6 +97,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
+    public Reservation getReservationWithShopById(Long reservationId) {
+        return reservationRepository.findReservationWithShopById(reservationId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByStatusAndReservedAtBefore(ReservationStatus status,
         LocalDateTime threshold) {
         return reservationRepository.findAllByStatusAndReservedAtBefore(status, threshold);
