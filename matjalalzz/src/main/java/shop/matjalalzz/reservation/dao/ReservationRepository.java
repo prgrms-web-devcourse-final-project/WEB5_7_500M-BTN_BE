@@ -34,7 +34,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         Pageable pageable
     );
 
-
     @Query("""
         SELECT r FROM Reservation r
         JOIN FETCH r.shop s
@@ -169,4 +168,21 @@ where r.id = :reservationId
 """)
     Optional<Reservation> findByIdWithShopAndOwner(@Param("reservationId") Long reservationId);
 
+
+    Reservation findByPartyId(Long partyId);
+
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        WHERE r.party.id in :partyIds
+        """)
+    List<Reservation> findAllByPartyIds(@Param("partyIds") List<Long> partyIds);
+
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        JOIN FETCH r.shop
+        WHERE r.id = :reservationId
+        """)
+    Optional<Reservation> findReservationWithShopById(@Param("reservationId") Long reservationId);
 }

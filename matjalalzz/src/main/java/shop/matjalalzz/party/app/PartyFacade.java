@@ -2,16 +2,13 @@ package shop.matjalalzz.party.app;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -19,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.chat.app.PartyChatService;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
-import shop.matjalalzz.image.app.ImageService;
-import shop.matjalalzz.party.dao.PartySpecification;
+import shop.matjalalzz.image.app.ImageFacade;
+
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
 import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.dto.PartyCreateRequest;
@@ -35,9 +32,10 @@ import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
 import shop.matjalalzz.reservation.app.ReservationCommandService;
+import shop.matjalalzz.reservation.app.ReservationQueryService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -49,11 +47,12 @@ public class PartyFacade {
 
     private final PartySchedulerService partySchedulerService;
     private final PartyService partyService;
-    private final ShopService shopService;
+    private final ShopQueryService shopQueryService;
     private final UserService userService;
     private final PartyChatService partyChatService;
-    private final ImageService imageService;
     private final ReservationCommandService reservationCommandService;
+    private final ReservationQueryService reservationQueryService;
+    private final ImageFacade imageFacade;
 
     private final String MAX_ATTEMPTS = "${custom.retry.max-attempts}";
     private final String MAX_DELAY = "${custom.retry.max-delay}";
@@ -73,7 +72,7 @@ public class PartyFacade {
         }
 
         User user = userService.getUserById(userId);
-        Shop shop = shopService.shopFind(request.shopId());
+        Shop shop = shopQueryService.findShop(request.shopId());
         Party party = PartyMapper.toEntity(request, shop);
 
         PartyUser host = PartyUser.createHost(party, user);
@@ -87,35 +86,39 @@ public class PartyFacade {
 
     @Transactional(readOnly = true)
     public PartyDetailResponse getPartyDetail(Long partyId) {
-        Party party = partyService.findById(partyId);
-
-        List<PartyMemberResponse> members = partyService.findAllByPartyIdToDto(partyId);
-
-        String thumbnailUrl = imageService.getShopThumbnail(party.getShop().getId());
+        Party party = partyService.findByIdWithShop(partyId);
+        List<PartyMemberResponse> members = partyService.findMembersByPartyId(partyId);
+        String thumbnailUrl = imageFacade.findByShopThumbnail(party.getShop().getId());
 
         return PartyMapper.toDetailResponse(party, thumbnailUrl, members);
     }
 
     @Transactional(readOnly = true)
     public List<PartyMemberResponse> getPartyMembers(Long partyId) {
-        return partyService.findAllByPartyIdToDto(partyId);
+        return partyService.findMembersByPartyId(partyId);
     }
 
     @Transactional(readOnly = true)
     public PartyScrollResponse searchParties(PartySearchParam condition, int size) {
-        Specification<Party> spec = PartySpecification.createSpecification(condition);
-
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Direction.DESC, "id"));
-        Slice<Party> partyList = partyService.findAll(spec, pageable);
+        Slice<Party> parties = partyService.searchParties(condition, PageRequest.of(0, size));
 
         Long nextCursor = null;
-        if (partyList.hasNext()) {
-            nextCursor = partyList.getContent().getLast().getId();
+        if (parties.hasNext()) {
+            nextCursor = parties.getContent().getLast().getId();
         }
 
-        List<PartyListResponse> content = partyList.stream()
+        // shopId 수집
+        List<Long> shopIds = parties.stream()
+            .map(p -> p.getShop().getId())
+            .distinct()
+            .toList();
+
+        // 썸네일 이미지 한꺼번에 조회
+        Map<Long, String> thumbMap = imageFacade.findByShopThumbnails(shopIds);
+
+        List<PartyListResponse> content = parties.stream()
             .map(party -> PartyMapper.toListResponse
-                (party, imageService.getShopThumbnail(party.getShop().getId()))
+                (party, thumbMap.get(party.getShop().getId()))
             )
             .toList();
 
@@ -176,11 +179,16 @@ public class PartyFacade {
         }
 
         // 6. 중복 참여, 이전에 참여 이력 존재 확인
-        Optional<PartyUser> existingPartyUser = partyService.findByUserIdAndPartyId(user.getId(),
+        Optional<Boolean> deletedOrNot = partyService.findByUserIdAndPartyId(user.getId(),
             party.getId());
 
-        if (existingPartyUser.isPresent()) {
-            throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
+        //이전에 참여 이력 존재
+        if (deletedOrNot.isPresent()) {
+            if (deletedOrNot.get()) { // 한번 파티에 참여했다가 탈퇴했던 유저
+                throw new BusinessException(ErrorCode.QUIT_PARTY_USER);
+            } else { //이미 파티에 참여중인 유저
+                throw new BusinessException(ErrorCode.ALREADY_PARTY_USER);
+            }
         }
 
         PartyUser partyUser = PartyUser.createUser(party, user);
@@ -212,7 +220,7 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
         }
 
-        Reservation reservation = party.getReservation();
+        Reservation reservation = reservationQueryService.findByPartyId(partyId);
 
         // 예약이 없거나, 아직 예약이 승인 대기 중일 때만 탈퇴 가능
         if (reservation != null && reservation.getStatus() != ReservationStatus.PENDING) {
@@ -224,16 +232,36 @@ public class PartyFacade {
 
     @Transactional
     public void quitPartyForWithdraw(User user) {
-        // 회원 탈퇴시에 본인이 파티원이며, 파티 탈퇴 가능한 파티만 조회
-        List<Party> parties = partyService.findAllParticipatingPartyByUserIdForWithdraw(
+        // 종료되지 않은 파티 중 본인이 호스트가 아닌 partyUser 조회
+        List<PartyUser> participatingPartyUsers = partyService.findAllParticipatingParty(
             user.getId());
 
-        for (Party party : parties) {
-            Reservation reservation = party.getReservation();
-            PartyUser partyUser = partyService.findPartyUser(user.getId(), party);
+        // 탈퇴할 파티가 없을 경우 바로 리턴
+        if (participatingPartyUsers.isEmpty()) {
+            return;
+        }
+
+        // partyId 수집
+        List<Long> partyIds = participatingPartyUsers.stream()
+            .map(pu -> pu.getParty().getId())
+            .distinct()
+            .toList();
+
+        // 파티별 예약 map 생성
+        Map<Long, Reservation> reservationByPartyId = reservationQueryService.getMapByPartyIds(
+            partyIds);
+
+        for (PartyUser pu : participatingPartyUsers) {
+            Long partyId = pu.getParty().getId();
+            Reservation reservation = reservationByPartyId.get(partyId);
+
+            //PENDING 상태가 아닌 예약을 가진 파티는 탈퇴 불가능
+            if (reservation != null && reservation.getStatus() != ReservationStatus.PENDING) {
+                continue;
+            }
 
             // 파티 탈퇴 진행
-            processQuitParty(partyUser, party, user, reservation);
+            processQuitParty(pu, pu.getParty(), user, reservation);
         }
     }
 
@@ -333,11 +361,10 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS_DELETE_PARTY);
         }
 
-        Reservation reservation = party.getReservation();
+        Reservation reservation = reservationQueryService.findByPartyId(partyId);
 
         // 예약일 하루 전이라면 파티 삭제 불가
-        if (reservation != null && reservation.getStatus() == ReservationStatus.CONFIRMED
-            && reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1))) {
+        if (cannotDeleteParty(reservation)) {
             throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_D_DAY);
         }
 
@@ -352,15 +379,31 @@ public class PartyFacade {
 
     @Transactional
     public void deletePartyForWithdraw(User user) {
-        // 회원 탈퇴시에 본인이 파티장이며 파티 해체시킬 수 있는 파티만 조회
-        List<Party> parties = partyService.findAllMyPartyByUserIdForWithdraw(user.getId());
+        // 회원 탈퇴시에 본인이 파티장이며 종료되지 않은 파티만 조회
+        List<Party> parties = partyService.findAllMyRecruitingParty(user.getId());
+
+        //partyId 수집
+        List<Long> partyIds = parties.stream()
+            .map(Party::getId)
+            .distinct()
+            .toList();
+
+        // 파티별 예약 map 생성
+        Map<Long, Reservation> reservationByPartyId = reservationQueryService.getMapByPartyIds(
+            partyIds);
 
         for (Party party : parties) {
+            Reservation reservation = reservationByPartyId.get(party.getId());
+
+            //파티의 예약일이 하루 전인 파티는 해체 시키지 않음
+            if (cannotDeleteParty(reservation)) {
+                continue;
+            }
+
             // 예약금을 지불한 파티원에게 예약금 환불
             reservationCommandService.refundPartyReservationFee(party);
 
             // 예약이 진행 중일 때, 예약을 취소
-            Reservation reservation = party.getReservation();
             if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
             }
@@ -368,6 +411,12 @@ public class PartyFacade {
             // 파티 해체
             partyService.breakParty(party);
         }
+    }
+
+    private boolean cannotDeleteParty(Reservation reservation) {
+        return reservation != null
+            && reservation.getStatus() == ReservationStatus.CONFIRMED
+            && reservation.getReservedAt().isBefore(LocalDateTime.now().plusDays(1));
     }
 
     @Transactional

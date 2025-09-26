@@ -1,8 +1,5 @@
 package shop.matjalalzz.shop.dto;
 
-import jakarta.persistence.Column;
-import java.time.LocalTime;
-import java.util.List;
 import lombok.Builder;
 import shop.matjalalzz.shop.entity.FoodCategory;
 

@@ -126,8 +126,9 @@ public class UserFacade {
         User user = userService.getUserById(userId);
 
         String key = StringUtils.removeStart(request.profileKey(), baseUrl);
+        String previousKey = user.getProfileKey();
 
-        if (!key.equals(user.getProfileKey())) {
+        if (previousKey != null && !key.equals(previousKey)) {
             preSignedProvider.deleteObject(user.getProfileKey());
         }
 

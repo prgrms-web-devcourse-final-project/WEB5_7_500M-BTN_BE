@@ -6,8 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import shop.matjalalzz.global.discord.api.DiscordService;
 import shop.matjalalzz.shop.entity.Shop;
+import shop.matjalalzz.shop.event.ShopCreatedEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -17,8 +21,8 @@ public class ShopEventListener {
 
     @Description("고객센터 문의가 접수 될 시 Discord 알람을 보낸다")
     @Async
-    @EventListener(Shop.class)
-    public void onShopAddEvent(Shop event) {
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onShopAddEvent(ShopCreatedEvent event) {
         discordService.ShopOwnerSendMessageToDiscord(
             event.getUser(),
             event.getShopName(),

@@ -14,10 +14,6 @@ public record ReviewCreateRequest(
     @NotNull(message = "예약ID는 필수입니다.")
     Long reservationId,
 
-    @Schema(description = "음식점 ID")
-    @NotNull(message = "음식점ID는 필수입니다.")
-    Long shopId,
-
     @Schema(description = "리뷰 내용")
     @NotBlank(message = "본문은 비어있을 수 없습니다.")
     String content,

@@ -22,11 +22,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.util.ReflectionTestUtils;
 import shop.matjalalzz.global.exception.BusinessException;
-import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.entity.User;
 import shop.matjalalzz.util.TestUtil;
@@ -41,7 +40,7 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Mock
-    private ShopService shopService;
+    private ShopQueryService shopQueryService;
 
     private final Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id"));
     private final Long SHOP_ID = 1L;
@@ -72,8 +71,8 @@ class ReservationServiceTest {
             Slice<Reservation> slice = new SliceImpl<>(reservations, pageable, true);
 
             // mocking
-            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(shopQueryService.findShop(SHOP_ID)).willReturn(shop);
+            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, CURSOR, pageable))
                 .willReturn(slice);
 
@@ -108,8 +107,8 @@ class ReservationServiceTest {
             Slice<Reservation> slice = new SliceImpl<>(reservations, pageable, true);
 
             // mocking
-            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(shopQueryService.findShop(SHOP_ID)).willReturn(shop);
+            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, null, pageable))
                 .willReturn(slice);
 
@@ -148,7 +147,7 @@ class ReservationServiceTest {
                 true); // r3는 커서 기준으로 제외됨
 
             // mocking
-            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
+            given(shopQueryService.findShop(SHOP_ID)).willReturn(shop);
             given(
                 reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID, null, 3L, pageable))
                 .willReturn(slice);
@@ -187,8 +186,8 @@ class ReservationServiceTest {
             Slice<Reservation> slice = new SliceImpl<>(List.of(r3, r2), pageable, true); // 최신순
 
             // mocking
-            given(shopService.shopFind(SHOP_ID)).willReturn(shop);
-            given(reservationFacade.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
+            given(shopQueryService.findShop(SHOP_ID)).willReturn(shop);
+            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
                 pageable))
                 .willReturn(slice);
 
@@ -225,8 +224,8 @@ class ReservationServiceTest {
             Slice<Reservation> slice = new SliceImpl<>(List.of(r2, r1), pageable, false);
 
             // mocking
-            given(shopService.findByOwnerId(owner.getId())).willReturn(List.of(shop1, shop2));
-            given(reservationFacade.findByShopIdsWithFilterAndCursor(
+            given(shopQueryService.findByOwnerId(owner.getId())).willReturn(List.of(shop1, shop2));
+            given(reservationService.findByShopIdsWithFilterAndCursor(
                 List.of(1L, 2L), null, null, pageable)).willReturn(slice);
 
             // when

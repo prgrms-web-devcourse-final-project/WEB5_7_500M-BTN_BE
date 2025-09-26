@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import shop.matjalalzz.global.discord.api.DiscordService;
-import shop.matjalalzz.inquiry.app.InquiryService;
-import shop.matjalalzz.inquiry.dao.InquiryRepository;
 import shop.matjalalzz.inquiry.entity.Inquiry;
+import shop.matjalalzz.inquiry.event.InquiryCreateEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -19,8 +21,8 @@ public class InquiryEventListener {
 
     @Description("고객센터 문의가 접수 될 시 Discord 알람을 보낸다")
     @Async
-    @EventListener(Inquiry.class)
-    public void onInquiryAddEvent(Inquiry event){
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onInquiryAddEvent(InquiryCreateEvent event) {
         discordService.InquirySendMessageToDiscord(
             event.getUser(),
             event.getTitle(),

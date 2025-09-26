@@ -49,8 +49,7 @@ public class PartySchedulerService {
         Instant instant = deadline.atZone(ZoneId.systemDefault()).toInstant();
 
         // 새 스레드에서 스케줄 실행 -> 새 스레드에서 적용할 트랜잭션 필요
-        taskScheduler.schedule(() -> partyStatusService.updateStatusByDeadline(party.getId()),
-            instant);
+        taskScheduler.schedule(() -> partyStatusService.updateStatusByDeadline(party.getId()), instant);
     }
 
 }

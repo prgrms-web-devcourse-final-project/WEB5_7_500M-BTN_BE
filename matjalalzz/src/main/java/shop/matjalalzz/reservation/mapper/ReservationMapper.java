@@ -14,7 +14,6 @@ import shop.matjalalzz.reservation.dto.ReservationListResponse;
 import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
 import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
 import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
-import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.entity.Shop;
@@ -116,4 +115,5 @@ public class ReservationMapper {
                 .build())
             .toList();
     }
+
 }
