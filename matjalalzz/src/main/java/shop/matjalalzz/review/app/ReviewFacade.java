@@ -15,7 +15,7 @@ import shop.matjalalzz.image.app.query.ImageQueryService;
 import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.PartyUser;
-import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.app.ReservationQueryService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
@@ -35,7 +35,7 @@ import shop.matjalalzz.user.entity.User;
 public class ReviewFacade {
 
     private final UserService userService;
-    private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
     private final PartyService partyService;
     private final ShopQueryService shopQueryService;
     private final PreSignedProvider preSignedProvider;
@@ -61,7 +61,8 @@ public class ReviewFacade {
         reviewQueryService.validateDuplicatedReview(request.reservationId(), writerId);
 
         User writer = userService.getUserById(writerId);
-        Reservation reservation = reservationService.getReservationById(request.reservationId());
+        Reservation reservation = reservationQueryService.getReservationById(
+            request.reservationId());
 
         if (reservation.getStatus() != ReservationStatus.TERMINATED) {
             throw new BusinessException(ErrorCode.INVALID_RESERVATION_STATUS);

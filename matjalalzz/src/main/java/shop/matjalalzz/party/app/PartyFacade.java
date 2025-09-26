@@ -31,7 +31,8 @@ import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.party.entity.enums.PartyStatus;
 import shop.matjalalzz.party.mapper.PartyMapper;
-import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.app.ReservationCommandService;
+import shop.matjalalzz.reservation.app.ReservationQueryService;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.shop.app.query.ShopQueryService;
@@ -48,8 +49,9 @@ public class PartyFacade {
     private final PartyService partyService;
     private final ShopQueryService shopQueryService;
     private final UserService userService;
-    private final ReservationService reservationService;
     private final PartyChatService partyChatService;
+    private final ReservationCommandService reservationCommandService;
+    private final ReservationQueryService reservationQueryService;
     private final ImageFacade imageFacade;
 
     private final String MAX_ATTEMPTS = "${custom.retry.max-attempts}";
@@ -218,7 +220,7 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.ALREADY_PROCESSED);
         }
 
-        Reservation reservation = reservationService.findByPartyId(partyId);
+        Reservation reservation = reservationQueryService.findByPartyId(partyId);
 
         // 예약이 없거나, 아직 예약이 승인 대기 중일 때만 탈퇴 가능
         if (reservation != null && reservation.getStatus() != ReservationStatus.PENDING) {
@@ -246,7 +248,7 @@ public class PartyFacade {
             .toList();
 
         // 파티별 예약 map 생성
-        Map<Long, Reservation> reservationByPartyId = reservationService.getMapByPartyIds(
+        Map<Long, Reservation> reservationByPartyId = reservationQueryService.getMapByPartyIds(
             partyIds);
 
         for (PartyUser pu : participatingPartyUsers) {
@@ -270,7 +272,7 @@ public class PartyFacade {
         if (party.getStatus() == PartyStatus.COMPLETED
             && party.getMinCount() > party.getCurrentCount() - 1) {
 
-            reservationService.refundPartyReservationFee(party);
+            reservationCommandService.refundPartyReservationFee(party);
 
             if (reservation != null) {
                 reservation.changeStatus(ReservationStatus.CANCELLED);
@@ -329,7 +331,7 @@ public class PartyFacade {
         if (party.getStatus() == PartyStatus.COMPLETED
             && party.getMinCount() > party.getCurrentCount() - 1) {
 
-            reservationService.refundPartyReservationFee(party);
+            reservationCommandService.refundPartyReservationFee(party);
 
             partyService.breakParty(party);
             return;
@@ -359,14 +361,14 @@ public class PartyFacade {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS_DELETE_PARTY);
         }
 
-        Reservation reservation = reservationService.findByPartyId(partyId);
+        Reservation reservation = reservationQueryService.findByPartyId(partyId);
 
         // 예약일 하루 전이라면 파티 삭제 불가
         if (cannotDeleteParty(reservation)) {
             throw new BusinessException(ErrorCode.CANNOT_DELETE_PARTY_D_DAY);
         }
 
-        reservationService.refundPartyReservationFee(party);
+        reservationCommandService.refundPartyReservationFee(party);
 
         if (reservation != null) {
             reservation.changeStatus(ReservationStatus.CANCELLED);
@@ -387,7 +389,7 @@ public class PartyFacade {
             .toList();
 
         // 파티별 예약 map 생성
-        Map<Long, Reservation> reservationByPartyId = reservationService.getMapByPartyIds(
+        Map<Long, Reservation> reservationByPartyId = reservationQueryService.getMapByPartyIds(
             partyIds);
 
         for (Party party : parties) {
@@ -399,7 +401,7 @@ public class PartyFacade {
             }
 
             // 예약금을 지불한 파티원에게 예약금 환불
-            reservationService.refundPartyReservationFee(party);
+            reservationCommandService.refundPartyReservationFee(party);
 
             // 예약이 진행 중일 때, 예약을 취소
             if (reservation != null) {
@@ -484,7 +486,7 @@ public class PartyFacade {
         boolean allPaid = party.getPartyUsers().stream().allMatch(PartyUser::isPaymentCompleted);
         if (allPaid) {
             User host = partyService.findPartyHost(party);
-            reservationService.createPartyReservation(party, host);
+            reservationCommandService.createPartyReservation(party, host);
             partyChatService.noticeReservationComplete(host, party);
         }
     }

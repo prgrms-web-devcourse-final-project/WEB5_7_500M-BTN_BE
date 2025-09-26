@@ -17,7 +17,7 @@ import shop.matjalalzz.global.security.jwt.app.TokenService;
 import shop.matjalalzz.global.security.jwt.entity.RefreshToken;
 import shop.matjalalzz.global.util.CookieUtils;
 import shop.matjalalzz.party.app.PartyFacade;
-import shop.matjalalzz.reservation.app.ReservationFacade;
+import shop.matjalalzz.reservation.app.ReservationCommandService;
 import shop.matjalalzz.user.dto.LoginRequest;
 import shop.matjalalzz.user.dto.MyInfoResponse;
 import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
@@ -39,7 +39,7 @@ public class UserFacade {
     private final PreSignedProvider preSignedProvider;
     private final TokenService tokenService;
     private final PartyFacade partyFacade;
-    private final ReservationFacade reservationFacade;
+    private final ReservationCommandService reservationCommandService;
 
     @Value("${custom.jwt.token-validity-time.refresh}")
     private int refreshTokenValiditySeconds;
@@ -52,7 +52,7 @@ public class UserFacade {
         //가입된 email과 password가 같은지 확인
         LoginUserProjection found = userService.getUserByEmailForLogin(dto.email());
 
-        if(StringUtils.isEmpty(found.getPassword()) ||
+        if (StringUtils.isEmpty(found.getPassword()) ||
             !passwordEncoder.matches(dto.password(), found.getPassword())) {
             throw new BusinessException(ErrorCode.LOGIN_USER_NOT_FOUND);
         }
@@ -75,7 +75,7 @@ public class UserFacade {
         Optional<User> user = userService.findUserByEmail(dto.email());
 
         if (user.isPresent()) {
-            if(user.get().isDeleted()) {
+            if (user.get().isDeleted()) {
                 user.get().recover();
                 return;
             }
@@ -96,7 +96,7 @@ public class UserFacade {
     public void oauthSignup(long userId, OAuthSignUpRequest request, HttpServletResponse response) {
         User user = userService.getUserById(userId);
 
-        if(user.isDeleted()) {
+        if (user.isDeleted()) {
             user.recover();
             return;
         }
@@ -148,13 +148,13 @@ public class UserFacade {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);  //401
         }
 
-        if(user.getRole() == Role.OWNER) {
+        if (user.getRole() == Role.OWNER) {
             throw new BusinessException(ErrorCode.OWNER_CANNOT_WITHDRAW);
         }
 
         partyFacade.deletePartyForWithdraw(user); // 본인이 파티장인 파티 중 해체 가능한 파티 처리
         partyFacade.quitPartyForWithdraw(user); // 본인이 파티참가자인 파티 중 탈퇴 가능한 파티 처리
-        reservationFacade.cancelReservationForWithdraw(user); // 취소 가능한 예약 처리
+        reservationCommandService.cancelReservationForWithdraw(user); // 취소 가능한 예약 처리
 
         tokenService.deleteRefreshToken(foundRefreshToken); // 리프레시 토큰 제거
 

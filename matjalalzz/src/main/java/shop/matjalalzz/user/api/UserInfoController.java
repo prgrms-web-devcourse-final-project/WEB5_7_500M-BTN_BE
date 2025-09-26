@@ -23,7 +23,7 @@ import shop.matjalalzz.global.s3.dto.PreSignedUrlResponse;
 import shop.matjalalzz.global.security.PrincipalUser;
 import shop.matjalalzz.party.app.PartyFacade;
 import shop.matjalalzz.party.dto.MyPartyPageResponse;
-import shop.matjalalzz.reservation.app.ReservationFacade;
+import shop.matjalalzz.reservation.app.ReservationQueryService;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.review.app.ReviewFacade;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
@@ -39,7 +39,7 @@ import shop.matjalalzz.user.dto.MyInfoUpdateRequest;
 public class UserInfoController {
 
     private final UserFacade userFacade;
-    private final ReservationFacade reservationFacade;
+    private final ReservationQueryService reservationQueryService;
     private final PartyFacade partyFacade;
     private final ReviewFacade reviewFacade;
     private final PreSignedProvider preSignedProvider;
@@ -123,7 +123,8 @@ public class UserInfoController {
         @RequestParam(name = "size", defaultValue = "10") int size,
         @RequestParam(name = "cursor", required = false) Long cursor
     ) {
-        MyReservationPageResponse result = reservationFacade.findMyReservationPage(userInfo.getId(),
+        MyReservationPageResponse result = reservationQueryService.findMyReservationPage(
+            userInfo.getId(),
             cursor, size);
 
         return BaseResponse.ok(result, BaseStatus.OK);

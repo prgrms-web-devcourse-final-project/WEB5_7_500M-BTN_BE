@@ -19,7 +19,7 @@ import shop.matjalalzz.party.dto.MyPartyResponse;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
 import shop.matjalalzz.party.entity.enums.GenderCondition;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.dao.UserRepository;
@@ -37,7 +37,7 @@ public class MyPartyListPerfTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private ShopService shopService;
+    private ShopQueryService shopQuerySErvice;
     @Autowired
     private PartyRepository partyRepository;
     @Autowired
@@ -68,7 +68,7 @@ public class MyPartyListPerfTest {
         }
         userRepository.saveAll(users);
 
-        Shop shop = shopService.shopFind(1L);
+        Shop shop = shopQuerySErvice.findShop(1L);
 
         // given: 파티 100개 생성
         List<Party> parties = new ArrayList<>();

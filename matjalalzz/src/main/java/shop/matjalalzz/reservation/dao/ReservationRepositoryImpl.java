@@ -26,7 +26,8 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     private static final QShop s = QShop.shop;
 
     @Override
-    public Slice<Reservation> findByShopIdWithFilterAndCursorQdsl(Long shopId, ReservationStatus status, Long cursor, Pageable pageable) {
+    public Slice<Reservation> findByShopIdWithFilterAndCursorQdsl(Long shopId,
+        ReservationStatus status, Long cursor, Pageable pageable) {
         var list = query.selectFrom(r)
             .where(r.shop.id.eq(shopId), eqStatus(status), ltCursor(cursor))
             .orderBy(r.id.desc())
@@ -36,8 +37,11 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     }
 
     @Override
-    public Slice<Reservation> findByShopIdsWithFilterAndCursorQdsl(List<Long> shopIds, ReservationStatus status, Long cursor, Pageable pageable) {
-        if (shopIds == null || shopIds.isEmpty()) return new SliceImpl<>(List.of(), pageable, false);
+    public Slice<Reservation> findByShopIdsWithFilterAndCursorQdsl(List<Long> shopIds,
+        ReservationStatus status, Long cursor, Pageable pageable) {
+        if (shopIds == null || shopIds.isEmpty()) {
+            return new SliceImpl<>(List.of(), pageable, false);
+        }
         var list = query.selectFrom(r)
             .where(r.shop.id.in(shopIds), eqStatus(status), ltCursor(cursor))
             .orderBy(r.id.desc())
@@ -47,7 +51,8 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
     }
 
     @Override
-    public Slice<MyReservationResponse> findByUserIdAndCursorQdsl(Long userId, Long cursor, Pageable pageable) {
+    public Slice<MyReservationResponse> findByUserIdAndCursorQdsl(Long userId, Long cursor,
+        Pageable pageable) {
         var list = query
             .select(Projections.constructor(MyReservationResponse.class,
                 r.id,
@@ -64,23 +69,34 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
             .limit(pageable.getPageSize() + 1)
             .fetch();
         boolean hasNext = list.size() > pageable.getPageSize();
-        if (hasNext) list = list.subList(0, pageable.getPageSize());
+        if (hasNext) {
+            list = list.subList(0, pageable.getPageSize());
+        }
         return new SliceImpl<>(list, pageable, hasNext);
     }
 
     @Override
-    public List<Reservation> findAllByStatusAndReservedAtBeforeQdsl(ReservationStatus status, LocalDateTime threshold) {
+    public List<Reservation> findAllByStatusAndReservedAtBeforeQdsl(ReservationStatus status,
+        LocalDateTime threshold) {
         return query.selectFrom(r)
             .where(r.status.eq(status), r.reservedAt.loe(threshold))
             .fetch();
     }
 
     /* helpers */
-    private BooleanExpression eqStatus(ReservationStatus st) { return st == null ? null : r.status.eq(st); }
-    private BooleanExpression ltCursor(Long cursor) { return cursor == null ? null : r.id.lt(cursor); }
+    private BooleanExpression eqStatus(ReservationStatus st) {
+        return st == null ? null : r.status.eq(st);
+    }
+
+    private BooleanExpression ltCursor(Long cursor) {
+        return cursor == null ? null : r.id.lt(cursor);
+    }
+
     private static <T> Slice<T> toSlice(List<T> rows, int size) {
         boolean hasNext = rows.size() > size;
-        if (hasNext) rows = rows.subList(0, size);
+        if (hasNext) {
+            rows = rows.subList(0, size);
+        }
         return new SliceImpl<>(rows, PageRequest.of(0, size), hasNext);
     }
 }

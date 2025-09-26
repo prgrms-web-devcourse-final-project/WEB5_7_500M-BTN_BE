@@ -37,9 +37,6 @@ import shop.matjalalzz.util.TestUtil;
 class ReservationCreateReservationTest {
 
     @Autowired
-    ReservationService reservationService;
-
-    @Autowired
     ReservationFacade reservationFacade;
 
     @Autowired

@@ -17,7 +17,7 @@ import shop.matjalalzz.party.entity.enums.GenderCondition;
 import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.dao.UserRepository;
 import shop.matjalalzz.user.entity.User;
@@ -32,7 +32,7 @@ public class PartyFacadeWithDrawTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ShopService shopService;
+    private ShopQueryService shopQueryService;
 
     @Autowired
     private PartyRepository partyRepository;
@@ -62,7 +62,7 @@ public class PartyFacadeWithDrawTest {
 
         userRepository.save(user);
 
-        Shop shop = shopService.shopFind(1L);
+        Shop shop = shopQueryService.findShop(1L);
 
         Party party1 = Party.builder()
             .title("파티1")

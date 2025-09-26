@@ -1,6 +1,9 @@
 package shop.matjalalzz.reservation.app;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,95 +13,79 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.matjalalzz.global.exception.BusinessException;
 import shop.matjalalzz.global.exception.domain.ErrorCode;
+import shop.matjalalzz.reservation.dao.ReservationRepository;
 import shop.matjalalzz.reservation.dto.MyReservationPageResponse;
 import shop.matjalalzz.reservation.dto.MyReservationResponse;
-import shop.matjalalzz.reservation.dto.ReservationListResponse;
-import shop.matjalalzz.reservation.dto.ReservationListResponse.ReservationContent;
-import shop.matjalalzz.reservation.dto.ReservationSummaryDto;
+import shop.matjalalzz.reservation.dto.projection.CancelReservationProjection;
+import shop.matjalalzz.reservation.dto.projection.MyReservationProjection;
+import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.shop.app.query.ShopQueryService;
-import shop.matjalalzz.shop.entity.Shop;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReservationQueryService {
 
-    private final ReservationService reservationService;
-    private final ShopQueryService shopQueryService;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationListResponse getReservations(
-        Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
+    public Slice<ReservationSummaryProjection> findSummariesByOwnerWithCursor(
+        Long ownerId, ReservationStatus status, Long cursor, int sizePlusOne
     ) {
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
-
-        if (shopId != null) {
-            Shop shop = shopQueryService.findShop(shopId); // 검증
-            if (!shop.getUser().getId().equals(ownerId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
-            Slice<Reservation> slice = reservationService.findByShopIdWithFilterAndCursor(
-                shopId, status, cursor, pageable
-            );
-            return toReservationListResponse(slice);
-        }
-
-        List<Shop> shops = shopQueryService.findByOwnerId(ownerId);
-        if (shops == null) {
-            throw new BusinessException(ErrorCode.SHOP_NOT_FOUND);
-        }
-
-        List<Long> shopIds = shops.stream().map(Shop::getId).toList();
-        Slice<Reservation> slice = reservationService.findByShopIdsWithFilterAndCursor(
-            shopIds, status, cursor, pageable
-        );
-        return toReservationListResponse(slice);
+        Pageable pageable = PageRequest.of(0, sizePlusOne, Sort.by(Sort.Direction.DESC, "id"));
+        return reservationRepository.findSummariesByOwnerWithCursor(ownerId, status, cursor,
+            pageable);
     }
 
-    public ReservationListResponse getReservationsProjection(
-        Long shopId, ReservationStatus status, Long ownerId, Long cursor, int size
+    public Slice<MyReservationResponse> findMyReservations(Long userId, Long cursor, int size) {
+        Slice<MyReservationProjection> views =
+            reservationRepository.findByUserIdAndCursor(userId, cursor, PageRequest.of(0, size));
+        return views.map(ReservationMapper::toMyReservationResponse);
+    }
+
+    public Reservation getReservationById(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
+    }
+
+    public List<Reservation> findAllByStatusAndReservedAtBefore(
+        ReservationStatus status, LocalDateTime threshold
     ) {
-        if (shopId != null) {
-            Shop shop = shopQueryService.findShop(shopId);
-            if (!shop.getUser().getId().equals(ownerId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
-        }
+        return reservationRepository.findAllByStatusAndReservedAtBefore(status, threshold);
+    }
 
-        int sizePlusOne = size + 1;
-        Pageable pageable = PageRequest.of(0, sizePlusOne, Sort.by(Sort.Direction.DESC, "id"));
+    public List<CancelReservationProjection> findAllMyReservationByUserIdForWithdraw(Long userId) {
+        // 기존 Service 로직과 동일: "하루 이상 남은 예약만" 보려면 기준시각 +1일
+        LocalDateTime threshold = LocalDateTime.now().plusDays(1);
+        return reservationRepository.findAllMyReservationByUserIdForWithdraw(userId, threshold);
+    }
 
-        List<ReservationSummaryDto> rows =
-            reservationService.findSummariesByOwnerWithCursor(ownerId, status, cursor, pageable);
-
-        boolean hasNext = rows.size() > size;
-        if (hasNext) {
-            rows = rows.subList(0, size);
-        }
-        Long nextCursor = hasNext ? rows.get(rows.size() - 1).reservationId() : null;
-
-        List<ReservationContent> content = ReservationMapper.toReservationProjectionContent(rows);
-        return ReservationMapper.toReservationListResponse(content, nextCursor);
+    public Reservation getByIdWithShopAndOwner(Long reservationId) {
+        return reservationRepository.findByIdWithShopAndOwner(reservationId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.DATA_NOT_FOUND));
     }
 
     public MyReservationPageResponse findMyReservationPage(Long userId, Long cursor, int size) {
-        Slice<MyReservationResponse> reservations = reservationService.findByUserIdAndCursor(
-            userId, cursor, PageRequest.of(0, size));
-
-        Long nextCursor = reservations.hasNext()
-            ? reservations.getContent().getLast().reservationId()
-            : null;
-
-        return ReservationMapper.toMyReservationPageResponse(nextCursor, reservations);
+        Slice<MyReservationResponse> slice = findMyReservations(userId, cursor, size); // Slice<MyReservationResponse>
+        Long nextCursor = slice.hasNext() ? slice.getContent().getLast().reservationId() : null;
+        return ReservationMapper.toMyReservationPageResponse(nextCursor, slice);
     }
 
-    // --- helpers ---
-    private ReservationListResponse toReservationListResponse(Slice<Reservation> slice) {
-        List<Reservation> list = slice.getContent();
-        Long nextCursor = slice.hasNext() ? list.getLast().getId() : null;
-        List<ReservationContent> content = ReservationMapper.toReservationContent(list);
-        return ReservationMapper.toReservationListResponse(content, nextCursor);
+    @Transactional(readOnly = true)
+    public Map<Long, Reservation> getMapByPartyIds(List<Long> partyIds) {
+
+        return reservationRepository.findAllByPartyIds(partyIds)
+            .stream()
+            .collect(Collectors.toMap(
+                r -> r.getParty().getId(),
+                r -> r
+            ));
     }
+
+    @Transactional(readOnly = true)
+    public Reservation findByPartyId(Long partyId) {
+        return reservationRepository.findByPartyId(partyId);
+    }
+
 }
