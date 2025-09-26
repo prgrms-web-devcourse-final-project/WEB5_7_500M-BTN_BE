@@ -89,6 +89,16 @@ public class ShopQueryService {
         return shopRepository.findShopCursorList(cursor, query,  approve, pageable, sort);
     }
 
+    public void validShop(Long shopId, Long ownerId) {
+        if (shopId != null) {
+            Shop shop = findShop(shopId);
+            if (!shop.getUser().getId().equals(ownerId)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+        } else {
+            throw new BusinessException(ErrorCode.SHOP_NOT_FOUND);
+        }
+    }
 
 
 

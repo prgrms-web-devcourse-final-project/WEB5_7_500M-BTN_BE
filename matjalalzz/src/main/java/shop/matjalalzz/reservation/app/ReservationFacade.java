@@ -20,7 +20,7 @@ import shop.matjalalzz.reservation.dto.projection.ReservationSummaryProjection;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.reservation.mapper.ReservationMapper;
-import shop.matjalalzz.shop.app.ShopService;
+import shop.matjalalzz.shop.app.query.ShopQueryService;
 import shop.matjalalzz.shop.entity.Shop;
 import shop.matjalalzz.user.app.UserService;
 import shop.matjalalzz.user.entity.User;
@@ -31,7 +31,7 @@ public class ReservationFacade {
 
     private final ReservationQueryService reservationQueryService;
     private final ReservationCommandService reservationCommandService;
-    private final ShopService shopService;
+    private final ShopQueryService shopQueryService;
     private final UserService userService;
     private final PartyService partyService;
 
@@ -41,7 +41,7 @@ public class ReservationFacade {
     ) {
 
         if(shopId != null){
-            shopService.validShop(shopId, ownerId);
+            shopQueryService.validShop(shopId, ownerId);
         }
 
         int sizePlusOne = size + 1;
@@ -59,7 +59,7 @@ public class ReservationFacade {
     @Transactional
     public CreateReservationResponse createReservation(Long userId, Long shopId,
         CreateReservationRequest request) {
-        Shop shop = shopService.shopFind(shopId);
+        Shop shop = shopQueryService.findShop(shopId);
         User user = userService.getUserById(userId);
 
         int reservationFee = shop.getReservationFee() * request.headCount();

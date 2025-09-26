@@ -2,6 +2,8 @@ package shop.matjalalzz.reservation.app;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -68,6 +70,22 @@ public class ReservationQueryService {
         Slice<MyReservationResponse> slice = findMyReservations(userId, cursor, size); // Slice<MyReservationResponse>
         Long nextCursor = slice.hasNext() ? slice.getContent().getLast().reservationId() : null;
         return ReservationMapper.toMyReservationPageResponse(nextCursor, slice);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Reservation> getMapByPartyIds(List<Long> partyIds) {
+
+        return reservationRepository.findAllByPartyIds(partyIds)
+            .stream()
+            .collect(Collectors.toMap(
+                r -> r.getParty().getId(),
+                r -> r
+            ));
+    }
+
+    @Transactional(readOnly = true)
+    public Reservation findByPartyId(Long partyId) {
+        return reservationRepository.findByPartyId(partyId);
     }
 
 }

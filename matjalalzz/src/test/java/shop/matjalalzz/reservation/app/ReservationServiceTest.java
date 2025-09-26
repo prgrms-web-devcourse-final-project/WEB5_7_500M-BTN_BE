@@ -6,7 +6,6 @@ import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ class ReservationServiceTest {
     private ReservationFacade reservationFacade;
 
     @InjectMocks
-    private ReservationService reservationService;
+    private ReservationQueryService reservationQueryService;
 
     @Mock
     private ShopQueryService shopQueryService;
@@ -72,7 +71,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopQueryService.findShop(SHOP_ID)).willReturn(shop);
-            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(reservationQueryService.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, CURSOR, pageable))
                 .willReturn(slice);
 
@@ -108,7 +107,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopQueryService.findShop(SHOP_ID)).willReturn(shop);
-            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID,
+            given(reservationQueryService.findByShopIdWithFilterAndCursor(SHOP_ID,
                 ReservationStatus.PENDING, null, pageable))
                 .willReturn(slice);
 
@@ -187,7 +186,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopQueryService.findShop(SHOP_ID)).willReturn(shop);
-            given(reservationService.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
+            given(reservationQueryService.findByShopIdWithFilterAndCursor(SHOP_ID, null, null,
                 pageable))
                 .willReturn(slice);
 
@@ -225,7 +224,7 @@ class ReservationServiceTest {
 
             // mocking
             given(shopQueryService.findByOwnerId(owner.getId())).willReturn(List.of(shop1, shop2));
-            given(reservationService.findByShopIdsWithFilterAndCursor(
+            given(reservationQueryService.findByShopIdsWithFilterAndCursor(
                 List.of(1L, 2L), null, null, pageable)).willReturn(slice);
 
             // when
@@ -257,7 +256,7 @@ class ReservationServiceTest {
                 ReflectionTestUtils.setField(reservation, "id", 1L);
                 reservation.changeStatus(ReservationStatus.PENDING);
 
-                given(reservationService.getReservationById(1L)).willReturn(reservation);
+                given(reservationQueryService.getReservationById(1L)).willReturn(reservation);
 
                 // when
                 reservationFacade.confirmReservation(reservation.getId(),
