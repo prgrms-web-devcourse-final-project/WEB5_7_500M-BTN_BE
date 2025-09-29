@@ -33,7 +33,7 @@ import shop.matjalalzz.image.entity.Image;
 import shop.matjalalzz.party.app.PartyService;
 import shop.matjalalzz.party.entity.Party;
 import shop.matjalalzz.party.entity.PartyUser;
-import shop.matjalalzz.reservation.app.ReservationService;
+import shop.matjalalzz.reservation.app.ReservationFacade;
 import shop.matjalalzz.reservation.entity.Reservation;
 import shop.matjalalzz.reservation.entity.ReservationStatus;
 import shop.matjalalzz.review.dto.MyReviewPageResponse;
@@ -54,13 +54,13 @@ class ReviewFacadeTest {
     private UserService userService;
 
     @Mock
-    private ReservationService reservationService;
-
-    @Mock
     private PartyService partyService;
 
     @Mock
     private ShopQueryService shopQueryService;
+
+    @Mock
+    private ReservationFacade reservationFacade;
 
     @Mock
     private PreSignedProvider preSignedProvider;
@@ -118,8 +118,8 @@ class ReviewFacadeTest {
 
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
-            when(shopQueryService.findShop(shopId)).thenReturn(shop);
+            when(reservationFacade.getReservationById(reservationId)).thenReturn(reservation);
+            when(shopQueryService.shopFind(shopId)).thenReturn(shop);
             doNothing().when(reviewCommandService).addShopRating(shop, rating);
             when(reviewCommandService.save(any(Review.class))).thenReturn(review);
             when(preSignedProvider.createReviewUploadUrls(anyInt(), anyLong(),
@@ -210,7 +210,7 @@ class ReviewFacadeTest {
 
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(reservationService.getReservationById(reservationId)).thenThrow(
+            when(reservationFacade.getReservationById(reservationId)).thenThrow(
                 new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
@@ -245,8 +245,8 @@ class ReviewFacadeTest {
 
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
-            when(shopQueryService.findShop(shopId)).thenThrow(
+            when(reservationFacade.getReservationById(reservationId)).thenReturn(reservation);
+            when(shopQueryService.shopFind(shopId)).thenThrow(
                 new BusinessException(ErrorCode.DATA_NOT_FOUND));
 
             // when & then
@@ -284,7 +284,7 @@ class ReviewFacadeTest {
 
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
+            when(reservationFacade.getReservationById(reservationId)).thenReturn(reservation);
 
             // when & then
             assertThatThrownBy(() -> reviewFacade.createReview(request, writerId))
@@ -318,7 +318,7 @@ class ReviewFacadeTest {
 
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
+            when(reservationFacade.getReservationById(reservationId)).thenReturn(reservation);
 
             // when & then
             assertThatThrownBy(() -> reviewFacade.createReview(request, writerId))
@@ -371,7 +371,7 @@ class ReviewFacadeTest {
 
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
+            when(reservationFacade.getReservationById(reservationId)).thenReturn(reservation);
             when(partyService.getPartyUsers(partyId)).thenReturn(partyUsers);
 
             // when & then
@@ -437,7 +437,7 @@ class ReviewFacadeTest {
 
             doNothing().when(reviewQueryService).validateDuplicatedReview(reservationId, writerId);
             when(userService.getUserById(writerId)).thenReturn(writer);
-            when(reservationService.getReservationById(reservationId)).thenReturn(reservation);
+            when(reservationFacade.getReservationById(reservationId)).thenReturn(reservation);
             when(partyService.getPartyUsers(partyId)).thenReturn(partyUsers);
             when(shopQueryService.findShop(shopId)).thenReturn(shop);
             doNothing().when(reviewCommandService).addShopRating(shop, rating);
